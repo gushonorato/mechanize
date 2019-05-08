@@ -1,6 +1,6 @@
 defmodule Mechanize.Page do
 
-  alias Mechanize.{Request, Response}
+  alias Mechanize.{Request, Response, HTMLParser}
   defstruct request: nil, response: nil, mechanize: nil
 
   @type t :: %__MODULE__{
@@ -13,4 +13,9 @@ defmodule Mechanize.Page do
     page.response.body
   end
 
+  def mechanize(page) do
+    page.mechanize
+  end
+
+  defdelegate find(page, selector), to: HTMLParser
 end

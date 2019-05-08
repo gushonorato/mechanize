@@ -1,16 +1,19 @@
 defmodule Mechanize.HTTPAdapter.Httpoison do
   use Mechanize.HTTPAdapter
+  alias Mechanize.{Request, Response, Page}
 
   @impl Mechanize.HTTPAdapter
-  @spec request!(any(), Mechanize.Request.t()) :: Mechanize.Response.t()
+
+  @spec request!(pid(), Request.t()) :: Page.t()
   def request!(mech, req) do
     HTTPoison.request!(req.method, req.url, req.body, req.headers)
     |> create_mechanize_page(req, mech)
   end
 
+  @spec create_mechanize_page(HTTPoison.Response.t(), Request.t(), Mechanize.t()) :: Page.t()
   defp create_mechanize_page(res, req, mech) do
-    %Mechanize.Page{
-      response: %Mechanize.Response{
+    %Page{
+      response: %Response{
         body: res.body,
         headers: res.headers,
         status_code: res.status_code

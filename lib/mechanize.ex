@@ -6,16 +6,22 @@ defmodule Mechanize do
 
   defstruct options: []
 
-  @spec start_link(any()) :: {:error, any()} | {:ok, pid()}
+  @type t :: %__MODULE__{
+    options: list()
+  }
+
+  @spec start_link(list()) :: {:error, any()} | {:ok, pid()}
   def start_link(options \\ []) do
     Agent.start_link(fn -> init(options) end)
   end
 
+  @spec new(list()) :: pid()
   def new(options \\ []) do
     {:ok, mech} = Mechanize.start_link(options)
     mech
   end
 
+  @spec init(list()) :: Mechanize.t()
   defp init(options) do
     opts =
       @default_options

@@ -19,7 +19,6 @@ defmodule Mechanize.HTTPAdapter.Httpoison do
         status_code: res.status_code
       },
       request: req,
-      body: res.body,
       mechanize: mech
     }
   end

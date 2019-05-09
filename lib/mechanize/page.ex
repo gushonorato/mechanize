@@ -24,7 +24,8 @@ defmodule Mechanize.Page do
   end
 
   def links(page) do
-    find(page, "a area")
+    find(page, "a")
+    |> Enum.into(find(page, "area"))
     |> Enum.map(&Link.create/1)
   end
 

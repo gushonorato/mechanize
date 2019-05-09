@@ -63,4 +63,9 @@ defmodule Mechanize do
 
   def get!(mech, url), do: deleg_http(:get!, [mech, url])
   def request!(mech, req), do: deleg_http(:request!, [mech, req])
+
+  @spec click(Mechanize.Page.Link.t()) :: Mechanize.Page.t()
+  def click(%Link{href: url, mechanize: mech}) do
+    get!(mech, url)
+  end
 end

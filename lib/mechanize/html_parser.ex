@@ -1,5 +1,4 @@
 defmodule Mechanize.HTMLParser do
-  use Introspection
   alias Mechanize.Page
 
   defmacro __using__(_) do
@@ -9,17 +8,11 @@ defmodule Mechanize.HTMLParser do
   end
 
   @callback find(Page.t(), String.t()) :: list()
+  @callback attribute(map(), String.t() | atom()) :: list()
+  @callback text(map() | Page.t()) :: String.t()
 
-  @spec find(Page.t(), String.t()) :: list()
-  def find(page, selector) do
-    parser(page).find(page,selector)
-  end
-
-  @spec parser(Page.t()) :: term()
-  def parser(page) do
-    page
-    |> Page.mechanize
-    |> Mechanize.get_option(:parser)
-    |> submodule("_parser")
+  @spec parser(String.t()) :: module()
+  def parser(parser_name) do
+    Plugin.get(__MODULE__, parser_name, "Parser")
   end
 end

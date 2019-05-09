@@ -5,7 +5,8 @@ defmodule Mechanize.HTTPAdapter.Httpoison do
   @impl Mechanize.HTTPAdapter
   @spec request!(pid(), Request.t()) :: Page.t()
   def request!(mech, req) do
-    HTTPoison.request!(req.method, req.url, req.body, req.headers)
+    req.method
+    |> HTTPoison.request!(req.url, req.body, req.headers)
     |> create_mechanize_page(req, mech)
   end
 

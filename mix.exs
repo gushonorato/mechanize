@@ -22,7 +22,8 @@ defmodule Mechanize.MixProject do
   defp deps do
     [
       {:httpoison, "~> 1.5"},
-      {:floki, "~> 0.21.0"}
+      {:floki, "~> 0.21.0"},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end

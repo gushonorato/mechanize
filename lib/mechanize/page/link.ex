@@ -21,7 +21,8 @@ defmodule Mechanize.Page.Link do
 
   @spec create(Element.t()) :: Link.t()
   def create(element) do
-    struct(%Link{}, Map.from_struct(element))
+    %Link{}
+    |> struct(Map.from_struct(element))
     |> Map.put(:href, element.parser.attribute(element, :href))
   end
 end

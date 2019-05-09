@@ -3,7 +3,6 @@ defmodule Mechanize.HTTPAdapter.Httpoison do
   alias Mechanize.{Request, Response, Page}
 
   @impl Mechanize.HTTPAdapter
-
   @spec request!(pid(), Request.t()) :: Page.t()
   def request!(mech, req) do
     HTTPoison.request!(req.method, req.url, req.body, req.headers)

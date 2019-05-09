@@ -1,14 +1,17 @@
 defmodule Mechanize do
   use Agent
-  alias Mechanize.HTTPAdapter
+  alias Mechanize.{HTTPAdapter, HTMLParser, Page}
+  alias Mechanize.Page.Link
 
-  @default_options [adapter: :httpoison]
-
-  defstruct options: []
+  defstruct options: [http_adapter: :httpoison, html_parser: :floki],
+            http_adapter: nil,
+            html_parser: nil
 
   @type t :: %__MODULE__{
-    options: list()
-  }
+          options: list(),
+          http_adapter: any(),
+          html_parser: any()
+        }
 
   @spec start_link(list()) :: {:error, any()} | {:ok, pid()}
   def start_link(options \\ []) do
@@ -24,17 +27,40 @@ defmodule Mechanize do
   @spec init(list()) :: Mechanize.t()
   defp init(options) do
     opts =
-      @default_options
+      %Mechanize{}
+      |> Map.get(:options)
       |> Keyword.merge(Application.get_all_env(:mechanize))
       |> Keyword.merge(options)
 
     %Mechanize{options: opts}
+    |> inject_dependencies
+  end
+
+  defp inject_dependencies(state) do
+    state
+    |> Map.put(:http_adapter, HTTPAdapter.adapter(state.options[:http_adapter]))
+    |> Map.put(:html_parser, HTMLParser.parser(state.options[:html_parser]))
   end
 
   def get_option(mechanize, option) do
     Agent.get(mechanize, fn state -> state.options[option] end)
   end
 
-  defdelegate get!(mechanize, url), to: HTTPAdapter
-  defdelegate request!(mechanize, request), to: HTTPAdapter
+  def http_adapter(mechanize) do
+    Agent.get(mechanize, fn state -> state.http_adapter end)
+  end
+
+  def html_parser(mechanize) do
+    Agent.get(mechanize, fn state -> state.html_parser end)
+  end
+
+  defp deleg_http(method, params) do
+    params
+    |> List.first()
+    |> http_adapter
+    |> apply(method, params)
+  end
+
+  def get!(mech, url), do: deleg_http(:get!, [mech, url])
+  def request!(mech, req), do: deleg_http(:request!, [mech, req])
 end

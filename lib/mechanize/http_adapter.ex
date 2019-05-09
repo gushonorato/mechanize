@@ -1,25 +1,17 @@
 defmodule Mechanize.HTTPAdapter do
-  use Introspection
+  @callback request!(pid(), Mechanize.Request.t()) :: Mechanize.Response.t()
 
   defmacro __using__(_) do
     quote do
       @behaviour Mechanize.HTTPAdapter
+
+      def get!(mechanize, url) do
+        request!(mechanize, %Mechanize.Request{method: :get, url: url})
+      end
     end
   end
 
-  @callback request!(pid(), Mechanize.Request.t()) :: Mechanize.Response.t()
-
-  def get!(mechanize, url) do
-    request!(mechanize, %Mechanize.Request{method: :get, url: url})
-  end
-
-  def request!(mechanize, request) do
-    adapter(mechanize).request!(mechanize, request)
-  end
-
-  defp adapter(mechanize) do
-    mechanize
-    |> Mechanize.get_option(:adapter)
-    |> submodule
+  def adapter(adapter_name) do
+    Plugin.get(__MODULE__, adapter_name)
   end
 end

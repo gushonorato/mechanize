@@ -1,6 +1,6 @@
 # Mechanizex ![Build Status](https://travis-ci.org/gushonorato/mechanizex.svg?branch=master)
 
-Build web scrapers and automate interaction with websites in Elixir with ease! Mechanizex is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features:
+Build web scrapers and automate interaction with websites in Elixir with ease! One of Mechanizex's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture. Mechanizex is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features:
 
 - Follow links
 - Populate and submit forms
@@ -11,8 +11,6 @@ Build web scrapers and automate interaction with websites in Elixir with ease! M
 - Proxy support
 - File upload
 - Obey robots.txt
-
-One of Mechanizex's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture.
 
 ## Installation
 

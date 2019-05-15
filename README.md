@@ -1,21 +1,35 @@
-# Mechanize
+# Mechanize ![Build Status](https://travis-ci.org/gushonorato/mechanize.svg?branch=master)
 
-**TODO: Add description**
+Build web scrapers and automate interaction with websites in Elixir with ease! Mechanizex is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features: 
+
+- Follow links
+- Populate and submit forms
+- Scrape data easily using CSS selectors
+- Automatically stores and sends cookies
+- Follow redirects and meta http-equiv="refresh"
+- Track of the sites that you have visited as a history
+- Proxy support
+- File upload
+- Obey robots.txt
+
+One of Mechanizex's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture.  
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `mechanize` to your list of dependencies in `mix.exs`:
+> **Warning:** This library is in active development and probably will have changes in the public API. It is not currently recommended to use it on production systems.
+
+The package can be installed by adding `mechanizex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:mechanize, "~> 0.1.0"}
+    {:mechanizex, github: "gushonorato/mechanizex"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/mechanize](https://hexdocs.pm/mechanize).
+## Authors
+Copyright © 2019 by Gustavo Honorato (gustavohonorato@gmail.com)
 
+## License
+This library is distributed under the MIT license. Please see the LICENSE file.

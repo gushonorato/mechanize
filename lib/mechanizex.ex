@@ -1,7 +1,7 @@
-defmodule Mechanize do
+defmodule Mechanizex do
   use Agent
-  alias Mechanize.{HTTPAdapter, HTMLParser}
-  alias Mechanize.Page.Link
+  alias Mechanizex.{HTTPAdapter, HTMLParser}
+  alias Mechanizex.Page.Link
 
   defstruct options: [http_adapter: :httpoison, html_parser: :floki],
             http_adapter: nil,
@@ -20,19 +20,19 @@ defmodule Mechanize do
 
   @spec new(list()) :: pid()
   def new(options \\ []) do
-    {:ok, mech} = Mechanize.start_link(options)
+    {:ok, mech} = Mechanizex.start_link(options)
     mech
   end
 
-  @spec init(list()) :: Mechanize.t()
+  @spec init(list()) :: Mechanizex.t()
   defp init(options) do
     opts =
-      %Mechanize{}
+      %Mechanizex{}
       |> Map.get(:options)
-      |> Keyword.merge(Application.get_all_env(:mechanize))
+      |> Keyword.merge(Application.get_all_env(:mechanizex))
       |> Keyword.merge(options)
 
-    %Mechanize{options: opts}
+    %Mechanizex{options: opts}
     |> inject_dependencies
   end
 
@@ -42,26 +42,26 @@ defmodule Mechanize do
     |> Map.put(:html_parser, HTMLParser.parser(state.options[:html_parser]))
   end
 
-  def option(mechanize, option) do
-    Agent.get(mechanize, fn state -> state.options[option] end)
+  def option(mechanizex, option) do
+    Agent.get(mechanizex, fn state -> state.options[option] end)
   end
 
-  def http_adapter(mechanize) do
-    Agent.get(mechanize, fn state -> state.http_adapter end)
+  def http_adapter(mechanizex) do
+    Agent.get(mechanizex, fn state -> state.http_adapter end)
   end
 
-  def set_http_adapter(mechanize, adapter) do
-    Agent.update(mechanize, &Map.put(&1, :http_adapter, adapter))
-    mechanize
+  def set_http_adapter(mechanizex, adapter) do
+    Agent.update(mechanizex, &Map.put(&1, :http_adapter, adapter))
+    mechanizex
   end
 
-  def html_parser(mechanize) do
-    Agent.get(mechanize, fn state -> state.html_parser end)
+  def html_parser(mechanizex) do
+    Agent.get(mechanizex, fn state -> state.html_parser end)
   end
 
-  def set_html_parser(mechanize, parser) do
-    Agent.update(mechanize, &Map.put(&1, :html_parser, parser))
-    mechanize
+  def set_html_parser(mechanizex, parser) do
+    Agent.update(mechanizex, &Map.put(&1, :html_parser, parser))
+    mechanizex
   end
 
   defp deleg_http(method, params) do
@@ -74,8 +74,8 @@ defmodule Mechanize do
   def get!(mech, url), do: deleg_http(:get!, [mech, url])
   def request!(mech, req), do: deleg_http(:request!, [mech, req])
 
-  @spec click(Mechanize.Page.Link.t()) :: Mechanize.Page.t()
-  def click(%Link{href: url, mechanize: mech}) do
+  @spec click(Mechanizex.Page.Link.t()) :: Mechanizex.Page.t()
+  def click(%Link{href: url, mechanizex: mech}) do
     get!(mech, url)
   end
 end

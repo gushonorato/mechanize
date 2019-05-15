@@ -1,4 +1,4 @@
-defmodule Mechanize.Response do
+defmodule Mechanizex.Response do
   defstruct body: nil, headers: nil, status_code: nil
 
   @type t :: %__MODULE__{

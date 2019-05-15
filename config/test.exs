@@ -1,4 +1,4 @@
 use Mix.Config
 
-config :mechanize,
+config :mechanizex,
   foo: "bar from config"

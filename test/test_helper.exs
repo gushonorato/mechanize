@@ -2,5 +2,5 @@ ExUnit.start()
 
 import Mox
 
-defmock(Mechanize.HTMLParser.Custom, for: Mechanize.HTMLParser)
-defmock(Mechanize.HTTPAdapter.Custom, for: Mechanize.HTTPAdapter)
+defmock(Mechanizex.HTMLParser.Custom, for: Mechanizex.HTMLParser)
+defmock(Mechanizex.HTTPAdapter.Custom, for: Mechanizex.HTTPAdapter)

@@ -1,16 +1,16 @@
-defmodule Mechanize.Page.Element do
-  defstruct name: nil, attributes: nil, children: nil, text: nil, mechanize: nil, parser: nil
+defmodule Mechanizex.Page.Element do
+  defstruct name: nil, attributes: nil, children: nil, text: nil, mechanizex: nil, parser: nil
 
   @type t :: %__MODULE__{
           name: String.t(),
           attributes: list(),
           children: list(),
           text: String.t(),
-          mechanize: pid(),
+          mechanizex: pid(),
           parser: module()
         }
 
-  def attribute(%Mechanize.Page.Element{} = el, attr_name) do
+  def attribute(%Mechanizex.Page.Element{} = el, attr_name) do
     el.parser.attribute(el, attr_name)
   end
 end

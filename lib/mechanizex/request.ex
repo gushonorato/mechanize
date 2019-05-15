@@ -1,4 +1,4 @@
-defmodule Mechanize.Request do
+defmodule Mechanizex.Request do
   defstruct method: :get, url: nil, headers: [], body: []
 
   @type t :: %__MODULE__{

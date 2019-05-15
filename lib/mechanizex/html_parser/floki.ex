@@ -1,9 +1,9 @@
-defmodule Mechanize.HTMLParser.FlokiParser do
-  use Mechanize.HTMLParser
-  alias Mechanize.Page
-  alias Mechanize.Page.Element
+defmodule Mechanizex.HTMLParser.FlokiParser do
+  use Mechanizex.HTMLParser
+  alias Mechanizex.Page
+  alias Mechanizex.Page.Element
 
-  @impl Mechanize.HTMLParser
+  @impl Mechanizex.HTMLParser
   def find(page, selector) do
     page
     |> Page.body()
@@ -17,29 +17,29 @@ defmodule Mechanize.HTMLParser.FlokiParser do
       attributes: attrs,
       children: children,
       text: Floki.text(el),
-      mechanize: Page.mechanize(page),
+      mechanizex: Page.mechanizex(page),
       parser: __MODULE__
     }
   end
 
-  @impl Mechanize.HTMLParser
+  @impl Mechanizex.HTMLParser
   def attribute(el, attr_name) when is_atom(attr_name) do
     attribute(el, Atom.to_string(attr_name))
   end
 
-  @impl Mechanize.HTMLParser
+  @impl Mechanizex.HTMLParser
   def attribute(%{name: name, attributes: attrs, children: children}, attr_name) do
     Floki.attribute([{name, attrs, children}], attr_name)
   end
 
-  @impl Mechanize.HTMLParser
+  @impl Mechanizex.HTMLParser
   def text(%Page{} = page) do
     page
     |> Page.body()
     |> Floki.text()
   end
 
-  @impl Mechanize.HTMLParser
+  @impl Mechanizex.HTMLParser
   def text(%{name: name, attributes: attrs, children: children}) do
     Floki.text([{name, attrs, children}])
   end

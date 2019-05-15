@@ -1,9 +1,9 @@
-defmodule Mechanize.HTMLParser do
-  alias Mechanize.Page
+defmodule Mechanizex.HTMLParser do
+  alias Mechanizex.Page
 
   defmacro __using__(_) do
     quote do
-      @behaviour Mechanize.HTMLParser
+      @behaviour Mechanizex.HTMLParser
     end
   end
 

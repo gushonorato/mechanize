@@ -13,6 +13,6 @@ defmodule Mechanize.HTMLParser do
 
   @spec parser(String.t()) :: module()
   def parser(parser_name) do
-    Plugin.get(__MODULE__, parser_name, "Parser")
+    Plugin.get(__MODULE__, parser_name)
   end
 end

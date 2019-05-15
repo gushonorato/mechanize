@@ -2,6 +2,6 @@ language: elixir
 elixir:
   - '1.7.4'
 otp_release:
-  - '21'
+  - '21.3'
 script:
 - MIX_ENV=test mix do deps.get, compile, coveralls.travis

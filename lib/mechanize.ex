@@ -1,6 +1,6 @@
 defmodule Mechanize do
   use Agent
-  alias Mechanize.{HTTPAdapter, HTMLParser, Page}
+  alias Mechanize.{HTTPAdapter, HTMLParser}
   alias Mechanize.Page.Link
 
   defstruct options: [http_adapter: :httpoison, html_parser: :floki],
@@ -42,7 +42,7 @@ defmodule Mechanize do
     |> Map.put(:html_parser, HTMLParser.parser(state.options[:html_parser]))
   end
 
-  def get_option(mechanize, option) do
+  def option(mechanize, option) do
     Agent.get(mechanize, fn state -> state.options[option] end)
   end
 
@@ -50,8 +50,18 @@ defmodule Mechanize do
     Agent.get(mechanize, fn state -> state.http_adapter end)
   end
 
+  def set_http_adapter(mechanize, adapter) do
+    Agent.update(mechanize, &Map.put(&1, :http_adapter, adapter))
+    mechanize
+  end
+
   def html_parser(mechanize) do
     Agent.get(mechanize, fn state -> state.html_parser end)
+  end
+
+  def set_html_parser(mechanize, parser) do
+    Agent.update(mechanize, &Map.put(&1, :html_parser, parser))
+    mechanize
   end
 
   defp deleg_http(method, params) do

@@ -7,7 +7,8 @@ defmodule Mechanize.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -24,7 +25,8 @@ defmodule Mechanize.MixProject do
       {:httpoison, "~> 1.5"},
       {:floki, "~> 0.21.0"},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:mox, "~> 0.5", only: :test}
+      {:mox, "~> 0.5", only: :test},
+      {:excoveralls, github: "parroty/excoveralls"}
     ]
   end
 end

@@ -11,7 +11,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
   end
 
   @spec create_mechanizex_page(HTTPoison.Response.t(), Request.t(), Mechanizex.t()) :: Page.t()
-  defp create_mechanizex_page(res, req, mech) do
+  defp create_mechanizex_page(res, req, agent) do
     %Page{
       response: %Response{
         body: res.body,
@@ -19,7 +19,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
         status_code: res.status_code
       },
       request: req,
-      mechanizex: mech
+      agent: agent
     }
   end
 end

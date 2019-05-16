@@ -1,46 +1,76 @@
-defmodule Mechanizex.HTMLParser.FlokiParser do
-  use Mechanizex.HTMLParser
-  alias Mechanizex.Page
+defmodule Mechanizex.HTMLParser.Floki do
+  alias Mechanizex.{HTMLParser, Page}
   alias Mechanizex.Page.Element
 
-  @impl Mechanizex.HTMLParser
-  def find(page, selector) do
+  @behaviour Mechanizex.HTMLParser
+
+  @impl HTMLParser
+  def search(%Page{} = page, selector) do
     page
-    |> Page.body()
+    |> Page.body
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, page))
   end
 
-  defp create_element({name, attrs, children} = el, page) do
-    %Element{
-      name: name,
-      attributes: attrs,
-      children: children,
-      text: Floki.text(el),
-      mechanizex: Page.mechanizex(page),
-      parser: __MODULE__
-    }
+  @impl HTMLParser
+  def search([], _), do: []
+
+  @impl HTMLParser
+  def search([h | _] = elements, selector) do
+    check_elements_from_same_page(elements)
+    elements
+    |> Enum.map(&Element.tree/1)
+    |> Floki.find(selector)
+    |> Enum.map(&create_element(&1, h.page))
   end
 
-  @impl Mechanizex.HTMLParser
-  def attribute(el, attr_name) when is_atom(attr_name) do
-    attribute(el, Atom.to_string(attr_name))
+
+  @impl HTMLParser
+  def attribute(elements, attribute_name) do
+    elements
+    |> Enum.map(&Element.tree/1)
+    |> Floki.attribute(attribute_name)
   end
 
-  @impl Mechanizex.HTMLParser
-  def attribute(%{name: name, attributes: attrs, children: children}, attr_name) do
-    Floki.attribute([{name, attrs, children}], attr_name)
+  @impl HTMLParser
+  def attribute(page, selector, attribute_name) do
+    page
+    |> Page.body
+    |> Floki.attribute(selector, attribute_name)
   end
 
-  @impl Mechanizex.HTMLParser
+  @impl HTMLParser
   def text(%Page{} = page) do
     page
-    |> Page.body()
-    |> Floki.text()
+    |> Page.body
+    |> Floki.text
   end
 
-  @impl Mechanizex.HTMLParser
-  def text(%{name: name, attributes: attrs, children: children}) do
-    Floki.text([{name, attrs, children}])
+  @impl HTMLParser
+  def text(elements) do
+    elements
+    |> Enum.map(&Element.tree/1)
+    |> Floki.text
+  end
+
+  defp check_elements_from_same_page(elements) do
+    num_pages =
+      elements
+      |> Enum.map(&Element.page/1)
+      |> Enum.uniq
+      |> Enum.count
+
+    if num_pages > 1, do: raise ArgumentError, "Elements are not from the same page"
+  end
+
+  defp create_element({name, attributes, _} = tree, page) do
+    %Element{
+      name: name,
+      attributes: attributes,
+      tree: tree,
+      text: Floki.text(tree),
+      page: page,
+      parser: __MODULE__
+    }
   end
 end

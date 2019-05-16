@@ -6,7 +6,7 @@ defmodule Mechanizex.Page.Link do
             href: nil,
             children: nil,
             text: nil,
-            mechanizex: nil,
+            agent: nil,
             parser: nil
 
   @type t :: %__MODULE__{
@@ -14,7 +14,7 @@ defmodule Mechanizex.Page.Link do
           attributes: list(),
           children: list(),
           text: String.t(),
-          mechanizex: pid(),
+          agent: pid(),
           parser: module(),
           href: list()
         }

@@ -1,15 +1,14 @@
 defmodule Mechanizex.HTMLParser do
   alias Mechanizex.Page
+  alias Mechanizex.Page.Element
 
-  defmacro __using__(_) do
-    quote do
-      @behaviour Mechanizex.HTMLParser
-    end
-  end
+  @type selector :: String.t()
+  @type attribute :: String.t()
 
-  @callback find(Page.t(), String.t()) :: list()
-  @callback attribute(map(), String.t() | atom()) :: list()
-  @callback text(map() | Page.t()) :: String.t()
+  @callback search(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
+  @callback attribute(list(%Element{}), attribute) :: list(String.t())
+  @callback attribute(Page.t(), selector, attribute) :: list(String.t())
+  @callback text(Page.t() | list(Element.t())) :: String.t()
 
   @spec parser(String.t()) :: module()
   def parser(parser_name) do

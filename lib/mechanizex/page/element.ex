@@ -1,16 +1,18 @@
 defmodule Mechanizex.Page.Element do
-  defstruct name: nil, attributes: nil, children: nil, text: nil, mechanizex: nil, parser: nil
+  defstruct name: nil, attributes: nil, tree: nil, text: nil, page: nil, parser: nil
 
   @type t :: %__MODULE__{
           name: String.t(),
           attributes: list(),
-          children: list(),
+          tree: list(),
           text: String.t(),
-          mechanizex: pid(),
+          page: Page.t(),
           parser: module()
         }
 
-  def attribute(%Mechanizex.Page.Element{} = el, attr_name) do
-    el.parser.attribute(el, attr_name)
-  end
+  def tree(%Mechanizex.Page.Element{ tree: tree }), do: tree
+
+  def agent(%Mechanizex.Page.Element{ page: page }), do: page.agent
+
+  def page(%Mechanizex.Page.Element{ page: page }), do: page
 end

@@ -1,25 +1,25 @@
 defmodule Mechanizex.Page do
   alias Mechanizex.{Request, Response}
   alias Mechanizex.Page.Link
-  defstruct request: nil, response: nil, mechanizex: nil, links: nil
+  defstruct request: nil, response: nil, agent: nil, links: nil
 
   @type t :: %__MODULE__{
           request: Request.t(),
           response: Response.t(),
-          mechanizex: pid()
+          agent: pid()
         }
 
   def body(page) do
     page.response.body
   end
 
-  def mechanizex(page) do
-    page.mechanizex
+  def agent(page) do
+    page.agent
   end
 
   def html_parser(page) do
     page
-    |> mechanizex
+    |> agent
     |> Mechanizex.html_parser()
   end
 

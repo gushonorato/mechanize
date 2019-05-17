@@ -56,7 +56,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @google %Element{
     name: "a",
-    attributes: [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
+    attributes: %{"href" => "http://google.com", "class" => "company js-google js-cool"},
     text: "Google",
     tree: {
       "a",
@@ -75,7 +75,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     test "one element with children found" do
       element = %Element{
         name: "div",
-        attributes: [{"class", "container"}, {"data-method", "get"}],
+        attributes: %{"class" => "container", "data-method" => "get"},
         text: "Google",
         tree: {
           "div",

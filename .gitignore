@@ -26,3 +26,5 @@ mechanizex-*.tar
 /cover/
 
 .DS_Store
+
+/.vscode/

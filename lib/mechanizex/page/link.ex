@@ -19,10 +19,7 @@ defmodule Mechanizex.Page.Link do
           href: list()
         }
 
-  @spec create(Element.t()) :: Link.t()
-  def create(element) do
-    %Link{}
-    |> struct(Map.from_struct(element))
-    |> Map.put(:href, element.parser.attribute(element, :href))
+  def click(%Element{attributes: %{ href: url }}) do
+
   end
 end

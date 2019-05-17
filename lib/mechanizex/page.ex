@@ -45,12 +45,11 @@ defmodule Mechanizex.Page do
   end
 
   defp filter_by_element_names(%Mechanizex.Page{} = page, names) do
-    names = Enum.map(names, &normalize/1)
+    names = Enum.map(names, &to_string/1)
     Enum.flat_map(names, fn name -> search(page, name) end)
   end
 
   defp filter_by_element_names(elements, names) do
-    names = Enum.map(names, &normalize/1)
     Enum.filter(elements, fn e -> e.name in names end)
   end
 
@@ -67,15 +66,11 @@ defmodule Mechanizex.Page do
     true
   end
 
-  defp criteria_meet?(element, {attr, value}) when is_atom(attr) do
-    criteria_meet?(element, {normalize(attr), value})
-  end
-
-  defp criteria_meet?(element, {"text", value}) when is_binary(value) do
+  defp criteria_meet?(element, {:text, value}) when is_binary(value) do
     element.text == value
   end
 
-  defp criteria_meet?(element, {"text", value}) do
+  defp criteria_meet?(element, {:text, value}) do
     element.text =~ value
   end
 
@@ -86,10 +81,6 @@ defmodule Mechanizex.Page do
   defp criteria_meet?(element, {attr_name, value}) do
     attr_value = element.attributes[attr_name]
     attr_value != nil and attr_value =~ value
-  end
-
-  defp normalize(name) do
-    if is_atom(name), do: Atom.to_string(name), else: name
   end
 
   defp delegate_parser(method, params) do

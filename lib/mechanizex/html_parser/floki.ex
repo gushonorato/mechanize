@@ -29,14 +29,14 @@ defmodule Mechanizex.HTMLParser.Floki do
   def attribute(elements, attribute_name) do
     elements
     |> Enum.map(&Element.tree/1)
-    |> Floki.attribute(attribute_name)
+    |> Floki.attribute(to_string(attribute_name))
   end
 
   @impl HTMLParser
   def attribute(page, selector, attribute_name) do
     page
     |> Page.body()
-    |> Floki.attribute(selector, attribute_name)
+    |> Floki.attribute(selector, to_string(attribute_name))
   end
 
   @impl HTMLParser
@@ -65,13 +65,25 @@ defmodule Mechanizex.HTMLParser.Floki do
 
   defp create_element({name, attributes, _} = tree, page) do
     %Element{
-      dom_id: tree |> Floki.attribute("id") |> List.first(),
-      name: name,
-      attributes: Enum.into(attributes, %{}),
+      dom_id: dom_id(tree),
+      name: String.to_atom(name),
+      attributes: create_attributes_map(attributes),
       tree: tree,
       text: Floki.text(tree),
       page: page,
       parser: __MODULE__
     }
+  end
+
+  defp dom_id(tree) do
+    tree
+    |> Floki.attribute("id")
+    |> List.first()
+  end
+
+  defp create_attributes_map(attributes) do
+    attributes
+    |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
+    |> Enum.into(%{})
   end
 end

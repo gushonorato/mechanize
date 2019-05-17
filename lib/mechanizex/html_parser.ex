@@ -3,7 +3,7 @@ defmodule Mechanizex.HTMLParser do
   alias Mechanizex.Page.Element
 
   @type selector :: String.t()
-  @type attribute :: String.t()
+  @type attribute :: atom()
 
   @callback search(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
   @callback attribute(list(%Element{}), attribute) :: list(String.t())

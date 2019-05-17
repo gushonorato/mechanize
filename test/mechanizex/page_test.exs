@@ -49,15 +49,7 @@ defmodule Mechanizex.PageTest do
     end
 
     test "one element returned", state do
-      assert with_elements_map(:name, state.page, [:title]) == ["title"]
-    end
-
-    test "criteria keys can be strings", state do
-      assert with_elements_map(:dom_id, state.page, [:a], [{"href", ~r/google.com.br/}]) == ["elem_4"]
-    end
-
-    test "element names can be strings", state do
-      assert with_elements_map(:dom_id, state.page, [:a], href: ~r/google.com.br/) == ["elem_4"]
+      assert with_elements_map(:name, state.page, [:title]) == [:title]
     end
 
     test "css criteria", state do

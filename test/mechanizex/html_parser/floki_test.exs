@@ -56,8 +56,8 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @google %Element{
     dom_id: nil,
-    name: "a",
-    attributes: %{"href" => "http://google.com", "class" => "company js-google js-cool"},
+    name: :a,
+    attributes: %{href: "http://google.com", class: "company js-google js-cool"},
     text: "Google",
     tree: {
       "a",
@@ -76,8 +76,8 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     test "one element with children found" do
       element = %Element{
         dom_id: "main",
-        name: "div",
-        attributes: %{"id" => "main", "class" => "container", "data-method" => "get"},
+        name: :div,
+        attributes: %{id: "main", class: "container", "data-method": "get"},
         text: "Google",
         tree: {
           "div",
@@ -126,22 +126,22 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   describe ".attribute" do
     test "attribute not found" do
-      assert HTMLParser.Floki.attribute([@google], "data-remote") == []
+      assert HTMLParser.Floki.attribute([@google], :"data-remote") == []
     end
 
     test "attribute found" do
-      assert HTMLParser.Floki.attribute([@google], "href") == ["http://google.com"]
+      assert HTMLParser.Floki.attribute([@google], :href) == ["http://google.com"]
     end
 
     test "multiple elements" do
-      assert HTMLParser.Floki.attribute([@google, @google], "href") == [
+      assert HTMLParser.Floki.attribute([@google, @google], :href) == [
                "http://google.com",
                "http://google.com"
              ]
     end
 
     test "multiple attributes found within a page" do
-      assert HTMLParser.Floki.attribute(@page, ".js-cool", "href") == [
+      assert HTMLParser.Floki.attribute(@page, ".js-cool", :href) == [
                "http://google.com",
                "http://google.com",
                "http://elixir-lang.org"

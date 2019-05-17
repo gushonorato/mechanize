@@ -65,6 +65,7 @@ defmodule Mechanizex.HTMLParser.Floki do
 
   defp create_element({name, attributes, _} = tree, page) do
     %Element{
+      dom_id: tree |> Floki.attribute("id") |> List.first(),
       name: name,
       attributes: Enum.into(attributes, %{}),
       tree: tree,

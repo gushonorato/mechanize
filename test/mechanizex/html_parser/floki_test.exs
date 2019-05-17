@@ -13,7 +13,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     <meta name="description" content="Test webpage"/>
     </head>
     <body>
-      <div class="container" data-method="get">
+      <div id="main" class="container" data-method="get">
         <a href="http://google.com" class="company js-google js-cool">Google</a>
       </div>
       <div class="content">
@@ -32,7 +32,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     <meta name="description" content="Test webpage"/>
     </head>
     <body>
-      <div class="container" data-method="get">
+      <div id="main" class="container" data-method="get">
       </div>
       <div class="content">
       </div>
@@ -55,6 +55,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   }
 
   @google %Element{
+    dom_id: nil,
     name: "a",
     attributes: %{"href" => "http://google.com", "class" => "company js-google js-cool"},
     text: "Google",
@@ -74,12 +75,13 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
     test "one element with children found" do
       element = %Element{
+        dom_id: "main",
         name: "div",
-        attributes: %{"class" => "container", "data-method" => "get"},
+        attributes: %{"id" => "main", "class" => "container", "data-method" => "get"},
         text: "Google",
         tree: {
           "div",
-          [{"class", "container"}, {"data-method", "get"}],
+          [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
           [
             {"a",
               [

@@ -24,3 +24,5 @@ mechanizex-*.tar
 .elixir_ls
 
 /cover/
+
+.DS_Store

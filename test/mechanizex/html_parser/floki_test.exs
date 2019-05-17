@@ -40,14 +40,14 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     </html>
   """
 
-  @page %Page {
+  @page %Page{
     agent: :fake_mechanize_pid,
     response: %Response{
       body: @html
     }
   }
 
-  @page_without_text %Page {
+  @page_without_text %Page{
     agent: :fake_mechanize_pid,
     response: %Response{
       body: @html_without_text
@@ -84,15 +84,16 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
           [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
           [
             {"a",
-              [
-                {"href", "http://google.com"},
-                {"class", "company js-google js-cool"}
-              ], ["Google"]}
+             [
+               {"href", "http://google.com"},
+               {"class", "company js-google js-cool"}
+             ], ["Google"]}
           ]
         },
         page: @page,
         parser: HTMLParser.Floki
       }
+
       assert HTMLParser.Floki.search(@page, ".container") == [element]
     end
 
@@ -115,13 +116,15 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
     test "elements from different pages" do
       assert_raise ArgumentError, fn ->
-        HTMLParser.Floki.search([%Element{page: @page}, %Element{page: @page_without_text}], ".js-google")
+        HTMLParser.Floki.search(
+          [%Element{page: @page}, %Element{page: @page_without_text}],
+          ".js-google"
+        )
       end
     end
   end
 
   describe ".attribute" do
-
     test "attribute not found" do
       assert HTMLParser.Floki.attribute([@google], "data-remote") == []
     end
@@ -131,16 +134,22 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     end
 
     test "multiple elements" do
-      assert HTMLParser.Floki.attribute([@google, @google], "href") == ["http://google.com", "http://google.com"]
+      assert HTMLParser.Floki.attribute([@google, @google], "href") == [
+               "http://google.com",
+               "http://google.com"
+             ]
     end
 
     test "multiple attributes found within a page" do
-      assert HTMLParser.Floki.attribute(@page, ".js-cool", "href") == ["http://google.com", "http://google.com", "http://elixir-lang.org"]
+      assert HTMLParser.Floki.attribute(@page, ".js-cool", "href") == [
+               "http://google.com",
+               "http://google.com",
+               "http://elixir-lang.org"
+             ]
     end
   end
 
   describe ".text" do
-
     test "within a page" do
       assert HTMLParser.Floki.text(@page) == "TestGoogleGoogleElixir langJava"
     end
@@ -157,18 +166,17 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
       text =
         @page
         |> HTMLParser.Floki.search("meta")
-        |> HTMLParser.Floki.text
+        |> HTMLParser.Floki.text()
 
-        assert text == ""
+      assert text == ""
     end
 
     test "page doesn't have text" do
       text =
         @page_without_text
-        |> HTMLParser.Floki.text
+        |> HTMLParser.Floki.text()
 
-        assert text == ""
+      assert text == ""
     end
   end
-
 end

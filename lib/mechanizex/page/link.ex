@@ -4,17 +4,17 @@ defmodule Mechanizex.Page.Link do
   defstruct name: nil,
             attributes: nil,
             href: nil,
-            children: nil,
+            tree: nil,
             text: nil,
-            agent: nil,
+            page: nil,
             parser: nil
 
   @type t :: %__MODULE__{
           name: String.t(),
           attributes: list(),
-          children: list(),
+          tree: list(),
           text: String.t(),
-          agent: pid(),
+          page: pid(),
           parser: module(),
           href: list()
         }

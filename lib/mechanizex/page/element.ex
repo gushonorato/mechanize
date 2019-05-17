@@ -11,9 +11,9 @@ defmodule Mechanizex.Page.Element do
           parser: module()
         }
 
-  def tree(%Mechanizex.Page.Element{ tree: tree }), do: tree
+  def tree(%Mechanizex.Page.Element{tree: tree}), do: tree
 
-  def agent(%Mechanizex.Page.Element{ page: page }), do: page.agent
+  def agent(%Mechanizex.Page.Element{page: page}), do: page.agent
 
-  def page(%Mechanizex.Page.Element{ page: page }), do: page
+  def page(%Mechanizex.Page.Element{page: page}), do: page
 end

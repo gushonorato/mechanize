@@ -7,7 +7,7 @@ defmodule Mechanizex.HTMLParser.Floki do
   @impl HTMLParser
   def search(%Page{} = page, selector) do
     page
-    |> Page.body
+    |> Page.body()
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, page))
   end
@@ -18,12 +18,12 @@ defmodule Mechanizex.HTMLParser.Floki do
   @impl HTMLParser
   def search([h | _] = elements, selector) do
     check_elements_from_same_page(elements)
+
     elements
     |> Enum.map(&Element.tree/1)
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, h.page))
   end
-
 
   @impl HTMLParser
   def attribute(elements, attribute_name) do
@@ -35,32 +35,32 @@ defmodule Mechanizex.HTMLParser.Floki do
   @impl HTMLParser
   def attribute(page, selector, attribute_name) do
     page
-    |> Page.body
+    |> Page.body()
     |> Floki.attribute(selector, attribute_name)
   end
 
   @impl HTMLParser
   def text(%Page{} = page) do
     page
-    |> Page.body
-    |> Floki.text
+    |> Page.body()
+    |> Floki.text()
   end
 
   @impl HTMLParser
   def text(elements) do
     elements
     |> Enum.map(&Element.tree/1)
-    |> Floki.text
+    |> Floki.text()
   end
 
   defp check_elements_from_same_page(elements) do
     num_pages =
       elements
       |> Enum.map(&Element.page/1)
-      |> Enum.uniq
-      |> Enum.count
+      |> Enum.uniq()
+      |> Enum.count()
 
-    if num_pages > 1, do: raise ArgumentError, "Elements are not from the same page"
+    if num_pages > 1, do: raise(ArgumentError, "Elements are not from the same page")
   end
 
   defp create_element({name, attributes, _} = tree, page) do

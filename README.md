@@ -2,15 +2,15 @@
 
 Build web scrapers and automate interaction with websites in Elixir with ease! One of Mechanizex's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture. Mechanizex is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features:
 
-- Follow links
-- Populate and submit forms
+- Follow hyperlinks
 - Scrape data easily using CSS selectors
-- Automatically stores and sends cookies
-- Follow redirects and meta http-equiv="refresh"
-- Track of the sites that you have visited as a history
-- Proxy support
-- File upload
-- Obey robots.txt
+- Populate and submit forms (WIP)
+- Automatically stores and sends cookies (TODO)
+- Follow redirects and meta http-equiv="refresh" (TODO)
+- Track of the sites that you have visited as a history (TODO)
+- Proxy support (TODO)
+- File upload (TODO)
+- Obey robots.txt (TODO)
 
 ## Installation
 

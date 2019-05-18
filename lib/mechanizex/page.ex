@@ -6,8 +6,7 @@ defmodule Mechanizex.Page do
   @type t :: %__MODULE__{
           request: Request.t(),
           response: Response.t(),
-          agent: pid(),
-          links: list(Link.t())
+          agent: pid()
         }
 
   def body(page) do
@@ -24,11 +23,26 @@ defmodule Mechanizex.Page do
     |> Mechanizex.Agent.html_parser()
   end
 
+  def click_link(page, text) do
+    page
+    |> with_links(text: text)
+    |> List.first()
+    |> Link.click()
+  end
+
+  def click_link(page, criterias) when is_list(criterias) do
+    page
+    |> with_links(criterias)
+    |> List.first()
+    |> Link.click()
+  end
+
   defdelegate links(page), to: __MODULE__, as: :with_links
 
   def with_links(page, criterias \\ []), do: with_elements(page, [:a, :area], criterias)
 
   def with_elements(page, element_names, criterias \\ [])
+
   def with_elements(page, element_names, criterias) do
     page
     |> maybe_filter_by_selector(criterias)

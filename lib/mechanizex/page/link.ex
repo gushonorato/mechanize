@@ -1,25 +1,10 @@
 defmodule Mechanizex.Page.Link do
-  alias Mechanizex.Page.{Element, Link}
+  alias Mechanizex.Page.Element
+  alias Mechanizex.Page
 
-  defstruct name: nil,
-            attributes: nil,
-            href: nil,
-            tree: nil,
-            text: nil,
-            page: nil,
-            parser: nil
-
-  @type t :: %__MODULE__{
-          name: String.t(),
-          attributes: list(),
-          tree: list(),
-          text: String.t(),
-          page: pid(),
-          parser: module(),
-          href: list()
-        }
-
-  def click(%Element{attributes: %{ href: url }}) do
-
+  def click(%Element{attributes: %{href: url}, page: page}) do
+    page
+    |> Page.agent()
+    |> Mechanizex.Agent.get!(URI.merge(page.response.url, url))
   end
 end

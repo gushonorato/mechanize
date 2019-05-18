@@ -111,10 +111,10 @@ defmodule Mechanizex.PageTest do
     test "return all links of a page", state do
       link_ids =
         state.page
-        |> Page.links
+        |> Page.links()
         |> Enum.map(&Map.get(&1, :dom_id))
 
-        assert link_ids == ["elem_4", "elem_6", "elem_7", "elem_8"]
+      assert link_ids == ["elem_4", "elem_6", "elem_7", "elem_8"]
     end
   end
 end

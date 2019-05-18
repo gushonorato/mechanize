@@ -16,7 +16,8 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
       response: %Response{
         body: res.body,
         headers: res.headers,
-        status_code: res.status_code
+        status_code: res.status_code,
+        url: req.url
       },
       request: req,
       agent: agent

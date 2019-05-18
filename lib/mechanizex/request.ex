@@ -3,7 +3,7 @@ defmodule Mechanizex.Request do
 
   @type t :: %__MODULE__{
           method: atom(),
-          url: String.t(),
+          url: binary(),
           headers: list(),
           body: term()
         }

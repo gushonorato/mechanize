@@ -41,15 +41,15 @@ defmodule Mechanizex.PageTest do
     end
 
     test "invalid string criteria", state do
-      assert with_elements_map(:name, state.page, [:a], foo: "bar") == []
+      assert with_elements_map(:tag_name, state.page, [:a], foo: "bar") == []
     end
 
     test "invalid regexp criteria", state do
-      assert with_elements_map(:name, state.page, [:title], foo: ~r/bar/) == []
+      assert with_elements_map(:tag_name, state.page, [:title], foo: ~r/bar/) == []
     end
 
     test "one element returned", state do
-      assert with_elements_map(:name, state.page, [:title]) == [:title]
+      assert with_elements_map(:tag_name, state.page, [:title]) == [:title]
     end
 
     test "css criteria", state do

@@ -66,7 +66,7 @@ defmodule Mechanizex.HTMLParser.Floki do
   defp create_element({name, attributes, _} = tree, page) do
     %Element{
       dom_id: dom_id(tree),
-      name: String.to_atom(name),
+      tag_name: String.to_atom(name),
       attributes: create_attributes_map(attributes),
       tree: tree,
       text: Floki.text(tree),

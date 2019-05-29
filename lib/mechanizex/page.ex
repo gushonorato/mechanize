@@ -64,7 +64,7 @@ defmodule Mechanizex.Page do
   end
 
   defp filter_by_element_names(elements, names) do
-    Enum.filter(elements, fn e -> e.name in names end)
+    Enum.filter(elements, fn e -> e.tag_name in names end)
   end
 
   defp filter_by_criteria(elements, criterias) do

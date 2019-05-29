@@ -1,9 +1,15 @@
 defmodule Mechanizex.Page.Element do
-  defstruct dom_id: nil, name: nil, attributes: nil, tree: nil, text: nil, page: nil, parser: nil
+  defstruct dom_id: nil,
+            tag_name: nil,
+            attributes: nil,
+            tree: nil,
+            text: nil,
+            page: nil,
+            parser: nil
 
   @type t :: %__MODULE__{
           dom_id: String.t(),
-          name: String.t(),
+          tag_name: String.t(),
           attributes: list(),
           tree: list(),
           text: String.t(),

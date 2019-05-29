@@ -23,16 +23,16 @@ defmodule Mechanizex.Page do
     |> Mechanizex.Agent.html_parser()
   end
 
-  def click_link(page, text) do
+  def click_link(page, criterias) when is_list(criterias) do
     page
-    |> with_links(text: text)
+    |> with_links(criterias)
     |> List.first()
     |> Link.click()
   end
 
-  def click_link(page, criterias) when is_list(criterias) do
+  def click_link(page, text) when is_binary(text) do
     page
-    |> with_links(criterias)
+    |> with_links(text: text)
     |> List.first()
     |> Link.click()
   end
@@ -76,7 +76,7 @@ defmodule Mechanizex.Page do
     criteria_meet?(element, h) and all_criterias_meet?(element, t)
   end
 
-  defp all_criterias_meet?(element, []) do
+  defp all_criterias_meet?(_, []) do
     true
   end
 

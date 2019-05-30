@@ -1,5 +1,5 @@
 defmodule Mechanizex.HTMLParser.Floki do
-  alias Mechanizex.{HTMLParser, Page}
+  alias Mechanizex.{HTMLParser, Page, Queryable}
   alias Mechanizex.Page.Element
 
   @behaviour Mechanizex.HTMLParser
@@ -20,20 +20,20 @@ defmodule Mechanizex.HTMLParser.Floki do
     check_elements_from_same_page(elements)
 
     elements
-    |> Enum.map(&Element.tree/1)
+    |> Enum.map(&Queryable.data/1)
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, h.page))
   end
 
   @impl HTMLParser
-  def attribute(elements, attribute_name) do
+  def attributes(elements, attribute_name) do
     elements
-    |> Enum.map(&Element.tree/1)
+    |> Enum.map(&Queryable.data/1)
     |> Floki.attribute(to_string(attribute_name))
   end
 
   @impl HTMLParser
-  def attribute(page, selector, attribute_name) do
+  def attributes(page, selector, attribute_name) do
     page
     |> Page.body()
     |> Floki.attribute(selector, to_string(attribute_name))
@@ -49,7 +49,7 @@ defmodule Mechanizex.HTMLParser.Floki do
   @impl HTMLParser
   def text(elements) do
     elements
-    |> Enum.map(&Element.tree/1)
+    |> Enum.map(&Queryable.data/1)
     |> Floki.text()
   end
 
@@ -70,8 +70,7 @@ defmodule Mechanizex.HTMLParser.Floki do
       attributes: create_attributes_map(attributes),
       tree: tree,
       text: Floki.text(tree),
-      page: page,
-      parser: __MODULE__
+      page: page
     }
   end
 

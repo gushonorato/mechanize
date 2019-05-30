@@ -1,6 +1,6 @@
 defmodule Mechanizex.HTTPAdapter.Httpoison do
   use Mechanizex.HTTPAdapter
-  alias Mechanizex.{Request, Response, Page}
+  alias Mechanizex.{Request, Response, Page, Agent}
 
   @impl Mechanizex.HTTPAdapter
   @spec request!(pid(), Request.t()) :: Page.t()
@@ -20,7 +20,8 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
         url: req.url
       },
       request: req,
-      agent: agent
+      agent: agent,
+      parser: Agent.html_parser(agent)
     }
   end
 end

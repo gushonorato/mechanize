@@ -1,7 +1,7 @@
 defmodule Mechanizex.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
   alias Mechanizex.HTMLParser
-  alias Mechanizex.{Response, Page}
+  alias Mechanizex.{Response, Page, Request}
   alias Mechanizex.Page.Element
 
   doctest Mechanizex.HTMLParser.Floki
@@ -42,6 +42,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @page %Page{
     agent: :fake_mechanize_pid,
+    request: %Request{},
     response: %Response{
       body: @html
     }
@@ -49,6 +50,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @page_without_text %Page{
     agent: :fake_mechanize_pid,
+    request: %Request{},
     response: %Response{
       body: @html_without_text
     }
@@ -64,8 +66,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
       [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
       ["Google"]
     },
-    page: @page,
-    parser: HTMLParser.Floki
+    page: @page
   }
 
   describe ".search" do
@@ -90,8 +91,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
              ], ["Google"]}
           ]
         },
-        page: @page,
-        parser: HTMLParser.Floki
+        page: @page
       }
 
       assert HTMLParser.Floki.search(@page, ".container") == [element]
@@ -124,24 +124,24 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     end
   end
 
-  describe ".attribute" do
+  describe ".attributes" do
     test "attribute not found" do
-      assert HTMLParser.Floki.attribute([@google], :"data-remote") == []
+      assert HTMLParser.Floki.attributes([@google], :"data-remote") == []
     end
 
     test "attribute found" do
-      assert HTMLParser.Floki.attribute([@google], :href) == ["http://google.com"]
+      assert HTMLParser.Floki.attributes([@google], :href) == ["http://google.com"]
     end
 
     test "multiple elements" do
-      assert HTMLParser.Floki.attribute([@google, @google], :href) == [
+      assert HTMLParser.Floki.attributes([@google, @google], :href) == [
                "http://google.com",
                "http://google.com"
              ]
     end
 
     test "multiple attributes found within a page" do
-      assert HTMLParser.Floki.attribute(@page, ".js-cool", :href) == [
+      assert HTMLParser.Floki.attributes(@page, ".js-cool", :href) == [
                "http://google.com",
                "http://google.com",
                "http://elixir-lang.org"

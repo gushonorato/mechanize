@@ -4,8 +4,7 @@ defmodule Mechanizex.Page.Element do
             attributes: nil,
             tree: nil,
             text: nil,
-            page: nil,
-            parser: nil
+            page: nil
 
   @type t :: %__MODULE__{
           dom_id: String.t(),
@@ -13,13 +12,17 @@ defmodule Mechanizex.Page.Element do
           attributes: list(),
           tree: list(),
           text: String.t(),
-          page: Page.t(),
-          parser: module()
+          page: Page.t()
         }
 
-  def tree(%Mechanizex.Page.Element{tree: tree}), do: tree
+  def page(element) do
+    element.page
+  end
 
-  def agent(%Mechanizex.Page.Element{page: page}), do: page.agent
-
-  def page(%Mechanizex.Page.Element{page: page}), do: page
+  defimpl Mechanizex.Queryable, for: Mechanizex.Page.Element do
+    alias Mechanizex.Queryable
+    def data(element), do: element.tree
+    def parser(element), do: Queryable.parser(element.page)
+    def tag_name(element), do: element.tag_name
+  end
 end

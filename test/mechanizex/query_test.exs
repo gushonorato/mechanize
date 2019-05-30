@@ -1,8 +1,7 @@
-defmodule Mechanizex.PageTest do
+defmodule Mechanizex.QueryTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Response
-  alias Mechanizex.Page
-  doctest Mechanizex.Page
+  alias Mechanizex.{Request, Response, Page, Query}
+  doctest Mechanizex.Query
 
   @html """
     <html>
@@ -27,6 +26,8 @@ defmodule Mechanizex.PageTest do
     {:ok,
      page: %Page{
        agent: Mechanizex.new(),
+       request: %Request{},
+       parser: Mechanizex.HTMLParser.Floki,
        response: %Response{
          body: @html
        }
@@ -36,7 +37,7 @@ defmodule Mechanizex.PageTest do
   describe ".with_elements" do
     defp with_elements_map(attr_for_map, page, elements, criteria \\ []) do
       page
-      |> Page.with_elements(elements, criteria)
+      |> Query.with_elements(elements, criteria)
       |> Enum.map(&Map.get(&1, attr_for_map))
     end
 
@@ -104,17 +105,6 @@ defmodule Mechanizex.PageTest do
                class: ~r/js-google/,
                rel: "nofollow"
              ) == ["elem_4"]
-    end
-  end
-
-  describe ".links" do
-    test "return all links of a page", state do
-      link_ids =
-        state.page
-        |> Page.links()
-        |> Enum.map(&Map.get(&1, :dom_id))
-
-      assert link_ids == ["elem_4", "elem_6", "elem_7", "elem_8"]
     end
   end
 end

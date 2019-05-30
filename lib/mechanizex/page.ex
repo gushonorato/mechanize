@@ -1,12 +1,15 @@
 defmodule Mechanizex.Page do
-  alias Mechanizex.{Request, Response}
+  alias Mechanizex.{Request, Response, Query}
   alias Mechanizex.Page.Link
-  defstruct request: nil, response: nil, agent: nil, links: nil
+
+  @enforce_keys [:request, :response, :agent, ]
+  defstruct request: nil, response: nil, agent: nil, parser: nil
 
   @type t :: %__MODULE__{
           request: Request.t(),
           response: Response.t(),
-          agent: pid()
+          agent: pid(),
+          parser: module()
         }
 
   def body(page) do
@@ -15,12 +18,6 @@ defmodule Mechanizex.Page do
 
   def agent(page) do
     page.agent
-  end
-
-  def html_parser(page) do
-    page
-    |> agent
-    |> Mechanizex.Agent.html_parser()
   end
 
   def click_link(page, criterias) when is_list(criterias) do
@@ -39,70 +36,14 @@ defmodule Mechanizex.Page do
 
   defdelegate links(page), to: __MODULE__, as: :with_links
 
-  def with_links(page, criterias \\ []), do: with_elements(page, [:a, :area], criterias)
+  def with_links(page, criterias \\ []), do: Query.with_elements(page, [:a, :area], criterias)
 
-  def with_elements(page, element_names, criterias \\ [])
+  defimpl Mechanizex.Queryable, for: Mechanizex.Page do
+    alias Mechanizex.{Page, Agent}
 
-  def with_elements(page, element_names, criterias) do
-    page
-    |> maybe_filter_by_selector(criterias)
-    |> filter_by_element_names(element_names)
-    |> filter_by_criteria(criterias)
+    def data(page), do: Page.body(page)
+    def parser(page), do: page |> Page.agent() |> Agent.html_parser()
+    def tag_name(_), do: raise ArgumentError, "%Page{} struct does not have a tag name."
   end
 
-  defp maybe_filter_by_selector(page, css: selector) do
-    search(page, selector)
-  end
-
-  defp maybe_filter_by_selector(page, _) do
-    page
-  end
-
-  defp filter_by_element_names(%Mechanizex.Page{} = page, names) do
-    names = Enum.map(names, &to_string/1)
-    Enum.flat_map(names, fn name -> search(page, name) end)
-  end
-
-  defp filter_by_element_names(elements, names) do
-    Enum.filter(elements, fn e -> e.tag_name in names end)
-  end
-
-  defp filter_by_criteria(elements, criterias) do
-    criterias = Keyword.delete(criterias, :css)
-    Enum.filter(elements, &all_criterias_meet?(&1, criterias))
-  end
-
-  defp all_criterias_meet?(element, [h | t]) do
-    criteria_meet?(element, h) and all_criterias_meet?(element, t)
-  end
-
-  defp all_criterias_meet?(_, []) do
-    true
-  end
-
-  defp criteria_meet?(element, {:text, value}) when is_binary(value) do
-    element.text == value
-  end
-
-  defp criteria_meet?(element, {:text, value}) do
-    element.text =~ value
-  end
-
-  defp criteria_meet?(element, {attr_name, value}) when is_binary(value) do
-    element.attributes[attr_name] == value
-  end
-
-  defp criteria_meet?(element, {attr_name, value}) do
-    attr_value = element.attributes[attr_name]
-    attr_value != nil and attr_value =~ value
-  end
-
-  defp delegate_parser(method, params) do
-    params
-    |> List.first()
-    |> html_parser
-    |> apply(method, params)
-  end
-
-  def search(page, selector), do: delegate_parser(:search, [page, selector])
 end

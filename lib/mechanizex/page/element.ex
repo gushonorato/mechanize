@@ -8,7 +8,7 @@ defmodule Mechanizex.Page.Element do
 
   @type t :: %__MODULE__{
           dom_id: String.t(),
-          tag_name: String.t(),
+          tag_name: atom(),
           attributes: list(),
           tree: list(),
           text: String.t(),

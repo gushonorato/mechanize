@@ -18,5 +18,4 @@ defmodule Mechanizex.Form.TextInput do
       value: element.attributes[:value]
     }
   end
-
 end

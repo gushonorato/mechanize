@@ -1,5 +1,4 @@
 defmodule Mechanizex.Query do
-
   alias Mechanizex.Queryable
 
   def with_elements(queryable, element_names, criterias \\ [])
@@ -60,18 +59,29 @@ defmodule Mechanizex.Query do
 
   def search(queryable, selector), do: parser(queryable).search(queryable, selector)
 
-  def attributes(queryable, attr_name) when not is_list(queryable), do: attributes([queryable], attr_name)
-  def attributes(queryable, attr_name), do: parser(queryable).attributes(queryable, attr_name)
-  def attributes(queryable, selector, attr_name), do: parser(queryable).attributes(queryable, selector, attr_name)
+  def attributes(queryable, attr_name) when not is_list(queryable),
+    do: attributes([queryable], attr_name)
 
-  def attribute(queryable, attr_name) when not is_list(queryable), do: attribute([queryable], attr_name)
-  def attribute(queryable, attr_name), do: parser(queryable).attributes(queryable, attr_name) |> List.first()
-  def attribute(queryable, selector, attr_name), do: parser(queryable).attributes(queryable, selector, attr_name) |> List.first()
+  def attributes(queryable, attr_name), do: parser(queryable).attributes(queryable, attr_name)
+
+  def attributes(queryable, selector, attr_name),
+    do: parser(queryable).attributes(queryable, selector, attr_name)
+
+  def attribute(queryable, attr_name) when not is_list(queryable),
+    do: attribute([queryable], attr_name)
+
+  def attribute(queryable, attr_name),
+    do: parser(queryable).attributes(queryable, attr_name) |> List.first()
+
+  def attribute(queryable, selector, attr_name),
+    do: parser(queryable).attributes(queryable, selector, attr_name) |> List.first()
 
   def text(queryable) when not is_list(queryable), do: parser(queryable).text([queryable])
   def text(queryable), do: parser(queryable).text(queryable)
 
-  def parser(queryable) when is_list(queryable), do: queryable |> List.first() |> Queryable.parser()
+  def parser(queryable) when is_list(queryable),
+    do: queryable |> List.first() |> Queryable.parser()
+
   def parser(queryable), do: Queryable.parser(queryable)
 end
 
@@ -80,5 +90,3 @@ defprotocol Mechanizex.Queryable do
   def parser(queryable)
   def tag_name(queryable)
 end
-
-

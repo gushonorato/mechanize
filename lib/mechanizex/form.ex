@@ -26,7 +26,7 @@ defmodule Mechanizex.Form do
     |> Enum.map(&create_field/1)
   end
 
-  defp create_field(%Element{ tag_name: :input } = element) do
+  defp create_field(%Element{tag_name: :input} = element) do
     TextInput.new(element)
   end
 end

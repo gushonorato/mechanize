@@ -19,7 +19,7 @@ defmodule Mechanizex.HTTPAdapter.LocalHtmlFile do
   end
 
   defp read_html_file(req) do
-    {:ok, html } = File.read(req.url)
+    {:ok, html} = File.read(req.url)
     html
   end
 end

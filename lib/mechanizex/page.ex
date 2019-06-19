@@ -1,5 +1,5 @@
 defmodule Mechanizex.Page do
-  alias Mechanizex.{Request, Response, Query}
+  alias Mechanizex.{Request, Response, Query, Form}
   alias Mechanizex.Page.Link
 
   @enforce_keys [:request, :response, :agent, ]
@@ -37,6 +37,14 @@ defmodule Mechanizex.Page do
   defdelegate links(page), to: __MODULE__, as: :with_links
 
   def with_links(page, criterias \\ []), do: Query.with_elements(page, [:a, :area], criterias)
+  def with_form(page, criterias \\ [])
+  def with_form(page, criterias) do
+    page
+    |> Query.with_elements([:form], criterias)
+    |> List.first()
+    |> Form.new()
+  end
+
 
   defimpl Mechanizex.Queryable, for: Mechanizex.Page do
     alias Mechanizex.{Page, Agent}

@@ -13,6 +13,11 @@ defmodule Mechanizex.HTMLParser.Floki do
   end
 
   @impl HTMLParser
+  def search(%Element{} = element, selector) do
+    search([element], selector)
+  end
+
+  @impl HTMLParser
   def search([], _), do: []
 
   @impl HTMLParser

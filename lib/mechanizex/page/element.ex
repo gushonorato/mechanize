@@ -36,4 +36,5 @@ end
 defimpl Parseable, for: Mechanizex.Page.Element do
   def parser(element), do: Parseable.parser(Elementable.element(element).page)
   def parser_data(element), do: Elementable.element(element).parser_data
+  def page(element), do: Elementable.element(element).page
 end

@@ -1,35 +1,17 @@
 defmodule Mechanizex.Query do
   alias Mechanizex.Page.Element
 
-  def with_elements(elements, element_names, criterias \\ [])
+  def select(elements, names, criterias \\ [])
 
-  def with_elements(elements, element_names, criterias) do
+  def select(elements, :all, criterias) do
     elements
-    |> maybe_filter_by_selector(criterias)
-    |> filter_by_element_names(element_names)
-    |> filter_by_criteria(criterias)
+    |> Enum.filter(&all_criterias_meet?(&1, criterias))
   end
 
-  defp maybe_filter_by_selector(elements, css: selector) do
-    search(elements, selector)
-  end
-
-  defp maybe_filter_by_selector(elements, _) do
+  def select(elements, names, criterias) do
     elements
-  end
-
-  defp filter_by_element_names(elements, names) when is_list(elements) do
-    Enum.filter(elements, fn element -> Element.name(element) in names end)
-  end
-
-  defp filter_by_element_names(elements, names) when is_map(elements) do
-    names = Enum.map(names, &to_string/1)
-    Enum.flat_map(names, fn name -> search(elements, name) end)
-  end
-
-  defp filter_by_criteria(elements, criterias) do
-    criterias = Keyword.delete(criterias, :css)
-    Enum.filter(elements, &all_criterias_meet?(&1, criterias))
+    |> Enum.filter(fn element -> Element.name(element) in names end)
+    |> Enum.filter(&all_criterias_meet?(&1, criterias))
   end
 
   defp all_criterias_meet?(elements, [h | t]) do
@@ -46,6 +28,10 @@ defmodule Mechanizex.Query do
 
   defp criteria_meet?(element, {:text, value}) do
     Element.text(element) =~ value
+  end
+
+  defp criteria_meet?(element, {attr_name, nil}) do
+    Element.attr(element, attr_name) == nil
   end
 
   defp criteria_meet?(element, {attr_name, value}) when is_binary(value) do

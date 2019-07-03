@@ -88,7 +88,7 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Query.with_elements([:input])
+    |> Query.search("input")
     |> Enum.reject(fn el -> Element.attr(el, :name) == nil end)
     |> Enum.map(&create_field/1)
   end

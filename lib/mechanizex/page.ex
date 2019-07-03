@@ -36,12 +36,17 @@ defmodule Mechanizex.Page do
 
   defdelegate links(page), to: __MODULE__, as: :with_links
 
-  def with_links(page, criterias \\ []), do: Query.with_elements(page, [:a, :area], criterias)
+  def with_links(page, criterias \\ []) do
+    page
+    |> Query.search("a, area")
+    |> Query.select(:all, criterias)
+  end
   def with_form(page, criterias \\ [])
 
   def with_form(page, criterias) do
     page
-    |> Query.with_elements([:form], criterias)
+    |> Query.search("form")
+    |> Query.select(:all, criterias)
     |> List.first()
     |> Form.new()
   end

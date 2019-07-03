@@ -1,6 +1,7 @@
 defmodule Mechanizex.QueryTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Request, Response, Page, Query}
+  alias Mechanizex.Page.Element
   doctest Mechanizex.Query
 
   @html """
@@ -35,76 +36,112 @@ defmodule Mechanizex.QueryTest do
   end
 
   describe ".with_elements" do
-    defp with_elements_map(attr_for_map, page, elements, criteria \\ []) do
-      page
-      |> Query.with_elements(elements, criteria)
-      |> Enum.map(&Map.get(&1, attr_for_map))
+    test "invalid string criteria", %{page: page} do
+      assert page
+             |> Query.with_elements([:a], foo: "bar")
+             |> Enum.map(&Element.name/1) == []
     end
 
-    test "invalid string criteria", state do
-      assert with_elements_map(:tag_name, state.page, [:a], foo: "bar") == []
+    test "invalid regexp criteria", %{page: page} do
+      assert page
+             |> Query.with_elements([:title], foo: ~r/bar/)
+             |> Enum.map(&Element.name/1) == []
     end
 
-    test "invalid regexp criteria", state do
-      assert with_elements_map(:tag_name, state.page, [:title], foo: ~r/bar/) == []
+    test "one element returned", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:title])
+        |> Enum.map(&Element.name/1) == [:title]
+      )
     end
 
-    test "one element returned", state do
-      assert with_elements_map(:tag_name, state.page, [:title]) == [:title]
-    end
-
-    test "css criteria", state do
-      assert with_elements_map(:dom_id, state.page, [:a], css: ".js-google") == [
+    test "css criteria", %{page: page} do
+      assert page
+             |> Query.with_elements([:a], css: ".js-google")
+             |> Enum.map(&Element.attr(&1, :id)) == [
                "elem_4",
                "elem_6"
              ]
     end
 
-    test "broad match with regex", state do
-      assert with_elements_map(:dom_id, state.page, [:a], href: ~r/google.com.br/) == ["elem_4"]
+    test "broad match with regex", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a], href: ~r/google.com.br/)
+        |> Enum.map(&Element.attr(&1, :id)) == ["elem_4"]
+      )
     end
 
-    test "broad match with string won't work", state do
-      assert with_elements_map(:dom_id, state.page, [:a], href: "google.com.br") == []
+    test "broad match with string won't work", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a], href: "google.com.br")
+        |> Enum.map(&Element.attr(&1, :id)) == []
+      )
     end
 
-    test "exact match with string in criteria", state do
-      assert with_elements_map(:dom_id, state.page, [:a], href: "http://google.com.br") == [
-               "elem_4"
-             ]
+    test "exact match with string in criteria", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a], href: "http://google.com.br")
+        |> Enum.map(&Element.attr(&1, :id)) == [
+          "elem_4"
+        ]
+      )
     end
 
-    test "accepts many attributes in criteria", state do
-      assert with_elements_map(:dom_id, state.page, [:a],
-               class: ~r/js-google /,
-               rel: ~r/nofollow/
-             ) == ["elem_4"]
+    test "accepts many attributes in criteria", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a],
+          class: ~r/js-google /,
+          rel: ~r/nofollow/
+        )
+        |> Enum.map(&Element.attr(&1, :id)) == ["elem_4"]
+      )
     end
 
-    test "broad match text with regexp", state do
-      assert with_elements_map(:dom_id, state.page, [:a], text: ~r/Google/) == [
-               "elem_4",
-               "elem_6"
-             ]
+    test "broad match text with regexp", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a], text: ~r/Google/)
+        |> Enum.map(&Element.attr(&1, :id)) == [
+          "elem_4",
+          "elem_6"
+        ]
+      )
     end
 
-    test "exact match text with string", state do
-      assert with_elements_map(:dom_id, state.page, [:a], text: "Google") == ["elem_6"]
+    test "exact match text with string", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a], text: "Google")
+        |> Enum.map(&Element.attr(&1, :id)) == ["elem_6"]
+      )
     end
 
-    test "text and many attributes criteria", state do
-      assert with_elements_map(:dom_id, state.page, [:a],
-               text: ~r/Google Brazil/,
-               class: ~r/js-google /
-             ) == ["elem_4"]
+    test "text and many attributes criteria", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a],
+          text: ~r/Google Brazil/,
+          class: ~r/js-google /
+        )
+        |> Enum.map(&Element.attr(&1, :id)) == ["elem_4"]
+      )
     end
 
-    test "css, text and many attributes criteria", state do
-      assert with_elements_map(:dom_id, state.page, [:a],
-               text: ~r/Google/,
-               class: ~r/js-google/,
-               rel: "nofollow"
-             ) == ["elem_4"]
+    test "css, text and many attributes criteria", %{page: page} do
+      assert(
+        page
+        |> Query.with_elements([:a],
+          text: ~r/Google/,
+          class: ~r/js-google/,
+          rel: "nofollow"
+        )
+        |> Enum.map(&Element.attr(&1, :id)) == ["elem_4"]
+      )
     end
   end
 end

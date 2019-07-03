@@ -14,8 +14,8 @@ defmodule Mechanizex.Form.TextInput do
   def new(element) do
     %Mechanizex.Form.TextInput{
       element: element,
-      name: element.attributes[:name],
-      value: element.attributes[:value]
+      name: Element.attr(element, :name),
+      value: Element.attr(element, :value)
     }
   end
 end

@@ -45,12 +45,9 @@ defmodule Mechanizex.Page do
     |> List.first()
     |> Form.new()
   end
+end
 
-  defimpl Mechanizex.Queryable, for: Mechanizex.Page do
-    alias Mechanizex.{Page, Agent}
-
-    def data(page), do: Page.body(page)
-    def parser(page), do: page |> Page.agent() |> Agent.html_parser()
-    def tag_name(_), do: raise(ArgumentError, "%Page{} struct does not have a tag name.")
-  end
+defimpl Parseable, for: Mechanizex.Page do
+  def parser(page), do: page.parser
+  def parser_data(page), do: page.response.body
 end

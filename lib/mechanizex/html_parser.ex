@@ -15,3 +15,8 @@ defmodule Mechanizex.HTMLParser do
     Plugin.get(__MODULE__, parser_name)
   end
 end
+
+defprotocol Parseable do
+  def parser(parseable)
+  def parser_data(parseable)
+end

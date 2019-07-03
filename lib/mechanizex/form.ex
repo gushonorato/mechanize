@@ -3,6 +3,7 @@ defmodule Mechanizex.Form do
   alias Mechanizex.Form.{TextInput, DetachedField}
   alias Mechanizex.{Query, Request}
 
+  @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil,
             fields: []
@@ -41,7 +42,8 @@ defmodule Mechanizex.Form do
 
   defp method(form) do
     method =
-      form.element.attributes[:method]
+      form
+      |> Element.attr(:method)
       |> Kernel.||("")
       |> String.trim()
       |> String.downcase()
@@ -50,7 +52,8 @@ defmodule Mechanizex.Form do
   end
 
   defp action_url(form) do
-    form.element.attributes[:action]
+    form
+    |> Element.attr(:action)
     |> Kernel.||("")
     |> String.trim()
     |> (&URI.merge(form.element.page.request.url, &1)).()
@@ -86,11 +89,11 @@ defmodule Mechanizex.Form do
   defp parse_fields(element) do
     element
     |> Query.with_elements([:input])
-    |> Enum.reject(fn el -> el.attributes[:name] == nil end)
+    |> Enum.reject(fn el -> Element.attr(el, :name) == nil end)
     |> Enum.map(&create_field/1)
   end
 
-  defp create_field(%Element{tag_name: :input} = element) do
+  defp create_field(%Element{name: :input} = element) do
     TextInput.new(element)
   end
 end

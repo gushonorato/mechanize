@@ -57,11 +57,10 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   }
 
   @google %Element{
-    dom_id: nil,
-    tag_name: :a,
-    attributes: %{href: "http://google.com", class: "company js-google js-cool"},
+    name: :a,
+    attrs: %{href: "http://google.com", class: "company js-google js-cool"},
     text: "Google",
-    tree: {
+    parser_data: {
       "a",
       [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
       ["Google"]
@@ -76,11 +75,10 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
     test "one element with children found" do
       element = %Element{
-        dom_id: "main",
-        tag_name: :div,
-        attributes: %{id: "main", class: "container", "data-method": "get"},
+        name: :div,
+        attrs: %{id: "main", class: "container", "data-method": "get"},
         text: "Google",
-        tree: {
+        parser_data: {
           "div",
           [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
           [

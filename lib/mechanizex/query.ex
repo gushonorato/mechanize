@@ -1,92 +1,66 @@
 defmodule Mechanizex.Query do
-  alias Mechanizex.Queryable
+  alias Mechanizex.Page.Element
 
-  def with_elements(queryable, element_names, criterias \\ [])
+  def with_elements(elements, element_names, criterias \\ [])
 
-  def with_elements(queryable, element_names, criterias) do
-    queryable
+  def with_elements(elements, element_names, criterias) do
+    elements
     |> maybe_filter_by_selector(criterias)
     |> filter_by_element_names(element_names)
     |> filter_by_criteria(criterias)
   end
 
-  defp maybe_filter_by_selector(queryable, css: selector) do
-    search(queryable, selector)
+  defp maybe_filter_by_selector(elements, css: selector) do
+    search(elements, selector)
   end
 
-  defp maybe_filter_by_selector(queryable, _) do
-    queryable
+  defp maybe_filter_by_selector(elements, _) do
+    elements
   end
 
-  defp filter_by_element_names(queryables, names) when is_list(queryables) do
-    Enum.filter(queryables, fn queryable -> Queryable.tag_name(queryable) in names end)
+  defp filter_by_element_names(elements, names) when is_list(elements) do
+    Enum.filter(elements, fn element -> Element.name(element) in names end)
   end
 
-  defp filter_by_element_names(queryable, names) when is_map(queryable) do
+  defp filter_by_element_names(elements, names) when is_map(elements) do
     names = Enum.map(names, &to_string/1)
-    Enum.flat_map(names, fn name -> search(queryable, name) end)
+    Enum.flat_map(names, fn name -> search(elements, name) end)
   end
 
-  defp filter_by_criteria(queryables, criterias) do
+  defp filter_by_criteria(elements, criterias) do
     criterias = Keyword.delete(criterias, :css)
-    Enum.filter(queryables, &all_criterias_meet?(&1, criterias))
+    Enum.filter(elements, &all_criterias_meet?(&1, criterias))
   end
 
-  defp all_criterias_meet?(queryable, [h | t]) do
-    criteria_meet?(queryable, h) and all_criterias_meet?(queryable, t)
+  defp all_criterias_meet?(elements, [h | t]) do
+    criteria_meet?(elements, h) and all_criterias_meet?(elements, t)
   end
 
   defp all_criterias_meet?(_, []) do
     true
   end
 
-  defp criteria_meet?(queryable, {:text, value}) when is_binary(value) do
-    text(queryable) == value
+  defp criteria_meet?(element, {:text, value}) when is_binary(value) do
+    Element.text(element) == value
   end
 
-  defp criteria_meet?(queryable, {:text, value}) do
-    text(queryable) =~ value
+  defp criteria_meet?(element, {:text, value}) do
+    Element.text(element) =~ value
   end
 
-  defp criteria_meet?(queryable, {attr_name, value}) when is_binary(value) do
-    attribute(queryable, attr_name) == value
+  defp criteria_meet?(element, {attr_name, value}) when is_binary(value) do
+    Element.attr(element, attr_name) == value
   end
 
-  defp criteria_meet?(queryable, {attr_name, value}) do
-    attr_value = attribute(queryable, attr_name)
+  defp criteria_meet?(element, {attr_name, value}) do
+    attr_value = Element.attr(element, attr_name)
     attr_value != nil and attr_value =~ value
   end
 
-  def search(queryable, selector), do: parser(queryable).search(queryable, selector)
+  def search(elements, selector), do: parser(elements).search(elements, selector)
 
-  def attributes(queryable, attr_name) when not is_list(queryable),
-    do: attributes([queryable], attr_name)
+  def parser(elements) when is_list(elements),
+    do: elements |> List.first() |> Parseable.parser()
 
-  def attributes(queryable, attr_name), do: parser(queryable).attributes(queryable, attr_name)
-
-  def attributes(queryable, selector, attr_name),
-    do: parser(queryable).attributes(queryable, selector, attr_name)
-
-  def attribute(queryable, attr_name) when not is_list(queryable),
-    do: attribute([queryable], attr_name)
-
-  def attribute(queryable, attr_name),
-    do: parser(queryable).attributes(queryable, attr_name) |> List.first()
-
-  def attribute(queryable, selector, attr_name),
-    do: parser(queryable).attributes(queryable, selector, attr_name) |> List.first()
-
-  def text(queryable) when not is_list(queryable), do: parser(queryable).text([queryable])
-  def text(queryable), do: parser(queryable).text(queryable)
-
-  def parser(queryable) when is_list(queryable),
-    do: queryable |> List.first() |> Queryable.parser()
-
-  def parser(queryable), do: Queryable.parser(queryable)
-end
-
-defprotocol Mechanizex.Queryable do
-  def data(queryable)
-  def parser(queryable)
-  def tag_name(queryable)
+  def parser(element), do: Parseable.parser(element)
 end

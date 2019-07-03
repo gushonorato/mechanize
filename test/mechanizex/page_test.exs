@@ -1,6 +1,7 @@
 defmodule Mechanizex.PageTest do
   use ExUnit.Case, async: true
   alias Mechanizex
+  alias Mechanizex.Page.Element
 
   setup_all do
     {:ok, agent: Mechanizex.new(http_adapter: :local_html_file)}
@@ -13,7 +14,7 @@ defmodule Mechanizex.PageTest do
         |> Mechanizex.get!("test/htdocs/two_forms.html")
         |> Mechanizex.with_form()
 
-      assert Enum.map(form.element.attributes, & &1) == [
+      assert Enum.map(Element.attrs(form), & &1) == [
                action: "/form1",
                id: "form-id-1",
                method: "get",
@@ -32,7 +33,7 @@ defmodule Mechanizex.PageTest do
         |> Mechanizex.get!("test/htdocs/two_forms.html")
         |> Mechanizex.with_form(name: "form-name-2")
 
-      assert Enum.map(form.element.attributes, & &1) == [
+      assert Enum.map(Element.attrs(form), & &1) == [
                action: "/form2",
                id: "form-id-2",
                method: "post",

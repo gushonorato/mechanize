@@ -1,7 +1,7 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
   alias Mechanizex.Form.{TextInput, DetachedField}
-  alias Mechanizex.Query
+  alias Mechanizex.{Query, Request}
 
   @enforce_keys [:element]
   defstruct element: nil,
@@ -31,6 +31,42 @@ defmodule Mechanizex.Form do
     %Mechanizex.Form{form | fields: fields}
   end
 
+  def submit(form) do
+    Mechanizex.Agent.request!(agent(form), %Request{
+      method: method(form),
+      url: action_url(form),
+      params: params(form)
+    })
+  end
+
+  defp method(form) do
+    method =
+      form.element.attributes[:method]
+      |> Kernel.||("")
+      |> String.trim()
+      |> String.downcase()
+
+    if method == "post", do: :post, else: :get
+  end
+
+  defp action_url(form) do
+    form.element.attributes[:action]
+    |> Kernel.||("")
+    |> String.trim()
+    |> (&URI.merge(form.element.page.request.url, &1)).()
+    |> URI.to_string()
+  end
+
+  defp params(form) do
+    Enum.reduce(form.fields, %{}, fn field, params ->
+      Map.put_new(params, field.name, field.value)
+    end)
+  end
+
+  defp agent(form) do
+    form.element.page.agent
+  end
+
   defp field_present?(%Mechanizex.Form{fields: fields}, field) do
     Enum.find(fields, fn %{label: label, name: name} ->
       label == field or name == field
@@ -49,7 +85,8 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Query.with_elements([:input, :text_area, :select])
+    |> Query.with_elements([:input])
+    |> Enum.reject(fn el -> el.attributes[:name] == nil end)
     |> Enum.map(&create_field/1)
   end
 

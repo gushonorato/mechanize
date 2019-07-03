@@ -19,7 +19,13 @@ defmodule Mechanizex.HTTPAdapter.LocalHtmlFile do
   end
 
   defp read_html_file(req) do
-    {:ok, html} = File.read(req.url)
-    html
+    req.url
+    |> String.replace_prefix("https://htdocs.local/", "")
+    |> File.read()
+    |> elem(1)
   end
 end
+
+import Mox
+
+defmock(Mechanizex.HTTPAdapter.LocalHtmlFileMock, for: Mechanizex.HTTPAdapter)

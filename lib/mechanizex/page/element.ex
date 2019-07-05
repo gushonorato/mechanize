@@ -17,6 +17,7 @@ defmodule Mechanizex.Page.Element do
   def text(el), do: el(el).text
   def name(el), do: el(el).name
   def attrs(el), do: el(el).attrs
+  def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
   def attr(el, attr_name), do: el(el).attrs[attr_name]
   defp el(elementable), do: Elementable.element(elementable)
 end

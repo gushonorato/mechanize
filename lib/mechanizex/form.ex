@@ -80,6 +80,7 @@ defmodule Mechanizex.Form do
 
   defp params(form) do
     form.fields
+    |> Enum.reject( fn field -> field.disabled == true end)
     |> Enum.map(fn field -> {field.name, field.value} end)
   end
 
@@ -98,7 +99,8 @@ defmodule Mechanizex.Form do
     %TextInput{
       element: element,
       name: Element.attr(element, :name),
-      value: Element.attr(element, :value)
+      value: Element.attr(element, :value),
+      disabled: Element.attr_present?(element, :disabled)
     }
   end
 
@@ -106,7 +108,8 @@ defmodule Mechanizex.Form do
     %TextInput{
       element: element,
       name: Element.attr(element, :name),
-      value: Element.text(element)
+      value: Element.text(element),
+      disabled: Element.attr_present?(element, :disabled)
     }
   end
 end

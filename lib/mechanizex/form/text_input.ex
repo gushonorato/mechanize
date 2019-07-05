@@ -3,12 +3,13 @@ defmodule Mechanizex.Form.TextInput do
 
   @derive [Elementable]
   @enforce_keys [:element]
-  defstruct element: nil, label: nil, name: nil, value: nil
+  defstruct element: nil, label: nil, name: nil, value: nil, disabled: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),
           label: String.t(),
           name: String.t(),
-          value: String.t()
+          value: String.t(),
+          disabled: boolean()
         }
 end

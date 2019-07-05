@@ -2,6 +2,7 @@ defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
   alias Mechanizex.{Form, Request}
+  alias Mechanizex.Page.Element
   alias Mechanizex.Form.TextInput
   import Mox
 
@@ -103,7 +104,7 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".parse_fields" do
-    test "parser all generic text inputs", %{agent: agent} do
+    test "parse all generic text input", %{agent: agent} do
       fields =
         agent
         |> Mechanizex.get!(
@@ -114,24 +115,42 @@ defmodule Mechanizex.FormTest do
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
       assert fields == [
-               {"color1", "color1 value"},
-               {"date1", "date1 value"},
-               {"datetime1", "datetime1 value"},
-               {"email1", "email1 value"},
-               {"hidden1", "hidden1 value"},
-               {"month1", "month1 value"},
-               {"number1", "number1 value"},
-               {"password1", "password1 value"},
-               {"range1", "range1 value"},
-               {"search1", "search1 value"},
-               {"submit1", "submit1 value"},
-               {"tel1", "tel1 value"},
-               {"text1", "text1 value"},
-               {"time1", "time1 value"},
-               {"url1", "url1 value"},
-               {"week1", "week1 value"},
-               {"textarea1", "textarea1 value"}
-             ]
+              {"color1", "color1 value"},
+              {"date1", "date1 value"},
+              {"datetime1", "datetime1 value"},
+              {"email1", "email1 value"},
+              {"hidden1", "hidden1 value"},
+              {"month1", "month1 value"},
+              {"number1", "number1 value"},
+              {"password1", "password1 value"},
+              {"range1", "range1 value"},
+              {"search1", "search1 value"},
+              {"submit1", "submit1 value"},
+              {"tel1", "tel1 value"},
+              {"text1", "text1 value"},
+              {"time1", "time1 value"},
+              {"url1", "url1 value"},
+              {"week1", "week1 value"},
+              {"textarea1", "textarea1 value"}
+            ]
+    end
+    test "parse disabled fields", %{agent: agent} do
+      fields =
+        agent
+        |> Mechanizex.get!(
+          "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
+        )
+        |> Mechanizex.with_form()
+        |> Map.get(:fields)
+        |> Enum.map(fn %TextInput{name: name, disabled: disabled} -> {name, disabled} end)
+
+      assert fields == [
+              {"color1", false},
+              {"date1", true},
+              {"datetime1", true},
+              {"email1", true},
+              {"textarea1", true}
+            ]
     end
   end
 
@@ -249,6 +268,23 @@ defmodule Mechanizex.FormTest do
       |> Mechanizex.with_form()
       |> Mechanizex.fill_field("username", with: "gustavo")
       |> Mechanizex.fill_field("passwd", with: "gu123456")
+      |> Mechanizex.submit()
+    end
+
+   test "doest not submit disabled fields", %{agent: agent} do
+      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :post,
+                                url: "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
+                                params: [{"color1", "color1 value"}]
+                              } ->
+        :ok
+      end)
+
+      agent
+      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
+      |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
   end

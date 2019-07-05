@@ -41,6 +41,7 @@ defmodule Mechanizex.Page do
     |> Query.search("a, area")
     |> Query.select(:all, criterias)
   end
+
   def with_form(page, criterias \\ [])
 
   def with_form(page, criterias) do

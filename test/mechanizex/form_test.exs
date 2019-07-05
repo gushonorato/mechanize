@@ -1,7 +1,8 @@
 defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
-  alias Mechanizex.Request
+  alias Mechanizex.{Form, Request}
+  alias Mechanizex.Form.TextInput
   import Mox
 
   setup_all do
@@ -14,32 +15,81 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".fill_field" do
-    test "update a text field by name", %{agent: agent} do
-      form =
+    test "update a first field by name", %{agent: agent} do
+      assert(
         agent
         |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
         |> Mechanizex.with_form()
-        |> Mechanizex.fill_field("username", with: "gustavo")
-        |> Mechanizex.fill_field("passwd", with: "123456")
-
-      assert Enum.map(form.fields, &{&1.name, &1.value}) == [
-               {"username", "gustavo"},
-               {"passwd", "123456"}
-             ]
+        |> Form.fill_field("username", with: "gustavo")
+        |> Form.fill_field("passwd", with: "123456")
+        |> Map.get(:fields)
+        |> Enum.map(&{&1.name, &1.value}) == [
+          {"username", "gustavo"},
+          {"passwd", "123456"}
+        ]
+      )
     end
 
     test "creates a new field", %{agent: agent} do
-      form =
+      fields =
         agent
         |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
         |> Mechanizex.with_form()
         |> Mechanizex.fill_field("captcha", with: "checked")
+        |> Map.get(:fields)
+        |> Enum.map(&{&1.name, &1.value})
 
-      assert Enum.map(form.fields, &{&1.name, &1.value}) == [
+      assert fields == [
                {"captcha", "checked"},
                {"username", nil},
                {"passwd", "12345"}
              ]
+    end
+  end
+
+  describe ".update_field" do
+    test "updates first field when duplicated" do
+      assert(
+        %Form{ element: :fake, fields: [
+          %TextInput{ element: :fake, name: "article[categories][]", value: "1"},
+          %TextInput{ element: :fake, name: "article[categories][]", value: "2"}
+        ]}
+        |> Form.update_field("article[categories][]", "3")
+        |> Map.get(:fields)
+        |> Enum.map(&{&1.name, &1.value}) == [{"article[categories][]", "3"}, {"article[categories][]", "2"}]
+      )
+    end
+  end
+
+  describe ".add_field" do
+    test "adds a field even if already exists" do
+      assert(
+        %Form{element: :fake}
+        |> Form.add_field("user[codes][]", "1")
+        |> Form.add_field("user[codes][]", "2")
+        |> Form.add_field("user[codes][]", "3")
+        |> Map.get(:fields)
+        |> Enum.map(&{&1.name, &1.value}) == [
+          {"user[codes][]", "3"},
+          {"user[codes][]", "2"},
+          {"user[codes][]", "1"}
+        ]
+      )
+    end
+  end
+
+  describe ".delete_field" do
+    test "removes all fields with the given name" do
+      assert(
+        %Form{ element: :fake, fields: [
+          %TextInput{ element: :fake, name: "article[categories][]", value: "1"},
+          %TextInput{ element: :fake, name: "article[categories][]", value: "2"},
+          %TextInput{ element: :fake, name: "username", value: "gustavo"}
+        ]}
+        |> Form.delete_field("article[categories][]")
+        |> Map.get(:fields)
+        |> Enum.map(&{&1.name, &1.value}) == [{"username", "gustavo"}]
+      )
     end
   end
 

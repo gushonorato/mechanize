@@ -22,14 +22,32 @@ defmodule Mechanizex.Form do
   end
 
   def fill_field(form, field, with: value) do
-    fields =
-      if field_present?(form, field) do
-        update_field(form.fields, field, value)
-      else
-        [DetachedField.new(field, value) | form.fields]
-      end
+    updated_form = update_field(form, field, value)
+    if updated_form == form, do: add_field(form, field, value), else: updated_form
+  end
 
-    %Mechanizex.Form{form | fields: fields}
+  def update_field(form, field, value) do
+    Map.put(form, :fields, do_update_field(form.fields, field, value))
+  end
+
+  defp do_update_field([], _, _) do
+    []
+  end
+
+  defp do_update_field([field | t], field_key, value) do
+    if field.name == field_key do
+      [%{field | value: value} | t]
+    else
+      [field | do_update_field(t, field_key, value)]
+    end
+  end
+
+  def add_field(form, field, value) do
+    Map.put(form, :fields, [DetachedField.new(field, value) | form.fields])
+  end
+
+  def delete_field(form, field_name) do
+    Map.put(form, :fields, Enum.reject(form.fields, fn(field) -> field.name == field_name end))
   end
 
   def submit(form) do
@@ -62,27 +80,11 @@ defmodule Mechanizex.Form do
 
   defp params(form) do
     form.fields
-    |> Enum.map(fn(field) -> {field.name, field.value} end)
+    |> Enum.map(fn field -> {field.name, field.value} end)
   end
 
   defp agent(form) do
     form.element.page.agent
-  end
-
-  defp field_present?(%Mechanizex.Form{fields: fields}, field) do
-    Enum.find(fields, fn %{label: label, name: name} ->
-      label == field or name == field
-    end)
-  end
-
-  defp update_field(fields, field, value) do
-    Enum.map(fields, fn f ->
-      if f.label == field or f.name == field do
-        Map.put(f, :value, value)
-      else
-        f
-      end
-    end)
   end
 
   defp parse_fields(element) do

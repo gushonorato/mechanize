@@ -12,5 +12,7 @@ matrix:
   exclude:
     - elixir: 1.8
       otp_release: 19.3
+    - elixir: 1.9
+      otp_release: 19.3
 script:
 - MIX_ENV=test mix do deps.get, compile, coveralls.travis

@@ -3,7 +3,7 @@ defmodule Mechanizex.Form do
   alias Mechanizex.Form.{TextInput, DetachedField}
   alias Mechanizex.{Query, Request}
 
-  @derive [Elementable]
+  @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
   defstruct element: nil,
             fields: []

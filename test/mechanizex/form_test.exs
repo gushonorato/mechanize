@@ -2,7 +2,6 @@ defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
   alias Mechanizex.{Form, Request}
-  alias Mechanizex.Page.Element
   alias Mechanizex.Form.TextInput
   import Mox
 
@@ -150,6 +149,23 @@ defmodule Mechanizex.FormTest do
               {"datetime1", true},
               {"email1", true},
               {"textarea1", true}
+            ]
+    end
+
+    test "parse elements without name", %{agent: agent} do
+      fields =
+        agent
+        |> Mechanizex.get!(
+          "https://htdocs.local/test/htdocs/form_with_inputs_without_name.html"
+        )
+        |> Mechanizex.with_form()
+        |> Map.get(:fields)
+        |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
+
+      assert fields == [
+              {nil, "gustavo"},
+              {nil, "123456"},
+              {nil, "input-submit"}
             ]
     end
   end

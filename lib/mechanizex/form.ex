@@ -80,7 +80,7 @@ defmodule Mechanizex.Form do
 
   defp params(form) do
     form.fields
-    |> Enum.reject( fn field -> field.disabled == true end)
+    |> Enum.reject( fn field -> field.disabled == true or field.name == nil end)
     |> Enum.map(fn field -> {field.name, field.value} end)
   end
 
@@ -91,7 +91,6 @@ defmodule Mechanizex.Form do
   defp parse_fields(element) do
     element
     |> Query.search("input, textarea")
-    |> Enum.reject(fn el -> Element.attr(el, :name) == nil end)
     |> Enum.map(&create_field/1)
   end
 

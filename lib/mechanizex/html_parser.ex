@@ -13,7 +13,7 @@ defmodule Mechanizex.HTMLParser do
   end
 end
 
-defprotocol Parseable do
+defprotocol Mechanizex.HTMLParser.Parseable do
   def parser(parseable)
   def parser_data(parseable)
   def page(parseable)

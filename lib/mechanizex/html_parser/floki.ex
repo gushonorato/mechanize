@@ -1,6 +1,7 @@
 defmodule Mechanizex.HTMLParser.Floki do
   alias Mechanizex.HTMLParser
   alias Mechanizex.Page.Element
+  alias Mechanizex.HTMLParser.Parseable
 
   @behaviour Mechanizex.HTMLParser
 

@@ -53,7 +53,7 @@ defmodule Mechanizex.Page do
   end
 end
 
-defimpl Parseable, for: Mechanizex.Page do
+defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page do
   def parser(page), do: page.parser
   def parser_data(page), do: page.response.body
   def page(page), do: page

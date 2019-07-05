@@ -36,8 +36,9 @@ defimpl Mechanizex.Page.Elementable, for: Any do
   def element(elementable), do: elementable.element
 end
 
-defimpl Parseable, for: Mechanizex.Page.Element do
+defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do
   alias Mechanizex.Page.Elementable
+  alias Mechanizex.HTMLParser.Parseable
   def parser(element), do: Parseable.parser(Elementable.element(element).page)
   def parser_data(element), do: Elementable.element(element).parser_data
   def page(element), do: Elementable.element(element).page

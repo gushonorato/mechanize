@@ -47,7 +47,7 @@ defmodule Mechanizex.Form do
   end
 
   def delete_field(form, field_name) do
-    Map.put(form, :fields, Enum.reject(form.fields, fn(field) -> field.name == field_name end))
+    Map.put(form, :fields, Enum.reject(form.fields, fn field -> field.name == field_name end))
   end
 
   def submit(form) do
@@ -89,12 +89,24 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Query.search("input")
+    |> Query.search("input, textarea")
     |> Enum.reject(fn el -> Element.attr(el, :name) == nil end)
     |> Enum.map(&create_field/1)
   end
 
   defp create_field(%Element{name: :input} = element) do
-    TextInput.new(element)
+    %TextInput{
+      element: element,
+      name: Element.attr(element, :name),
+      value: Element.attr(element, :value)
+    }
+  end
+
+  defp create_field(%Element{name: :textarea} = element) do
+    %TextInput{
+      element: element,
+      name: Element.attr(element, :name),
+      value: Element.text(element)
+    }
   end
 end

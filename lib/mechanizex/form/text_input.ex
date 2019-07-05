@@ -11,12 +11,4 @@ defmodule Mechanizex.Form.TextInput do
           name: String.t(),
           value: String.t()
         }
-
-  def new(element) do
-    %Mechanizex.Form.TextInput{
-      element: element,
-      name: Element.attr(element, :name),
-      value: Element.attr(element, :value)
-    }
-  end
 end

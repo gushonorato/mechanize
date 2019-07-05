@@ -50,13 +50,19 @@ defmodule Mechanizex.FormTest do
   describe ".update_field" do
     test "updates first field when duplicated" do
       assert(
-        %Form{ element: :fake, fields: [
-          %TextInput{ element: :fake, name: "article[categories][]", value: "1"},
-          %TextInput{ element: :fake, name: "article[categories][]", value: "2"}
-        ]}
+        %Form{
+          element: :fake,
+          fields: [
+            %TextInput{element: :fake, name: "article[categories][]", value: "1"},
+            %TextInput{element: :fake, name: "article[categories][]", value: "2"}
+          ]
+        }
         |> Form.update_field("article[categories][]", "3")
         |> Map.get(:fields)
-        |> Enum.map(&{&1.name, &1.value}) == [{"article[categories][]", "3"}, {"article[categories][]", "2"}]
+        |> Enum.map(&{&1.name, &1.value}) == [
+          {"article[categories][]", "3"},
+          {"article[categories][]", "2"}
+        ]
       )
     end
   end
@@ -81,15 +87,51 @@ defmodule Mechanizex.FormTest do
   describe ".delete_field" do
     test "removes all fields with the given name" do
       assert(
-        %Form{ element: :fake, fields: [
-          %TextInput{ element: :fake, name: "article[categories][]", value: "1"},
-          %TextInput{ element: :fake, name: "article[categories][]", value: "2"},
-          %TextInput{ element: :fake, name: "username", value: "gustavo"}
-        ]}
+        %Form{
+          element: :fake,
+          fields: [
+            %TextInput{element: :fake, name: "article[categories][]", value: "1"},
+            %TextInput{element: :fake, name: "article[categories][]", value: "2"},
+            %TextInput{element: :fake, name: "username", value: "gustavo"}
+          ]
+        }
         |> Form.delete_field("article[categories][]")
         |> Map.get(:fields)
         |> Enum.map(&{&1.name, &1.value}) == [{"username", "gustavo"}]
       )
+    end
+  end
+
+  describe ".parse_fields" do
+    test "parser all generic text inputs", %{agent: agent} do
+      fields =
+        agent
+        |> Mechanizex.get!(
+          "https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html"
+        )
+        |> Mechanizex.with_form()
+        |> Map.get(:fields)
+        |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
+
+      assert fields == [
+               {"color1", "color1 value"},
+               {"date1", "date1 value"},
+               {"datetime1", "datetime1 value"},
+               {"email1", "email1 value"},
+               {"hidden1", "hidden1 value"},
+               {"month1", "month1 value"},
+               {"number1", "number1 value"},
+               {"password1", "password1 value"},
+               {"range1", "range1 value"},
+               {"search1", "search1 value"},
+               {"submit1", "submit1 value"},
+               {"tel1", "tel1 value"},
+               {"text1", "text1 value"},
+               {"time1", "time1 value"},
+               {"url1", "url1 value"},
+               {"week1", "week1 value"},
+               {"textarea1", "textarea1 value"}
+             ]
     end
   end
 

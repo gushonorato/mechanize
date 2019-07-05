@@ -147,7 +147,7 @@ defmodule Mechanizex.FormTest do
                               %Request{
                                 method: :post,
                                 url: "https://www.foo.com/login",
-                                params: %{"username" => "gustavo", "passwd" => "gu123456"}
+                                params: [{"username", "gustavo"}, {"passwd", "gu123456"}]
                               } ->
         :ok
       end)

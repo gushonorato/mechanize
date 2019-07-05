@@ -61,9 +61,8 @@ defmodule Mechanizex.Form do
   end
 
   defp params(form) do
-    Enum.reduce(form.fields, %{}, fn field, params ->
-      Map.put_new(params, field.name, field.value)
-    end)
+    form.fields
+    |> Enum.map(fn(field) -> {field.name, field.value} end)
   end
 
   defp agent(form) do

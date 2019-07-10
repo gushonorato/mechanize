@@ -1,6 +1,6 @@
 defmodule Mechanizex.Agent do
   use Agent
-  alias Mechanizex.{HTTPAdapter, HTMLParser, Page}
+  alias Mechanizex.{HTTPAdapter, HTMLParser, Page, Request}
   alias Mechanizex.Page.Link
 
   defstruct options: [http_adapter: :httpoison, html_parser: :floki],
@@ -64,13 +64,14 @@ defmodule Mechanizex.Agent do
     mechanizex
   end
 
-  defp deleg_http(method, params) do
-    params
-    |> List.first()
-    |> http_adapter
-    |> apply(method, params)
+  def get!(agent, %URI{} = uri) do
+    get!(agent, URI.to_string(uri))
   end
 
-  def get!(mech, url), do: deleg_http(:get!, [mech, url])
-  def request!(mech, req), do: deleg_http(:request!, [mech, req])
+  def get!(agent, url) do
+    request!(agent, %Request{ method: :get, url: url })
+  end
+  def request!(agent, request) do
+    http_adapter(agent).request!(agent, request)
+  end
 end

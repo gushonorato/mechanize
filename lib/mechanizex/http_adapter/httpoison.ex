@@ -1,5 +1,5 @@
 defmodule Mechanizex.HTTPAdapter.Httpoison do
-  use Mechanizex.HTTPAdapter
+  @behaviour Mechanizex.HTTPAdapter
   alias Mechanizex.{Request, Response, Page, Agent}
 
   @impl Mechanizex.HTTPAdapter

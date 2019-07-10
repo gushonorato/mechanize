@@ -22,18 +22,11 @@ defmodule Mechanizex.Page.Element do
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
   def attr(el, attr_name), do: el(el).attrs[attr_name]
   defp el(elementable), do: Elementable.element(elementable)
-end
 
-defprotocol Mechanizex.Page.Elementable do
-  def element(elementable)
 end
 
 defimpl Mechanizex.Page.Elementable, for: Mechanizex.Page.Element do
   def element(elementable), do: elementable
-end
-
-defimpl Mechanizex.Page.Elementable, for: Any do
-  def element(elementable), do: elementable.element
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do

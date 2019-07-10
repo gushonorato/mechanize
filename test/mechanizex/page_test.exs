@@ -111,6 +111,19 @@ defmodule Mechanizex.PageTest do
         ]
       )
     end
+
+    test "image area links", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
+        |> Page.with_links()
+        |> Enum.map(&Element.attr(&1, :alt)) == [
+          "Sun",
+          "Mercury",
+          "Venus"
+        ]
+      )
+    end
   end
 
   describe ".with_link" do
@@ -165,6 +178,15 @@ defmodule Mechanizex.PageTest do
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
+
+    test "image area links", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
+        |> Page.with_link()
+        |> Element.attr(:alt) == "Sun"
+      )
+    end
   end
 
   describe ".click_link" do
@@ -195,7 +217,7 @@ defmodule Mechanizex.PageTest do
       )
     end
 
-    test "click on relative link", %{agent: agent} do
+    test "relative link", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
         :ok
@@ -205,6 +227,18 @@ defmodule Mechanizex.PageTest do
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
         |> Page.click_link("Back") == :ok
       )
+    end
+
+    test "image area links", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test/htdocs/sun.html"} ->
+        :ok
+      end)
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
+      |> Page.click_link(alt: "Sun")
+
     end
 
   end

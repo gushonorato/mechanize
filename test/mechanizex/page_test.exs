@@ -190,7 +190,6 @@ defmodule Mechanizex.PageTest do
   end
 
   describe ".click_link" do
-
     setup :verify_on_exit!
 
     test "click on first matched link", %{agent: agent} do
@@ -198,11 +197,10 @@ defmodule Mechanizex.PageTest do
       |> expect(:request!, fn _, %Request{method: :get, url: "http://www.google.com"} ->
         :ok
       end)
-      assert(
-        agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.click_link(class: ~r/great-company/) == :ok
-      )
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+      |> Page.click_link(class: ~r/great-company/)
     end
 
     test "click on first matched link by text", %{agent: agent} do
@@ -210,11 +208,10 @@ defmodule Mechanizex.PageTest do
       |> expect(:request!, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} ->
         :ok
       end)
-      assert(
-        agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.click_link("SEO Master") == :ok
-      )
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+      |> Page.click_link("SEO Master")
     end
 
     test "relative link", %{agent: agent} do
@@ -222,24 +219,25 @@ defmodule Mechanizex.PageTest do
       |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
         :ok
       end)
-      assert(
-        agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.click_link("Back") == :ok
-      )
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+      |> Page.click_link("Back")
     end
 
     test "image area links", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test/htdocs/sun.html"} ->
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :get,
+                                url: "https://htdocs.local/test/htdocs/sun.html"
+                              } ->
         :ok
       end)
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
       |> Page.click_link(alt: "Sun")
-
     end
-
   end
 end

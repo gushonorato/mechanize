@@ -38,17 +38,11 @@ defmodule Mechanizex.HTMLParser.Floki do
 
   defp create_element({name, attributes, _} = tree, page) do
     %Element{
-      name: String.to_atom(name),
-      attrs: create_attributes_map(attributes),
+      name: name,
+      attrs: attributes,
       parser_data: tree,
       text: Floki.text(tree),
       page: page
     }
-  end
-
-  defp create_attributes_map(attributes) do
-    attributes
-    |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
-    |> Enum.into(%{})
   end
 end

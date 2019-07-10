@@ -11,7 +11,7 @@ defmodule Mechanizex.Query do
 
   def select(elements, names, criterias) do
     elements
-    |> Enum.filter(fn element -> Element.name(element) in names end)
+    |> Enum.filter(fn element -> String.to_atom(Element.name(element)) in names end)
     |> Enum.filter(&all_criterias_meet?(&1, criterias))
   end
 

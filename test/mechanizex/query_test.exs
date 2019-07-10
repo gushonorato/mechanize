@@ -6,12 +6,16 @@ defmodule Mechanizex.QueryTest do
 
   @subject [
     %Element{
-      name: :a,
-      attrs: %{href: "www.google.com", rel: "follow", disabled: "disabled"},
+      name: "a",
+      attrs: [{"href", "www.google.com"}, {"rel", "follow"}, {"disabled", "disabled"}],
       text: "Google"
     },
-    %Element{name: :a, attrs: %{href: "www.microsoft.com", rel: "nofollow"}, text: "Microsoft"},
-    %Element{name: :area, attrs: %{href: "www.amazon.com", rel: "follow"}, text: "Amazon"}
+    %Element{
+      name: "a",
+      attrs: [{"href", "www.microsoft.com"}, {"rel", "nofollow"}],
+      text: "Microsoft"
+    },
+    %Element{name: "area", attrs: [{"href", "www.amazon.com"}, {"rel", "follow"}], text: "Amazon"}
   ]
 
   describe ".select" do

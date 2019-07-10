@@ -1,24 +1,20 @@
 defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
+  alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.{Form, Request}
   alias Mechanizex.Form.TextInput
   import Mox
 
   setup_all do
-    {:ok, agent: Mechanizex.new(http_adapter: :local_html_file_mock)}
-  end
-
-  setup do
-    stub_with(Mechanizex.HTTPAdapter.LocalHtmlFileMock, Mechanizex.HTTPAdapter.LocalHtmlFile)
-    :ok
+    {:ok, agent: Mechanizex.new(http_adapter: :mock)}
   end
 
   describe ".fill_field" do
     test "update a first field by name", %{agent: agent} do
       assert(
         agent
-        |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
         |> Mechanizex.with_form()
         |> Form.fill_field("username", with: "gustavo")
         |> Form.fill_field("passwd", with: "123456")
@@ -33,7 +29,7 @@ defmodule Mechanizex.FormTest do
     test "creates a new field", %{agent: agent} do
       fields =
         agent
-        |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
         |> Mechanizex.with_form()
         |> Mechanizex.fill_field("captcha", with: "checked")
         |> Map.get(:fields)
@@ -106,7 +102,7 @@ defmodule Mechanizex.FormTest do
     test "parse all generic text input", %{agent: agent} do
       fields =
         agent
-        |> Mechanizex.get!(
+        |> LocalPageLoader.get(
           "https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html"
         )
         |> Mechanizex.with_form()
@@ -114,29 +110,30 @@ defmodule Mechanizex.FormTest do
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
       assert fields == [
-              {"color1", "color1 value"},
-              {"date1", "date1 value"},
-              {"datetime1", "datetime1 value"},
-              {"email1", "email1 value"},
-              {"hidden1", "hidden1 value"},
-              {"month1", "month1 value"},
-              {"number1", "number1 value"},
-              {"password1", "password1 value"},
-              {"range1", "range1 value"},
-              {"search1", "search1 value"},
-              {"submit1", "submit1 value"},
-              {"tel1", "tel1 value"},
-              {"text1", "text1 value"},
-              {"time1", "time1 value"},
-              {"url1", "url1 value"},
-              {"week1", "week1 value"},
-              {"textarea1", "textarea1 value"}
-            ]
+               {"color1", "color1 value"},
+               {"date1", "date1 value"},
+               {"datetime1", "datetime1 value"},
+               {"email1", "email1 value"},
+               {"hidden1", "hidden1 value"},
+               {"month1", "month1 value"},
+               {"number1", "number1 value"},
+               {"password1", "password1 value"},
+               {"range1", "range1 value"},
+               {"search1", "search1 value"},
+               {"submit1", "submit1 value"},
+               {"tel1", "tel1 value"},
+               {"text1", "text1 value"},
+               {"time1", "time1 value"},
+               {"url1", "url1 value"},
+               {"week1", "week1 value"},
+               {"textarea1", "textarea1 value"}
+             ]
     end
+
     test "parse disabled fields", %{agent: agent} do
       fields =
         agent
-        |> Mechanizex.get!(
+        |> LocalPageLoader.get(
           "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
         )
         |> Mechanizex.with_form()
@@ -144,29 +141,27 @@ defmodule Mechanizex.FormTest do
         |> Enum.map(fn %TextInput{name: name, disabled: disabled} -> {name, disabled} end)
 
       assert fields == [
-              {"color1", false},
-              {"date1", true},
-              {"datetime1", true},
-              {"email1", true},
-              {"textarea1", true}
-            ]
+               {"color1", false},
+               {"date1", true},
+               {"datetime1", true},
+               {"email1", true},
+               {"textarea1", true}
+             ]
     end
 
     test "parse elements without name", %{agent: agent} do
       fields =
         agent
-        |> Mechanizex.get!(
-          "https://htdocs.local/test/htdocs/form_with_inputs_without_name.html"
-        )
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_inputs_without_name.html")
         |> Mechanizex.with_form()
         |> Map.get(:fields)
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
       assert fields == [
-              {nil, "gustavo"},
-              {nil, "123456"},
-              {nil, "input-submit"}
-            ]
+               {nil, "gustavo"},
+               {nil, "123456"},
+               {nil, "input-submit"}
+             ]
     end
   end
 
@@ -174,43 +169,43 @@ defmodule Mechanizex.FormTest do
     setup :verify_on_exit!
 
     test "method is get when method attribute missing", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "method is get when method attribute is blank", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_method_attribute_blank.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_blank.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "method post", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _, %Request{method: :post, url: "https://htdocs.local/login"} ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_method_attribute_post.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_post.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "absent action attribute", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _,
                               %Request{
                                 method: :post,
@@ -221,13 +216,13 @@ defmodule Mechanizex.FormTest do
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absent_action.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absent_action.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "empty action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _,
                               %Request{
                                 method: :post,
@@ -238,38 +233,38 @@ defmodule Mechanizex.FormTest do
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_blank_action.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_blank_action.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "relative action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _,
                               %Request{method: :post, url: "https://htdocs.local/test/login"} ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_relative_action.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_relative_action.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "absolute action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _, %Request{method: :post, url: "https://www.foo.com/login"} ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
 
     test "input fields submission", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _,
                               %Request{
                                 method: :post,
@@ -280,26 +275,29 @@ defmodule Mechanizex.FormTest do
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
       |> Mechanizex.with_form()
       |> Mechanizex.fill_field("username", with: "gustavo")
       |> Mechanizex.fill_field("passwd", with: "gu123456")
       |> Mechanizex.submit()
     end
 
-   test "doest not submit disabled fields", %{agent: agent} do
-      Mechanizex.HTTPAdapter.LocalHtmlFileMock
+    test "doest not submit disabled fields", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
       |> expect(:request!, fn _,
                               %Request{
                                 method: :post,
-                                url: "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
+                                url:
+                                  "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
                                 params: [{"color1", "color1 value"}]
                               } ->
         :ok
       end)
 
       agent
-      |> Mechanizex.get!("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
+      |> LocalPageLoader.get(
+        "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
+      )
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end

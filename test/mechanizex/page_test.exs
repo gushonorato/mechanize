@@ -1,17 +1,20 @@
 defmodule Mechanizex.PageTest do
   use ExUnit.Case, async: true
   alias Mechanizex
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Test.Support.LocalPageLoader
+  alias Mechanizex.Page.{Element, Link}
+  alias Mechanizex.{Page, Request}
+  import Mox
 
   setup_all do
-    {:ok, agent: Mechanizex.new(http_adapter: :local_html_file)}
+    {:ok, agent: Mechanizex.new(http_adapter: :mock)}
   end
 
   describe ".with_form" do
     test "return only the first form", %{agent: agent} do
       form =
         agent
-        |> Mechanizex.get!("test/htdocs/two_forms.html")
+        |> LocalPageLoader.get("test/htdocs/two_forms.html")
         |> Mechanizex.with_form()
 
       assert Enum.map(Element.attrs(form), & &1) == [
@@ -30,7 +33,7 @@ defmodule Mechanizex.PageTest do
     test "select form by its attributes", %{agent: agent} do
       form =
         agent
-        |> Mechanizex.get!("test/htdocs/two_forms.html")
+        |> LocalPageLoader.get("test/htdocs/two_forms.html")
         |> Mechanizex.with_form(name: "form-name-2")
 
       assert Enum.map(Element.attrs(form), & &1) == [

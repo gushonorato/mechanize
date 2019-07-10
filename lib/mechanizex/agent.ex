@@ -69,8 +69,9 @@ defmodule Mechanizex.Agent do
   end
 
   def get!(agent, url) do
-    request!(agent, %Request{ method: :get, url: url })
+    request!(agent, %Request{method: :get, url: url})
   end
+
   def request!(agent, request) do
     http_adapter(agent).request!(agent, request)
   end

@@ -152,7 +152,9 @@ defmodule Mechanizex.FormTest do
     test "parse elements without name", %{agent: agent} do
       fields =
         agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_inputs_without_name.html")
+        |> LocalPageLoader.get(
+          "https://htdocs.local/test/htdocs/form_with_inputs_without_name.html"
+        )
         |> Mechanizex.with_form()
         |> Map.get(:fields)
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
@@ -175,7 +177,9 @@ defmodule Mechanizex.FormTest do
       end)
 
       agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
+      |> LocalPageLoader.get(
+        "https://htdocs.local/test/htdocs/form_method_attribute_missing.html"
+      )
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end

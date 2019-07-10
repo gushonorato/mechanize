@@ -80,7 +80,7 @@ defmodule Mechanizex.Form do
 
   defp params(form) do
     form.fields
-    |> Enum.reject( fn field -> field.disabled == true or field.name == nil end)
+    |> Enum.reject(fn field -> field.disabled == true or field.name == nil end)
     |> Enum.map(fn field -> {field.name, field.value} end)
   end
 

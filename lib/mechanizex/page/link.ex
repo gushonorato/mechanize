@@ -9,9 +9,13 @@ defmodule Mechanizex.Page.Link do
           element: Element.t()
         }
 
-  def click(%Mechanizex.Page.Link{element: %{attrs: %{href: url}, page: page}}) do
-    page
+  def click(%Mechanizex.Page.Link{} = link) do
+    url = Element.attr(link, :href)
+    base_url = link |> Element.page() |> Page.url()
+
+    link
+    |> Element.page()
     |> Page.agent()
-    |> Mechanizex.Agent.get!(URI.merge(Page.url(page), url))
+    |> Mechanizex.Agent.get!(URI.merge(base_url, url))
   end
 end

@@ -94,7 +94,7 @@ defmodule Mechanizex.Form do
     |> Enum.map(&create_field/1)
   end
 
-  defp create_field(%Element{name: :input} = element) do
+  defp create_field(%Element{name: "input"} = element) do
     %TextInput{
       element: element,
       name: Element.attr(element, :name),
@@ -103,7 +103,7 @@ defmodule Mechanizex.Form do
     }
   end
 
-  defp create_field(%Element{name: :textarea} = element) do
+  defp create_field(%Element{name: "textarea"} = element) do
     %TextInput{
       element: element,
       name: Element.attr(element, :name),

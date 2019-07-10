@@ -17,11 +17,11 @@ defmodule Mechanizex.PageTest do
         |> LocalPageLoader.get("test/htdocs/two_forms.html")
         |> Mechanizex.with_form()
 
-      assert Enum.map(Element.attrs(form), & &1) == [
-               action: "/form1",
-               id: "form-id-1",
-               method: "get",
-               name: "form-name-1"
+      assert Element.attrs(form) == [
+               {"id", "form-id-1"},
+               {"action", "/form1"},
+               {"method", "get"},
+               {"name", "form-name-1"}
              ]
 
       assert Enum.map(form.fields, &{&1.name, &1.value}) == [
@@ -36,11 +36,11 @@ defmodule Mechanizex.PageTest do
         |> LocalPageLoader.get("test/htdocs/two_forms.html")
         |> Mechanizex.with_form(name: "form-name-2")
 
-      assert Enum.map(Element.attrs(form), & &1) == [
-               action: "/form2",
-               id: "form-id-2",
-               method: "post",
-               name: "form-name-2"
+      assert Element.attrs(form) == [
+               {"id", "form-id-2"},
+               {"action", "/form2"},
+               {"method", "post"},
+               {"name", "form-name-2"}
              ]
 
       assert Enum.map(form.fields, &{&1.name, &1.value}) == [

@@ -57,8 +57,8 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   }
 
   @google %Element{
-    name: :a,
-    attrs: %{href: "http://google.com", class: "company js-google js-cool"},
+    name: "a",
+    attrs: [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
     text: "Google",
     parser_data: {
       "a",
@@ -75,8 +75,8 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
     test "one element with children found" do
       element = %Element{
-        name: :div,
-        attrs: %{id: "main", class: "container", "data-method": "get"},
+        name: "div",
+        attrs: [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
         text: "Google",
         parser_data: {
           "div",

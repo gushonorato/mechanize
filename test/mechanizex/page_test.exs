@@ -49,4 +49,163 @@ defmodule Mechanizex.PageTest do
              ]
     end
   end
+
+  describe ".with_links" do
+    test "returns list of %Link struct", %{agent: agent} do
+      [%Link{}] =
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(href: ~r/google.com/)
+    end
+
+    test "with one attribute criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(href: ~r/google.com/)
+        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+      )
+    end
+
+    test "with many attributes criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(class: ~r/great-company/, rel: "search")
+        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+      )
+    end
+
+    test "with text criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(text: "Google")
+        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+      )
+    end
+
+    test "multiple links with same text", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(text: ~r/Google/)
+        |> Enum.map(&Element.attr(&1, :href)) == [
+          "http://www.google.com",
+          "http://www.android.com"
+        ]
+      )
+    end
+
+    test "multiple links with same attribute", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_links(class: ~r/great-company/)
+        |> Enum.map(&Element.text/1) == [
+          "Google",
+          "Google Android",
+          "Microsoft",
+          "Apple",
+          "Back"
+        ]
+      )
+    end
+  end
+
+  describe ".with_link" do
+    test "returns list of %Link struct", %{agent: agent} do
+      %Link{} =
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(href: ~r/google.com/)
+    end
+
+    test "with one attribute criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(href: ~r/google.com/)
+        |> Element.attr(:href) == "http://www.google.com"
+      )
+    end
+
+    test "with many attributes criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(class: ~r/great-company/, rel: "search")
+        |> Element.attr(:href) == "http://www.google.com"
+      )
+    end
+
+    test "with text criteria", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(text: "Google")
+        |> Element.attr(:href) == "http://www.google.com"
+      )
+    end
+
+    test "multiple links with same text return the first", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(text: ~r/Google/)
+        |> Element.attr(:href) == "http://www.google.com"
+      )
+    end
+
+    test "multiple links with same attribute return the first", %{agent: agent} do
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.with_link(class: ~r/great-company/)
+        |> Element.attr(:href) == "http://www.google.com"
+      )
+    end
+  end
+
+  describe ".click_link" do
+
+    setup :verify_on_exit!
+
+    test "click on first matched link", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _, %Request{method: :get, url: "http://www.google.com"} ->
+        :ok
+      end)
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.click_link(class: ~r/great-company/) == :ok
+      )
+    end
+
+    test "click on first matched link by text", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} ->
+        :ok
+      end)
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.click_link("SEO Master") == :ok
+      )
+    end
+
+    test "click on relative link", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
+        :ok
+      end)
+      assert(
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
+        |> Page.click_link("Back") == :ok
+      )
+    end
+
+  end
 end

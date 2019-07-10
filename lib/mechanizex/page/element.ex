@@ -21,18 +21,25 @@ defmodule Mechanizex.Page.Element do
   def name(el), do: el(el).name
   def attrs(el), do: el(el).attrs
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
-  def attr(el, attr_name), do: el(el).attrs[attr_name]
+
+  def attr(el, attr_name) do
+    el
+    |> attrs()
+    |> List.keyfind(to_string(attr_name), 0, {nil, nil})
+    |> elem(1)
+  end
+
   defp el(elementable), do: Elementable.element(elementable)
 
   def to_links(elements) when is_list(elements) do
     Enum.map(elements, &to_link/1)
   end
 
-  def to_link(%Mechanizex.Page.Element{name: :a} = element) do
+  def to_link(%Mechanizex.Page.Element{name: "a"} = element) do
     %Link{element: element}
   end
 
-  def to_link(%Mechanizex.Page.Element{name: :area} = element) do
+  def to_link(%Mechanizex.Page.Element{name: "area"} = element) do
     %Link{element: element}
   end
 end

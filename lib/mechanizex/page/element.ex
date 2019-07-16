@@ -18,15 +18,33 @@ defmodule Mechanizex.Page.Element do
 
   def page(el), do: el(el).page
   def text(el), do: el(el).text
-  def name(el), do: el(el).name
+  def name(el), do: maybe_normalize_value(el(el).name, true)
   def attrs(el), do: el(el).attrs
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
 
-  def attr(el, attr_name) do
+  def attr(el, attr_name, opts \\ []) do
+    default_opts = [default: nil, normalize: false]
+    opts = Keyword.merge(default_opts, opts)
+
     el
     |> attrs()
-    |> List.keyfind(to_string(attr_name), 0, {nil, nil})
+    |> List.keyfind(to_string(attr_name), 0, {nil, opts[:default]})
     |> elem(1)
+    |> maybe_normalize_value(opts[:normalize])
+  end
+
+  defp maybe_normalize_value(value, false) do
+    value
+  end
+
+  defp maybe_normalize_value(nil, _) do
+    nil
+  end
+
+  defp maybe_normalize_value(value, _) do
+    value
+    |> String.downcase()
+    |> String.trim()
   end
 
   defp el(elementable), do: Elementable.element(elementable)

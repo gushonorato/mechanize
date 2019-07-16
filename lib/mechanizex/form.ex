@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField}
+  alias Mechanizex.Form.{TextInput, DetachedField, Submit}
   alias Mechanizex.{Query, Request}
 
   @derive [Mechanizex.Page.Elementable]
@@ -50,6 +50,10 @@ defmodule Mechanizex.Form do
     Map.put(form, :fields, Enum.reject(form.fields, fn field -> field.name == field_name end))
   end
 
+  def fields(form) do
+    form.fields
+  end
+
   def submit(form) do
     Mechanizex.Agent.request!(agent(form), %Request{
       method: method(form),
@@ -90,25 +94,25 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Query.search("input, textarea")
+    |> Query.search("input, textarea, button")
     |> Enum.map(&create_field/1)
+    |> Enum.reject(&is_nil/1)
   end
 
-  defp create_field(%Element{name: "input"} = element) do
-    %TextInput{
-      element: element,
-      name: Element.attr(element, :name),
-      value: Element.attr(element, :value),
-      disabled: Element.attr_present?(element, :disabled)
-    }
-  end
+  defp create_field(el) do
+    name = Element.name(el)
+    type = Element.attr(el, :type, normalize: true)
 
-  defp create_field(%Element{name: "textarea"} = element) do
-    %TextInput{
-      element: element,
-      name: Element.attr(element, :name),
-      value: Element.text(element),
-      disabled: Element.attr_present?(element, :disabled)
-    }
+    cond do
+      type == "reset" ->
+        nil
+      name == "button" and (type == "submit" or type == nil or type == "") ->
+        Submit.new(el)
+      name == "input" and (type == "submit" or type  == "image") ->
+        Submit.new(el)
+      name == "textarea" or name == "input" ->
+        TextInput.new(el)
+      true -> nil
+    end
   end
 end

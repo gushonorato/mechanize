@@ -12,4 +12,22 @@ defmodule Mechanizex.Form.TextInput do
           value: String.t(),
           disabled: boolean()
         }
+
+  def new(%Element{name: "input"} = el) do
+    %Mechanizex.Form.TextInput{
+      element: el,
+      name: Element.attr(el, :name),
+      value: Element.attr(el, :value),
+      disabled: Element.attr_present?(el, :disabled)
+    }
+  end
+
+  def new(%Element{name: "textarea"} = el) do
+    %Mechanizex.Form.TextInput{
+      element: el,
+      name: Element.attr(el, :name),
+      value: Element.text(el),
+      disabled: Element.attr_present?(el, :disabled)
+    }
+  end
 end

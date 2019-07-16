@@ -3,7 +3,7 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.{Form, Request}
-  alias Mechanizex.Form.TextInput
+  alias Mechanizex.Form.{TextInput}
   import Mox
 
   setup_all do
@@ -18,7 +18,7 @@ defmodule Mechanizex.FormTest do
         |> Mechanizex.with_form()
         |> Form.fill_field("username", with: "gustavo")
         |> Form.fill_field("passwd", with: "123456")
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(&{&1.name, &1.value}) == [
           {"username", "gustavo"},
           {"passwd", "123456"}
@@ -32,7 +32,7 @@ defmodule Mechanizex.FormTest do
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
         |> Mechanizex.with_form()
         |> Mechanizex.fill_field("captcha", with: "checked")
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(&{&1.name, &1.value})
 
       assert fields == [
@@ -54,7 +54,7 @@ defmodule Mechanizex.FormTest do
           ]
         }
         |> Form.update_field("article[categories][]", "3")
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(&{&1.name, &1.value}) == [
           {"article[categories][]", "3"},
           {"article[categories][]", "2"}
@@ -70,7 +70,7 @@ defmodule Mechanizex.FormTest do
         |> Form.add_field("user[codes][]", "1")
         |> Form.add_field("user[codes][]", "2")
         |> Form.add_field("user[codes][]", "3")
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(&{&1.name, &1.value}) == [
           {"user[codes][]", "3"},
           {"user[codes][]", "2"},
@@ -92,7 +92,7 @@ defmodule Mechanizex.FormTest do
           ]
         }
         |> Form.delete_field("article[categories][]")
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(&{&1.name, &1.value}) == [{"username", "gustavo"}]
       )
     end
@@ -106,7 +106,7 @@ defmodule Mechanizex.FormTest do
           "https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html"
         )
         |> Mechanizex.with_form()
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
       assert fields == [
@@ -120,7 +120,6 @@ defmodule Mechanizex.FormTest do
                {"password1", "password1 value"},
                {"range1", "range1 value"},
                {"search1", "search1 value"},
-               {"submit1", "submit1 value"},
                {"tel1", "tel1 value"},
                {"text1", "text1 value"},
                {"time1", "time1 value"},
@@ -137,7 +136,7 @@ defmodule Mechanizex.FormTest do
           "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
         )
         |> Mechanizex.with_form()
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, disabled: disabled} -> {name, disabled} end)
 
       assert fields == [
@@ -156,13 +155,46 @@ defmodule Mechanizex.FormTest do
           "https://htdocs.local/test/htdocs/form_with_inputs_without_name.html"
         )
         |> Mechanizex.with_form()
-        |> Map.get(:fields)
+        |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
       assert fields == [
                {nil, "gustavo"},
-               {nil, "123456"},
-               {nil, "input-submit"}
+               {nil, "123456"}
+             ]
+    end
+
+    test "parse all submit buttons", %{agent: agent} do
+      assert agent
+             |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_buttons.html")
+             |> Mechanizex.with_form()
+             |> Form.fields()
+             |> Enum.map(fn %{
+                              name: name,
+                              value: value,
+                              text: text,
+                              id: id,
+                              disabled: disabled
+                            } ->
+               {name, value, text, id, disabled}
+             end) == [
+                {"button1", "button1_value", "button1_value", nil, false},
+                {"button2", "button2_value", "button2_value", nil, false},
+                {nil, "button3_value", "button3_value", nil, false},
+                {"button4", "button4_value", nil, nil, false},
+                {"button5", "button5_value", "Button 5", nil, false},
+                {nil, "button6_value", "Button 6", nil, false},
+                {"button7", "button7_value", "Button 7", nil, false},
+                {"button8", "button8_value", "Button 8", nil, false},
+                {nil, nil, "Button 9", "button9", true},
+                {"button10", "button10_value", "Button 10", nil, false},
+                {"button14", "button14_value", "Button 14", nil, false},
+                {"button15", "button15_value", "Button 15", nil, false},
+                {"button16", "button16_value", "Button 16", nil, false},
+                {"button17", "button17_value", "Button 17", nil, false},
+                {"button18", "button18_value", "Button 18", nil, false},
+                {"button19", "button19_value", "Button 19", nil, false},
+                {"BUTTON20", "button20_value", "Button 20", nil, false}
              ]
     end
   end
@@ -305,5 +337,9 @@ defmodule Mechanizex.FormTest do
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
+  end
+
+  describe ".click_button" do
+    setup :verify_on_exit!
   end
 end

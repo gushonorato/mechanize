@@ -41,8 +41,15 @@ defmodule Mechanizex.HTMLParser.Floki do
       name: name,
       attrs: attributes,
       parser_data: tree,
-      text: Floki.text(tree),
+      text: normalize_text(tree),
       page: page
     }
+  end
+
+  defp normalize_text(tree) do
+    case Floki.text(tree) do
+      "" -> nil
+      text -> text
+    end
   end
 end

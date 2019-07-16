@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <form method="post">
+    <!-- Happy path (all submit buttons) -->
+    <input type="submit" name="button1" value="button1_value"/>
+    <input type="submit" name="button2" value="button2_value">Lero lero</input>
+    <input type="submit" value="button3_value"/>
+    <input type="image" name="button4" value="button4_value"/>
+    <button type="submit" name="button5" value="button5_value">Button 5</button>
+    <button value="button6_value">Button 6</button>
+    <button name="button7" value="button7_value">Button 7</button>
+    <button type="submit" name="button8" value="button8_value">Button 8</button>
+    <button id="button9" disabled>Button 9</button>
+    <button type="" name="button10" value="button10_value">Button 10</button>
+
+    <!-- Unhappy path (Not a submit button) -->
+    <button type="reset">Button 11</button>
+    <input type="reset">Button 12</button>
+    <button type="button">Button 13</button>
+
+    <!-- Unhappy path (Case insensitive test) -->
+    <BuTToN type="submit" name="button14" value="button14_value">Button 14</BuTToN>
+    <Button type="submit" name="button15" value="button15_value">Button 15</Button>
+    <button type="Submit" name="button16" value="button16_value">Button 16</button>
+    <button type="SuBmiT" name="button17" value="button17_value">Button 17</button>
+    <button type="SUBMIT" name="button18" value="button18_value">Button 18</button>
+    <BUTTON type="submit" name="button19" value="button19_value">Button 19</button>
+    <BUTTON TYPE="SUBMIT" NAME="BUTTON20" VALUE="button20_value">Button 20</button>
+
+  </form>
+</body>
+</html>

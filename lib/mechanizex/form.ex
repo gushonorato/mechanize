@@ -54,6 +54,11 @@ defmodule Mechanizex.Form do
     form.fields
   end
 
+  def buttons(form) do
+    form.fields
+    |> Enum.filter(&match?(%Submit{}, &1))
+  end
+
   def submit(form) do
     Mechanizex.Agent.request!(agent(form), %Request{
       method: method(form),

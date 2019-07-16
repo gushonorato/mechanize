@@ -199,6 +199,34 @@ defmodule Mechanizex.FormTest do
     end
   end
 
+  describe ".buttons" do
+    test "return a list of submit buttons from fields" do
+      assert(
+        %Form{
+          element: :fake,
+          fields: [
+            %TextInput{element: :fake, name: "username", value: "gustavo"},
+            %Submit{element: :fake, name: "submit1"},
+            %Submit{element: :fake, name: "submit2"}
+          ]
+        }
+        |> Form.buttons() == [%Submit{element: :fake, name: "submit1"}, %Submit{element: :fake, name: "submit2"}]
+      )
+    end
+
+    test "return a empty list if no submit button found" do
+      assert(
+        %Form{
+          element: :fake,
+          fields: [
+            %TextInput{element: :fake, name: "username", value: "gustavo"}
+          ]
+        }
+        |> Form.buttons() == []
+      )
+    end
+  end
+
   describe ".submit" do
     setup :verify_on_exit!
 

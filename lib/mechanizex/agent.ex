@@ -20,8 +20,8 @@ defmodule Mechanizex.Agent do
 
   @spec new(list()) :: pid()
   def new(options \\ []) do
-    {:ok, mech} = Mechanizex.Agent.start_link(options)
-    mech
+    {:ok, agent} = Mechanizex.Agent.start_link(options)
+    agent
   end
 
   @spec init(list()) :: Mechanizex.Agent.t()
@@ -42,26 +42,26 @@ defmodule Mechanizex.Agent do
     |> Map.put(:html_parser, HTMLParser.parser(state.options[:html_parser]))
   end
 
-  def option(mechanizex, option) do
-    Agent.get(mechanizex, fn state -> state.options[option] end)
+  def option(agent, option) do
+    Agent.get(agent, fn state -> state.options[option] end)
   end
 
-  def http_adapter(mechanizex) do
-    Agent.get(mechanizex, fn state -> state.http_adapter end)
+  def http_adapter(agent) do
+    Agent.get(agent, fn state -> state.http_adapter end)
   end
 
-  def set_http_adapter(mechanizex, adapter) do
-    Agent.update(mechanizex, &Map.put(&1, :http_adapter, adapter))
-    mechanizex
+  def set_http_adapter(agent, adapter) do
+    Agent.update(agent, &Map.put(&1, :http_adapter, adapter))
+    agent
   end
 
-  def html_parser(mechanizex) do
-    Agent.get(mechanizex, fn state -> state.html_parser end)
+  def html_parser(agent) do
+    Agent.get(agent, fn state -> state.html_parser end)
   end
 
-  def set_html_parser(mechanizex, parser) do
-    Agent.update(mechanizex, &Map.put(&1, :html_parser, parser))
-    mechanizex
+  def set_html_parser(agent, parser) do
+    Agent.update(agent, &Map.put(&1, :html_parser, parser))
+    agent
   end
 
   def get!(agent, %URI{} = uri) do

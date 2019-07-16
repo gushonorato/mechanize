@@ -3,9 +3,12 @@ defmodule Mechanizex.AgentTest do
   alias Mechanizex.HTTPAdapter
   doctest Mechanizex.Agent
 
+  setup do
+    {:ok, agent: Mechanizex.new()}
+  end
+
   describe ".new" do
-    test "start a process" do
-      agent = Mechanizex.Agent.new()
+    test "start a process", %{agent: agent} do
       assert is_pid(agent)
     end
   end
@@ -52,19 +55,22 @@ defmodule Mechanizex.AgentTest do
   end
 
   describe ".http_adapter" do
-    test "default http adapter" do
-      default_adapter = Mechanizex.Agent.new() |> Mechanizex.Agent.http_adapter()
-      assert default_adapter == HTTPAdapter.Httpoison
+    test "default http adapter", %{agent: agent} do
+      assert Mechanizex.Agent.http_adapter(agent) == HTTPAdapter.Httpoison
     end
   end
 
   describe ".set_http_adapter" do
-    test "returns mechanizex agent" do
-      agent = Mechanizex.Agent.new()
+    test "returns agent", %{agent: agent} do
       assert Mechanizex.Agent.set_http_adapter(agent, Mechanizex.HTTPAdapter.Custom) == agent
     end
 
-    test "updates http adapter" do
+    test "updates http adapter", %{agent: agent} do
+      Mechanizex.Agent.set_http_adapter(agent, Mechanizex.HTTPAdapter.Custom)
+      assert Mechanizex.Agent.http_adapter(agent) == Mechanizex.HTTPAdapter.Custom
+    end
+  end
+
       agent =
         Mechanizex.Agent.new()
         |> Mechanizex.Agent.set_http_adapter(Mechanizex.HTTPAdapter.Custom)
@@ -74,16 +80,12 @@ defmodule Mechanizex.AgentTest do
   end
 
   describe ".set_html_parser" do
-    test "returns mechanizex agent" do
-      agent = Mechanizex.Agent.new()
+    test "returns mechanizex agent", %{agent: agent} do
       assert Mechanizex.Agent.set_html_parser(agent, Mechanizex.HTMLParser.Custom) == agent
     end
 
-    test "updates html parser" do
-      agent =
-        Mechanizex.Agent.new()
-        |> Mechanizex.Agent.set_html_parser(Mechanizex.HTMLParser.Custom)
-
+    test "updates html parser", %{agent: agent} do
+      Mechanizex.Agent.set_html_parser(agent, Mechanizex.HTMLParser.Custom)
       assert Mechanizex.Agent.html_parser(agent) == Mechanizex.HTMLParser.Custom
     end
   end

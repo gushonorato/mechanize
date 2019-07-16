@@ -44,4 +44,8 @@ defmodule Mechanizex.Form.Submit do
       disabled: Element.attr_present?(el, :disabled)
     }
   end
+
+  def is_submit?(field) do
+    match?(%__MODULE__{}, field)
+  end
 end

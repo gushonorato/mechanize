@@ -3,7 +3,7 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.{Form, Request}
-  alias Mechanizex.Form.{TextInput}
+  alias Mechanizex.Form.{TextInput, Submit}
   import Mox
 
   setup_all do
@@ -166,7 +166,9 @@ defmodule Mechanizex.FormTest do
 
     test "parse all submit buttons", %{agent: agent} do
       assert agent
-             |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_buttons.html")
+             |> LocalPageLoader.get(
+               "https://htdocs.local/test/htdocs/form_with_all_kinds_of_buttons.html"
+             )
              |> Mechanizex.with_form()
              |> Form.fields()
              |> Enum.map(fn %{
@@ -199,7 +201,7 @@ defmodule Mechanizex.FormTest do
     end
   end
 
-  describe ".buttons" do
+  describe ".submit_buttons" do
     test "return a list of submit buttons from fields" do
       assert(
         %Form{
@@ -210,7 +212,10 @@ defmodule Mechanizex.FormTest do
             %Submit{element: :fake, name: "submit2"}
           ]
         }
-        |> Form.buttons() == [%Submit{element: :fake, name: "submit1"}, %Submit{element: :fake, name: "submit2"}]
+        |> Form.submit_buttons() == [
+          %Submit{element: :fake, name: "submit1"},
+          %Submit{element: :fake, name: "submit2"}
+        ]
       )
     end
 
@@ -222,7 +227,7 @@ defmodule Mechanizex.FormTest do
             %TextInput{element: :fake, name: "username", value: "gustavo"}
           ]
         }
-        |> Form.buttons() == []
+        |> Form.submit_buttons() == []
       )
     end
   end
@@ -368,6 +373,81 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".click_button" do
+    test "click by text", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :post,
+                                url:
+                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                                params: [
+                                  {"button1_name", "button1_value"},
+                                  {"username", nil},
+                                  {"passwd", nil}
+                                ]
+                              } ->
+        :ok
+      end)
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
+      |> Mechanizex.with_form()
+      |> Form.click_button("Button 1")
+    end
+
+    test "click by name", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :post,
+                                url:
+                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                                params: [
+                                  {"button1_name", "button1_value"},
+                                  {"username", nil},
+                                  {"passwd", nil}
+                                ]
+                              } ->
+        :ok
+      end)
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
+      |> Mechanizex.with_form()
+      |> Form.click_button("button1_name")
+    end
+
+    test "click by id", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :post,
+                                url:
+                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                                params: [
+                                  {"button1_name", "button1_value"},
+                                  {"username", nil},
+                                  {"passwd", nil}
+                                ]
+                              } ->
+        :ok
+      end)
+
+      agent
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
+      |> Mechanizex.with_form()
+      |> Form.click_button("button1_id")
+    end
+
+    test "click on unexistent button raises an exception", %{agent: agent} do
+      assert_raise Mechanizex.Form.ButtonNotFound, fn ->
+        agent
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
+        |> Mechanizex.with_form()
+        |> Form.click_button("Unexistent button")
+      end
+    end
+
     setup :verify_on_exit!
   end
 end

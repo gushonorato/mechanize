@@ -54,17 +54,29 @@ defmodule Mechanizex.Form do
     form.fields
   end
 
-  def buttons(form) do
-    form.fields
-    |> Enum.filter(&match?(%Submit{}, &1))
-  end
+  def submit_buttons(form), do: Enum.filter(form.fields, &Submit.is_submit?/1)
 
-  def submit(form) do
+  def submit(form, button \\ nil) do
     Mechanizex.Agent.request!(agent(form), %Request{
       method: method(form),
       url: action_url(form),
-      params: params(form)
+      params: params(form.fields, button)
     })
+  end
+
+  def click_button(form, locator) do
+    button =
+      form
+      |> submit_buttons()
+      |> Enum.filter(fn %Submit{text: text, id: id, name: name} ->
+        locator == text or locator == id or locator == name
+      end)
+      |> List.first()
+
+    case button do
+      nil -> raise Mechanizex.Form.ButtonNotFound, message: "Unable to click on button with id, name or text equal to \"#{locator}\"."
+      _ -> submit(form, button)
+    end
   end
 
   defp method(form) do
@@ -87,11 +99,16 @@ defmodule Mechanizex.Form do
     |> URI.to_string()
   end
 
-  defp params(form) do
-    form.fields
-    |> Enum.reject(fn field -> field.disabled == true or field.name == nil end)
-    |> Enum.map(fn field -> {field.name, field.value} end)
+  defp params(fields, button) do
+    fields
+    |> Enum.reject(&Submit.is_submit?/1)
+    |> maybe_add_submit_button(button)
+    |> Enum.reject(fn f -> f.disabled == true or f.name == nil end)
+    |> Enum.map(fn f -> {f.name, f.value} end)
   end
+
+  defp maybe_add_submit_button(params, nil), do: params
+  defp maybe_add_submit_button(params, button), do: [button | params]
 
   defp agent(form) do
     form.element.page.agent
@@ -125,4 +142,8 @@ defmodule Mechanizex.Form do
         nil
     end
   end
+end
+
+defmodule Mechanizex.Form.ButtonNotFound do
+  defexception [:message]
 end

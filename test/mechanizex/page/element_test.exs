@@ -36,5 +36,4 @@ defmodule Mechanizex.Page.ElementTest do
       assert Element.attr(@subject, :value, default: " LERo", normalize: true) == "lero"
     end
   end
-
 end

@@ -23,7 +23,7 @@ defmodule Mechanizex.Form.Submit do
     }
   end
 
-  def new(%Element{name: "input", attrs: [{"type", "image"}|_]} = el) do
+  def new(%Element{name: "input", attrs: [{"type", "image"} | _]} = el) do
     %Mechanizex.Form.Submit{
       element: el,
       name: Element.attr(el, :name),

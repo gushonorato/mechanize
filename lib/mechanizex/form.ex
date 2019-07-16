@@ -106,13 +106,18 @@ defmodule Mechanizex.Form do
     cond do
       type == "reset" ->
         nil
+
       name == "button" and (type == "submit" or type == nil or type == "") ->
         Submit.new(el)
-      name == "input" and (type == "submit" or type  == "image") ->
+
+      name == "input" and (type == "submit" or type == "image") ->
         Submit.new(el)
+
       name == "textarea" or name == "input" ->
         TextInput.new(el)
-      true -> nil
+
+      true ->
+        nil
     end
   end
 end

@@ -21,7 +21,7 @@ defmodule Mechanizex.Page.ElementTest do
     end
 
     test "ignore default value if attribute exists" do
-      Element.attr(@subject, :type, default: "") == " TExT   "
+      assert Element.attr(@subject, :type, default: "") == " TExT   "
     end
 
     test "normalized value" do

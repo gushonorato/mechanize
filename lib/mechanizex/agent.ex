@@ -77,11 +77,22 @@ defmodule Mechanizex.Agent do
     %Mechanizex.Agent{
       http_adapter: HTTPAdapter.adapter(options[:http_adapter]),
       html_parser: HTMLParser.parser(options[:html_parser]),
-      http_headers:
-        Keyword.merge(options[:http_headers],
-          user_agent: user_agent_string!(options[:user_agent_alias])
-        )
+      http_headers: config_http_headers(options)
     }
+  end
+
+  defp config_http_headers(options) do
+    options[:http_headers]
+    |> List.keystore("user-agent", 0, {"user-agent", user_agent_string!(options[:user_agent_alias])})
+    |> normalize_headers()
+  end
+
+  defp normalize_headers(headers) do
+    Enum.map(headers, &normalize_header/1)
+  end
+
+  defp normalize_header({k, v}) do
+    { String.downcase(k), v}
   end
 
   def http_adapter(agent) do
@@ -107,20 +118,21 @@ defmodule Mechanizex.Agent do
   end
 
   def set_http_headers(agent, headers) do
-    Agent.update(agent, &Map.put(&1, :http_headers, headers))
+    Agent.update(agent, &Map.put(&1, :http_headers, normalize_headers(headers)))
     agent
   end
 
-  def add_http_headers(agent, headers) do
+  def put_http_header(agent, h, v) do
+    {h, _} = header = normalize_header({h, v})
     Agent.update(agent, fn state ->
-      %__MODULE__{state | http_headers: Keyword.merge(state.http_headers, headers)}
+      %__MODULE__{state | http_headers: List.keystore(state.http_headers, h, 0, header)}
     end)
 
     agent
   end
 
   def set_user_agent_alias(agent, user_agent_alias) do
-    add_http_headers(agent, user_agent: user_agent_string!(user_agent_alias))
+    put_http_header(agent, "user-agent", user_agent_string!(user_agent_alias))
   end
 
   defp user_agent_string!(user_agent_alias) do

@@ -27,51 +27,84 @@ defmodule Mechanizex.AgentTest do
     end
   end
 
-  describe "http default headers" do
-    test "initial header values", %{agent: agent} do
+  describe "initial headers config" do
+    test "load headers from mix config", %{agent: agent} do
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
-               foo: "bar",
-               user_agent:
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"
+               {"foo", "bar"},
+               {"user-agent",
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
              ]
     end
 
-    test "set headers", %{agent: agent} do
-      Mechanizex.Agent.set_http_headers(agent, content_type: "text/html")
-      assert Mechanizex.Agent.http_headers(agent) == [content_type: "text/html"]
-    end
-
-    test "add headers", %{agent: agent} do
-      Mechanizex.Agent.add_http_headers(agent, content_type: "text/html")
+    test "init parameters overrides mix config" do
+      agent = Mechanizex.Agent.new(http_headers: [{"custom-header", "value"}])
 
       assert Mechanizex.Agent.http_headers(agent) == [
-               # loaded by config env
-               foo: "bar",
-               user_agent:
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
-               content_type: "text/html"
-             ]
-
-      Mechanizex.Agent.add_http_headers(agent, content_type: "application/javascript")
-
-      assert Mechanizex.Agent.http_headers(agent) == [
-               # loaded by config env
-               foo: "bar",
-               user_agent:
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
-               content_type: "application/javascript"
+               {"custom-header", "value"},
+               {"user-agent",
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
              ]
     end
 
-    test "set on init overrides foo=>bar config" do
-      agent = Mechanizex.Agent.new(http_headers: [custom_header: "value"])
+    test "ensure headers are always in downcase" do
+      agent = Mechanizex.Agent.new(http_headers: [{"Custom-Header", "value"}])
 
       assert Mechanizex.Agent.http_headers(agent) == [
-               custom_header: "value",
-               user_agent:
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"
+               {"custom-header", "value"},
+               {"user-agent",
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
              ]
+    end
+  end
+
+  describe ".set_http_headers" do
+    test "set all headers at once", %{agent: agent} do
+      Mechanizex.Agent.set_http_headers(agent, [{"content-type", "text/html"}])
+      assert Mechanizex.Agent.http_headers(agent) == [{"content-type", "text/html"}]
+    end
+
+    test "ensure all headers are in lowercase", %{agent: agent} do
+      Mechanizex.Agent.set_http_headers(agent, [{"Content-Type", "text/html"}, {"Custom-Header", "Lero"}])
+      assert Mechanizex.Agent.http_headers(agent) == [{"content-type", "text/html"}, {"custom-header", "Lero"}]
+    end
+  end
+
+  describe ".put_http_header" do
+    test "updates existent header", %{agent: agent} do
+      Mechanizex.Agent.put_http_header(agent, "user-agent", "Lero")
+
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               {"foo", "bar"},
+               {"user-agent","Lero"},
+             ]
+    end
+
+    test "add new header if doesnt'", %{agent: agent} do
+      Mechanizex.Agent.put_http_header(agent, "content-type", "text/html")
+
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               {"foo", "bar"},
+               {"user-agent",
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"},
+               {"content-type", "text/html"}
+             ]
+
+    end
+
+    test "ensure inserted header is lowecase", %{agent: agent} do
+      Mechanizex.Agent.put_http_header(agent, "Content-Type", "text/html")
+
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               {"foo", "bar"},
+               {"user-agent",
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"},
+               {"content-type", "text/html"}
+             ]
+
     end
   end
 
@@ -81,9 +114,9 @@ defmodule Mechanizex.AgentTest do
 
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
-               foo: "bar",
-               user_agent:
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"
+               {"foo", "bar"},
+               {"user-agent",
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"}
              ]
     end
 
@@ -92,9 +125,9 @@ defmodule Mechanizex.AgentTest do
 
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
-               foo: "bar",
-               user_agent:
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"
+               {"foo", "bar"},
+               {"user-agent",
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"}
              ]
     end
 

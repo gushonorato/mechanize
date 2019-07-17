@@ -12,13 +12,9 @@ defmodule Mechanizex.Page do
           parser: module()
         }
 
-  def body(page) do
-    page.response.body
-  end
-
-  def agent(page) do
-    page.agent
-  end
+  def response_code(page), do: page.response.code
+  def body(page), do: page.response.body
+  def agent(page), do: page.agent
 
   def click_link(page, criterias) when is_list(criterias) do
     page

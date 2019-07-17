@@ -6,7 +6,7 @@ defmodule Mechanizex.Test.Support.LocalPageLoader do
       response: %Response{
         body: read_html_file(url),
         headers: [],
-        status_code: 200,
+        code: 200,
         url: url
       },
       request: %Request{

@@ -26,8 +26,9 @@ defmodule Mechanizex.MixProject do
       {:floki, "~> 0.21.0"},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:mox, "~> 0.5", only: :test},
-      {:excoveralls, github: "parroty/excoveralls"},
-      {:mix_test_watch, "~> 0.8", only: :dev, runtime: false}
+      {:excoveralls, github: "parroty/excoveralls", only: [:dev, :test]},
+      {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
+      {:bypass, "~> 1.0", only: :test}
     ]
   end
 end

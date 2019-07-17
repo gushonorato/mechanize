@@ -29,46 +29,49 @@ defmodule Mechanizex.AgentTest do
 
   describe "http default headers" do
     test "initial header values", %{agent: agent} do
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "user-agent" =>
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
-                 "foo" => "bar" #loaded by config env
-             }
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               foo: "bar",
+               user_agent:
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"
+             ]
     end
 
     test "set headers", %{agent: agent} do
-      Mechanizex.Agent.set_http_headers(agent, %{"content-type" => "text/html"})
-      assert Mechanizex.Agent.http_headers(agent) == %{"content-type" => "text/html"}
+      Mechanizex.Agent.set_http_headers(agent, content_type: "text/html")
+      assert Mechanizex.Agent.http_headers(agent) == [content_type: "text/html"]
     end
 
     test "add headers", %{agent: agent} do
-      Mechanizex.Agent.add_http_headers(agent, %{"content-type" => "text/html"})
+      Mechanizex.Agent.add_http_headers(agent, content_type: "text/html")
 
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "user-agent" =>
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               foo: "bar",
+               user_agent:
                  "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
-               "content-type" => "text/html",
-               "foo" => "bar" #loaded by config env
-             }
+               content_type: "text/html"
+             ]
 
-      Mechanizex.Agent.add_http_headers(agent, %{"content-type" => "application/javascript"})
+      Mechanizex.Agent.add_http_headers(agent, content_type: "application/javascript")
 
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "user-agent" =>
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               foo: "bar",
+               user_agent:
                  "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
-               "content-type" => "application/javascript",
-               "foo" => "bar" #loaded by config env
-             }
+               content_type: "application/javascript"
+             ]
     end
 
     test "set on init overrides foo=>bar config" do
-      agent = Mechanizex.Agent.new(http_headers: %{"custom-header" => "value"})
+      agent = Mechanizex.Agent.new(http_headers: [custom_header: "value"])
 
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "custom-header" => "value",
-               "user-agent" =>
+      assert Mechanizex.Agent.http_headers(agent) == [
+               custom_header: "value",
+               user_agent:
                  "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"
-             }
+             ]
     end
   end
 
@@ -76,21 +79,23 @@ defmodule Mechanizex.AgentTest do
     test "set by alias", %{agent: agent} do
       Mechanizex.Agent.set_user_agent_alias(agent, :windows_chrome)
 
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "user-agent" =>
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
-                "foo" => "bar" #loaded by config env
-             }
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               foo: "bar",
+               user_agent:
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"
+             ]
     end
 
     test "set on init" do
       agent = Mechanizex.Agent.new(user_agent_alias: :windows_chrome)
 
-      assert Mechanizex.Agent.http_headers(agent) == %{
-               "user-agent" =>
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
-                "foo" => "bar" #loaded by config env
-             }
+      assert Mechanizex.Agent.http_headers(agent) == [
+               # loaded by config env
+               foo: "bar",
+               user_agent:
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"
+             ]
     end
 
     test "raise error when invalid alias passed", %{agent: agent} do

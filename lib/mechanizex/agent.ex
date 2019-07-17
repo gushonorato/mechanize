@@ -134,7 +134,7 @@ defmodule Mechanizex.Agent do
     end
   end
 
-  def get!(agent, url, headers \\ %{})
+  def get!(agent, url, headers \\ [])
 
   def get!(agent, %URI{} = uri, headers) do
     get!(agent, URI.to_string(uri), headers)
@@ -145,7 +145,11 @@ defmodule Mechanizex.Agent do
   end
 
   def request!(agent, request) do
-    http_adapter(agent).request!(agent, request)
+    http_adapter(agent).request!(agent, merge_headers(agent, request))
+  end
+
+  defp merge_headers(agent, request) do
+    %Request{request | headers: Keyword.merge(http_headers(agent), request.headers)}
   end
 end
 

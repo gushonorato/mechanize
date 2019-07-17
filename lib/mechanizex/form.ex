@@ -74,8 +74,12 @@ defmodule Mechanizex.Form do
       |> List.first()
 
     case button do
-      nil -> raise Mechanizex.Form.ButtonNotFound, message: "Unable to click on button with id, name or text equal to \"#{locator}\"."
-      _ -> submit(form, button)
+      nil ->
+        raise Mechanizex.Form.ButtonNotFound,
+          message: "Unable to click on button with id, name or text equal to \"#{locator}\"."
+
+      _ ->
+        submit(form, button)
     end
   end
 

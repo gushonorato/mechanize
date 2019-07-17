@@ -1,16 +1,46 @@
 defmodule Mechanizex.Agent do
   use Agent
-  alias Mechanizex.{HTTPAdapter, HTMLParser, Page, Request}
-  alias Mechanizex.Page.Link
+  alias Mechanizex.{HTTPAdapter, HTMLParser, Request}
 
-  defstruct options: [http_adapter: :httpoison, html_parser: :floki],
-            http_adapter: nil,
-            html_parser: nil
+  @user_agent_alias [
+    mechanizex: "Mechanizex/#{Mix.Project.config[:version]} Elixir/#{System.version} (http://github.com/gushonorato/mechanizex/)",
+    linux_firefox: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0",
+    linux_konqueror: "Mozilla/5.0 (compatible; Konqueror/3; Linux)",
+    linux_mozilla: "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030624",
+    mac_firefox: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0",
+    mac_mozilla: "Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.4a) Gecko/20030401",
+    mac_safari_4: "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10",
+    mac_safari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+    windows_chrome: "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
+    windows_ie_6: "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+    windows_ie_7: "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
+    windows_ie_8: "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
+    windows_ie_9: "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)",
+    windows_ie_10: "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)",
+    windows_ie_11: "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko",
+    windows_edge: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586",
+    windows_mozilla: "Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6",
+    windows_firefox: "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0",
+    iphone: "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B5110e Safari/601.1",
+    ipad: "Mozilla/5.0 (iPad; CPU OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
+    android: "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 7 Build/LMY47V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.76 Safari/537.36"
+  ]
+
+  @default_options [
+    http_adapter: :httpoison,
+    html_parser: :floki,
+    http_headers: %{},
+    user_agent_alias: :mechanizex
+  ]
+
+  defstruct http_adapter: nil,
+            html_parser: nil,
+            http_headers: nil
 
   @type t :: %__MODULE__{
-          options: list(),
           http_adapter: any(),
-          html_parser: any()
+          html_parser: any(),
+          http_headers: map()
         }
 
   @spec start_link(list()) :: {:error, any()} | {:ok, pid()}
@@ -26,24 +56,18 @@ defmodule Mechanizex.Agent do
 
   @spec init(list()) :: Mechanizex.Agent.t()
   defp init(options) do
-    opts =
-      %Mechanizex.Agent{}
-      |> Map.get(:options)
+      @default_options
       |> Keyword.merge(Application.get_all_env(:mechanizex))
       |> Keyword.merge(options)
-
-    %Mechanizex.Agent{options: opts}
-    |> inject_dependencies
+      |> config_agent()
   end
 
-  defp inject_dependencies(state) do
-    state
-    |> Map.put(:http_adapter, HTTPAdapter.adapter(state.options[:http_adapter]))
-    |> Map.put(:html_parser, HTMLParser.parser(state.options[:html_parser]))
-  end
-
-  def option(agent, option) do
-    Agent.get(agent, fn state -> state.options[option] end)
+  defp config_agent(options) do
+    %Mechanizex.Agent{
+      http_adapter: HTTPAdapter.adapter(options[:http_adapter]),
+      html_parser: HTMLParser.parser(options[:html_parser]),
+      http_headers: Map.merge(options[:http_headers], %{"user-agent" => user_agent_string!(options[:user_agent_alias])})
+    }
   end
 
   def http_adapter(agent) do
@@ -64,6 +88,33 @@ defmodule Mechanizex.Agent do
     agent
   end
 
+  def http_headers(agent) do
+    Agent.get(agent, fn state -> state.http_headers end)
+  end
+
+  def set_http_headers(agent, headers) do
+    Agent.update(agent, &Map.put(&1, :http_headers, headers))
+    agent
+  end
+
+  def add_http_headers(agent, headers) do
+    Agent.update agent, fn(state) ->
+      %__MODULE__{ state | http_headers: Map.merge(state.http_headers, headers) }
+    end
+    agent
+  end
+
+  def set_user_agent_alias(agent, user_agent_alias) do
+    add_http_headers(agent, %{"user-agent" => user_agent_string!(user_agent_alias)})
+  end
+
+  defp user_agent_string!(user_agent_alias) do
+    case @user_agent_alias[user_agent_alias] do
+      nil ->  raise Mechanizex.Agent.InvalidUserAgentAlias, message: "Invalid user agent alias \"#{user_agent_alias}\""
+      user_agent_string -> user_agent_string
+    end
+  end
+
   def get!(agent, %URI{} = uri) do
     get!(agent, URI.to_string(uri))
   end
@@ -75,4 +126,8 @@ defmodule Mechanizex.Agent do
   def request!(agent, request) do
     http_adapter(agent).request!(agent, request)
   end
+end
+
+defmodule Mechanizex.Agent.InvalidUserAgentAlias do
+  defexception [:message]
 end

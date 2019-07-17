@@ -4,7 +4,7 @@ defmodule Mechanizex.AgentTest do
   doctest Mechanizex.Agent
 
   setup do
-    {:ok, agent: Mechanizex.new()}
+    {:ok, agent: start_supervised!(Mechanizex.Agent)}
   end
 
   describe ".new" do
@@ -25,36 +25,87 @@ defmodule Mechanizex.AgentTest do
 
       refute agent1 == agent2
     end
+  end
 
-    test "input options by config file" do
-      {:ok, agent} = Mechanizex.Agent.start_link()
-      assert Mechanizex.Agent.option(agent, :foo) == "bar from config"
+  describe "http default headers" do
+    test "initial header values", %{agent: agent} do
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "user-agent" =>
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
+                 "foo" => "bar" #loaded by config env
+             }
     end
 
-    test "input options by parameters takes precedence over config file" do
-      {:ok, agent} = Mechanizex.Agent.start_link(foo: "bar from params")
-      assert Mechanizex.Agent.option(agent, :foo) == "bar from params"
+    test "set headers", %{agent: agent} do
+      Mechanizex.Agent.set_http_headers(agent, %{"content-type" => "text/html"})
+      assert Mechanizex.Agent.http_headers(agent) == %{"content-type" => "text/html"}
     end
 
-    test "input options by params only affects current agent" do
-      {:ok, _} = Mechanizex.Agent.start_link(foo: "bar from params")
-      {:ok, agent2} = Mechanizex.Agent.start_link()
+    test "add headers", %{agent: agent} do
+      Mechanizex.Agent.add_http_headers(agent, %{"content-type" => "text/html"})
 
-      assert Mechanizex.Agent.option(agent2, :foo) == "bar from config"
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "user-agent" =>
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
+               "content-type" => "text/html",
+               "foo" => "bar" #loaded by config env
+             }
+
+      Mechanizex.Agent.add_http_headers(agent, %{"content-type" => "application/javascript"})
+
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "user-agent" =>
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
+               "content-type" => "application/javascript",
+               "foo" => "bar" #loaded by config env
+             }
     end
 
-    test "http adapter option" do
-      {:ok, agent} = Mechanizex.Agent.start_link(http_adapter: :custom)
-      assert Mechanizex.Agent.http_adapter(agent) == Mechanizex.HTTPAdapter.Custom
+    test "set on init overrides foo=>bar config" do
+      agent = Mechanizex.Agent.new(http_headers: %{"custom-header" => "value"})
+
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "custom-header" => "value",
+               "user-agent" =>
+                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"
+             }
+    end
+  end
+
+  describe ".set_user_agent_alias" do
+    test "set by alias", %{agent: agent} do
+      Mechanizex.Agent.set_user_agent_alias(agent, :windows_chrome)
+
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "user-agent" =>
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
+                "foo" => "bar" #loaded by config env
+             }
     end
 
-    test "html parser option" do
-      {:ok, agent} = Mechanizex.Agent.start_link(html_parser: :custom)
-      assert Mechanizex.Agent.html_parser(agent) == Mechanizex.HTMLParser.Custom
+    test "set on init" do
+      agent = Mechanizex.Agent.new(user_agent_alias: :windows_chrome)
+
+      assert Mechanizex.Agent.http_headers(agent) == %{
+               "user-agent" =>
+                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
+                "foo" => "bar" #loaded by config env
+             }
+    end
+
+    test "raise error when invalid alias passed", %{agent: agent} do
+      assert_raise Mechanizex.Agent.InvalidUserAgentAlias, fn ->
+        Mechanizex.Agent.set_user_agent_alias(agent, :windows_chrom)
+      end
     end
   end
 
   describe ".http_adapter" do
+    test "configure on init" do
+      {:ok, agent} = Mechanizex.Agent.start_link(http_adapter: :custom)
+      assert Mechanizex.Agent.http_adapter(agent) == Mechanizex.HTTPAdapter.Custom
+    end
+
     test "default http adapter", %{agent: agent} do
       assert Mechanizex.Agent.http_adapter(agent) == HTTPAdapter.Httpoison
     end
@@ -71,14 +122,6 @@ defmodule Mechanizex.AgentTest do
     end
   end
 
-      agent =
-        Mechanizex.Agent.new()
-        |> Mechanizex.Agent.set_http_adapter(Mechanizex.HTTPAdapter.Custom)
-
-      assert Mechanizex.Agent.http_adapter(agent) == Mechanizex.HTTPAdapter.Custom
-    end
-  end
-
   describe ".set_html_parser" do
     test "returns mechanizex agent", %{agent: agent} do
       assert Mechanizex.Agent.set_html_parser(agent, Mechanizex.HTMLParser.Custom) == agent
@@ -86,6 +129,11 @@ defmodule Mechanizex.AgentTest do
 
     test "updates html parser", %{agent: agent} do
       Mechanizex.Agent.set_html_parser(agent, Mechanizex.HTMLParser.Custom)
+      assert Mechanizex.Agent.html_parser(agent) == Mechanizex.HTMLParser.Custom
+    end
+
+    test "html parser option" do
+      {:ok, agent} = Mechanizex.Agent.start_link(html_parser: :custom)
       assert Mechanizex.Agent.html_parser(agent) == Mechanizex.HTMLParser.Custom
     end
   end

@@ -1,4 +1,6 @@
 use Mix.Config
 
 config :mechanizex,
-  foo: "bar from config"
+  http_headers: %{
+    "foo" => "bar"
+  }

@@ -83,7 +83,11 @@ defmodule Mechanizex.Agent do
 
   defp config_http_headers(options) do
     options[:http_headers]
-    |> List.keystore("user-agent", 0, {"user-agent", user_agent_string!(options[:user_agent_alias])})
+    |> List.keystore(
+      "user-agent",
+      0,
+      {"user-agent", user_agent_string!(options[:user_agent_alias])}
+    )
     |> normalize_headers()
   end
 
@@ -92,7 +96,7 @@ defmodule Mechanizex.Agent do
   end
 
   defp normalize_header({k, v}) do
-    { String.downcase(k), v}
+    {String.downcase(k), v}
   end
 
   def http_adapter(agent) do
@@ -124,6 +128,7 @@ defmodule Mechanizex.Agent do
 
   def put_http_header(agent, h, v) do
     {h, _} = header = normalize_header({h, v})
+
     Agent.update(agent, fn state ->
       %__MODULE__{state | http_headers: List.keystore(state.http_headers, h, 0, header)}
     end)
@@ -135,7 +140,7 @@ defmodule Mechanizex.Agent do
     put_http_header(agent, "user-agent", user_agent_string!(user_agent_alias))
   end
 
-  defp user_agent_string!(user_agent_alias) do
+  def user_agent_string!(user_agent_alias) do
     case @user_agent_alias[user_agent_alias] do
       nil ->
         raise Mechanizex.Agent.InvalidUserAgentAlias,
@@ -157,11 +162,14 @@ defmodule Mechanizex.Agent do
   end
 
   def request!(agent, request) do
-    http_adapter(agent).request!(agent, merge_headers(agent, request))
+    http_adapter(agent).request!(agent, %Request{
+      request
+      | headers: merge_http_headers(http_headers(agent), normalize_headers(request.headers))
+    })
   end
 
-  defp merge_headers(agent, request) do
-    %Request{request | headers: Keyword.merge(http_headers(agent), request.headers)}
+  defp merge_http_headers(agent_headers, request_headers) do
+    Enum.uniq_by(request_headers ++ agent_headers, &elem(&1, 0))
   end
 end
 

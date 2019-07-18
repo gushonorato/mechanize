@@ -1,10 +1,15 @@
 defmodule Mechanizex.AgentTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.HTTPAdapter
+  alias Mechanizex.{HTTPAdapter, Request}
+  import Mox
   doctest Mechanizex.Agent
 
   setup do
-    {:ok, agent: start_supervised!(Mechanizex.Agent)}
+    {:ok, agent: start_supervised!({Mechanizex.Agent, http_adapter: :mock})}
+  end
+
+  setup_all do
+    {:ok, default_ua: Mechanizex.Agent.user_agent_string!(:mechanizex)}
   end
 
   describe ".new" do
@@ -28,32 +33,29 @@ defmodule Mechanizex.AgentTest do
   end
 
   describe "initial headers config" do
-    test "load headers from mix config", %{agent: agent} do
+    test "load headers from mix config", %{agent: agent, default_ua: ua} do
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent",
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
+               {"user-agent", ua}
              ]
     end
 
-    test "init parameters overrides mix config" do
+    test "init parameters overrides mix config", %{default_ua: ua} do
       agent = Mechanizex.Agent.new(http_headers: [{"custom-header", "value"}])
 
       assert Mechanizex.Agent.http_headers(agent) == [
                {"custom-header", "value"},
-               {"user-agent",
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
+               {"user-agent", ua}
              ]
     end
 
-    test "ensure headers are always in downcase" do
+    test "ensure headers are always in downcase", %{default_ua: ua} do
       agent = Mechanizex.Agent.new(http_headers: [{"Custom-Header", "value"}])
 
       assert Mechanizex.Agent.http_headers(agent) == [
                {"custom-header", "value"},
-               {"user-agent",
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"}
+               {"user-agent", ua}
              ]
     end
   end
@@ -65,8 +67,15 @@ defmodule Mechanizex.AgentTest do
     end
 
     test "ensure all headers are in lowercase", %{agent: agent} do
-      Mechanizex.Agent.set_http_headers(agent, [{"Content-Type", "text/html"}, {"Custom-Header", "Lero"}])
-      assert Mechanizex.Agent.http_headers(agent) == [{"content-type", "text/html"}, {"custom-header", "Lero"}]
+      Mechanizex.Agent.set_http_headers(agent, [
+        {"Content-Type", "text/html"},
+        {"Custom-Header", "Lero"}
+      ])
+
+      assert Mechanizex.Agent.http_headers(agent) == [
+               {"content-type", "text/html"},
+               {"custom-header", "Lero"}
+             ]
     end
   end
 
@@ -77,34 +86,35 @@ defmodule Mechanizex.AgentTest do
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent","Lero"},
+               {"user-agent", "Lero"}
              ]
     end
 
-    test "add new header if doesnt'", %{agent: agent} do
+    test "add new header if doesnt'", %{agent: agent, default_ua: ua} do
       Mechanizex.Agent.put_http_header(agent, "content-type", "text/html")
 
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent",
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"},
+               {"user-agent", ua},
                {"content-type", "text/html"}
              ]
-
     end
 
-    test "ensure inserted header is lowecase", %{agent: agent} do
+    test "ensure inserted header is lowecase", %{agent: agent, default_ua: ua} do
       Mechanizex.Agent.put_http_header(agent, "Content-Type", "text/html")
 
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent",
-                 "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)"},
+               {"user-agent", ua},
                {"content-type", "text/html"}
              ]
+    end
+  end
 
+  describe ".http_header" do
+    test "default user agent" do
     end
   end
 
@@ -115,8 +125,7 @@ defmodule Mechanizex.AgentTest do
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent",
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"}
+               {"user-agent", Mechanizex.Agent.user_agent_string!(:windows_chrome)}
              ]
     end
 
@@ -126,8 +135,7 @@ defmodule Mechanizex.AgentTest do
       assert Mechanizex.Agent.http_headers(agent) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent",
-                 "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36"}
+               {"user-agent", Mechanizex.Agent.user_agent_string!(:windows_chrome)}
              ]
     end
 
@@ -144,7 +152,8 @@ defmodule Mechanizex.AgentTest do
       assert Mechanizex.Agent.http_adapter(agent) == Mechanizex.HTTPAdapter.Custom
     end
 
-    test "default http adapter", %{agent: agent} do
+    test "default http adapter" do
+      agent = Mechanizex.Agent.new()
       assert Mechanizex.Agent.http_adapter(agent) == HTTPAdapter.Httpoison
     end
   end
@@ -173,6 +182,74 @@ defmodule Mechanizex.AgentTest do
     test "html parser option" do
       {:ok, agent} = Mechanizex.Agent.start_link(html_parser: :custom)
       assert Mechanizex.Agent.html_parser(agent) == Mechanizex.HTMLParser.Custom
+    end
+  end
+
+  describe ".request!" do
+    test "add agent's default http headers on request", %{agent: agent, default_ua: ua} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :get,
+                                url: "https://www.seomaster.com.br",
+                                headers: [
+                                  {"custom-header", "lero"},
+                                  {"foo", "bar"},
+                                  {"user-agent", ^ua}
+                                ]
+                              } ->
+        nil
+      end)
+
+      Mechanizex.Agent.request!(agent, %Request{
+        method: :get,
+        url: "https://www.seomaster.com.br",
+        headers: [{"custom-header", "lero"}]
+      })
+    end
+
+    test "update default http header", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :get,
+                                url: "https://www.seomaster.com.br",
+                                headers: [
+                                  {"custom-header", "lero"},
+                                  {"user-agent", "Gustabot"},
+                                  {"foo", "bar"}
+                                ]
+                              } ->
+        nil
+      end)
+
+      Mechanizex.Agent.request!(agent, %Request{
+        method: :get,
+        url: "https://www.seomaster.com.br",
+        headers: [{"custom-header", "lero"}, {"user-agent", "Gustabot"}]
+      })
+    end
+
+    test "ensure header downcase", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :get,
+                                url: "https://www.seomaster.com.br",
+                                headers: [
+                                  {"custom-header", "lero"},
+                                  {"user-agent", "Gustabot"},
+                                  {"foo", "bar"}
+                                ]
+                              } ->
+        nil
+      end)
+
+      Mechanizex.Agent.request!(agent, %Request{
+        method: :get,
+        url: "https://www.seomaster.com.br",
+        headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
+      })
     end
   end
 end

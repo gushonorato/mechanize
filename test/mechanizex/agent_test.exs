@@ -251,5 +251,30 @@ defmodule Mechanizex.AgentTest do
         headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
       })
     end
+
+    test "send request parameters", %{agent: agent, default_ua: ua} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request!, fn _,
+                              %Request{
+                                method: :get,
+                                url: "https://www.seomaster.com.br",
+                                params: [
+                                  {"query", "lero"},
+                                  {"start", "100"}
+                                ],
+                                headers: [
+                                  {"foo", "bar"},
+                                  {"user-agent", ^ua}
+                                ]
+                              } ->
+        nil
+      end)
+
+      Mechanizex.Agent.request!(agent, %Request{
+        method: :get,
+        url: "https://www.seomaster.com.br",
+        params: [{"query", "lero"}, {"start", "100"}]
+      })
+    end
   end
 end

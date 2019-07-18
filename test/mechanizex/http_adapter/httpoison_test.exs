@@ -14,7 +14,7 @@ defmodule Mechanizex.HTTPAdapter.HTTPoisonTest do
       Plug.Conn.resp(conn, 200, "Lero")
     end)
 
-    page = Adapter.request!(agent, %Request{method: :get, url: endpoint_url(bypass.port)})
+    {:ok, page} = Adapter.request(agent, %Request{method: :get, url: endpoint_url(bypass.port)})
 
     assert Page.response_code(page) == 200
     assert Page.body(page) == "Lero"

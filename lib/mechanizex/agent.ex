@@ -55,6 +55,14 @@ defmodule Mechanizex.Agent do
           http_headers: keyword()
         }
 
+  defmodule ConnectionError do
+    defexception [:message, :error]
+  end
+
+  defmodule InvalidUserAgentAlias do
+    defexception [:message]
+  end
+
   @spec start_link(list()) :: {:error, any()} | {:ok, pid()}
   def start_link(options \\ []) do
     Agent.start_link(fn -> init(options) end)
@@ -162,7 +170,14 @@ defmodule Mechanizex.Agent do
   end
 
   def request!(agent, request) do
-    http_adapter(agent).request!(agent, %Request{
+    case request(agent, request) do
+      {:ok, page} -> page
+      {:error, error} -> raise ConnectionError, message: error.message, error: error
+    end
+  end
+
+  def request(agent, request) do
+    http_adapter(agent).request(agent, %Request{
       request
       | headers: merge_http_headers(http_headers(agent), normalize_headers(request.headers))
     })
@@ -171,8 +186,4 @@ defmodule Mechanizex.Agent do
   defp merge_http_headers(agent_headers, request_headers) do
     Enum.uniq_by(request_headers ++ agent_headers, &elem(&1, 0))
   end
-end
-
-defmodule Mechanizex.Agent.InvalidUserAgentAlias do
-  defexception [:message]
 end

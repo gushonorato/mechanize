@@ -194,8 +194,8 @@ defmodule Mechanizex.PageTest do
 
     test "click on first matched link", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "http://www.google.com"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :get, url: "http://www.google.com"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -205,8 +205,8 @@ defmodule Mechanizex.PageTest do
 
     test "click on first matched link by text", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -216,8 +216,8 @@ defmodule Mechanizex.PageTest do
 
     test "relative link", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -227,12 +227,12 @@ defmodule Mechanizex.PageTest do
 
     test "image area links", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :get,
-                                url: "https://htdocs.local/test/htdocs/sun.html"
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :get,
+                               url: "https://htdocs.local/test/htdocs/sun.html"
+                             } ->
+        {:ok, nil}
       end)
 
       agent

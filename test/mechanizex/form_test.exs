@@ -237,8 +237,8 @@ defmodule Mechanizex.FormTest do
 
     test "method is get when method attribute missing", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -251,8 +251,8 @@ defmodule Mechanizex.FormTest do
 
     test "method is get when method attribute is blank", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -263,8 +263,8 @@ defmodule Mechanizex.FormTest do
 
     test "method post", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :post, url: "https://htdocs.local/login"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/login"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -275,13 +275,13 @@ defmodule Mechanizex.FormTest do
 
     test "absent action attribute", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_with_absent_action.html"
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url:
+                                 "https://htdocs.local/test/htdocs/form_with_absent_action.html"
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -292,13 +292,12 @@ defmodule Mechanizex.FormTest do
 
     test "empty action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_with_blank_action.html"
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url: "https://htdocs.local/test/htdocs/form_with_blank_action.html"
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -309,9 +308,8 @@ defmodule Mechanizex.FormTest do
 
     test "relative action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{method: :post, url: "https://htdocs.local/test/login"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/test/login"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -322,8 +320,8 @@ defmodule Mechanizex.FormTest do
 
     test "absolute action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _, %Request{method: :post, url: "https://www.foo.com/login"} ->
-        :ok
+      |> expect(:request, fn _, %Request{method: :post, url: "https://www.foo.com/login"} ->
+        {:ok, nil}
       end)
 
       agent
@@ -334,13 +332,13 @@ defmodule Mechanizex.FormTest do
 
     test "input fields submission", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url: "https://www.foo.com/login",
-                                params: [{"username", "gustavo"}, {"passwd", "gu123456"}]
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url: "https://www.foo.com/login",
+                               params: [{"username", "gustavo"}, {"passwd", "gu123456"}]
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -353,14 +351,14 @@ defmodule Mechanizex.FormTest do
 
     test "doest not submit disabled fields", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
-                                params: [{"color1", "color1 value"}]
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url:
+                                 "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
+                               params: [{"color1", "color1 value"}]
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -375,18 +373,18 @@ defmodule Mechanizex.FormTest do
   describe ".click_button" do
     test "click by text", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
-                                params: [
-                                  {"button1_name", "button1_value"},
-                                  {"username", nil},
-                                  {"passwd", nil}
-                                ]
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url:
+                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               params: [
+                                 {"button1_name", "button1_value"},
+                                 {"username", nil},
+                                 {"passwd", nil}
+                               ]
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -397,18 +395,18 @@ defmodule Mechanizex.FormTest do
 
     test "click by name", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
-                                params: [
-                                  {"button1_name", "button1_value"},
-                                  {"username", nil},
-                                  {"passwd", nil}
-                                ]
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url:
+                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               params: [
+                                 {"button1_name", "button1_value"},
+                                 {"username", nil},
+                                 {"passwd", nil}
+                               ]
+                             } ->
+        {:ok, nil}
       end)
 
       agent
@@ -419,18 +417,18 @@ defmodule Mechanizex.FormTest do
 
     test "click by id", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn _,
-                              %Request{
-                                method: :post,
-                                url:
-                                  "https://htdocs.local/test/htdocs/form_button_click_test.html",
-                                params: [
-                                  {"button1_name", "button1_value"},
-                                  {"username", nil},
-                                  {"passwd", nil}
-                                ]
-                              } ->
-        :ok
+      |> expect(:request, fn _,
+                             %Request{
+                               method: :post,
+                               url:
+                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               params: [
+                                 {"button1_name", "button1_value"},
+                                 {"username", nil},
+                                 {"passwd", nil}
+                               ]
+                             } ->
+        {:ok, nil}
       end)
 
       agent

@@ -102,9 +102,7 @@ defmodule Mechanizex.FormTest do
     test "parse all generic text input", %{agent: agent} do
       fields =
         agent
-        |> LocalPageLoader.get(
-          "https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html"
-        )
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html")
         |> Mechanizex.with_form()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
@@ -132,9 +130,7 @@ defmodule Mechanizex.FormTest do
     test "parse disabled fields", %{agent: agent} do
       fields =
         agent
-        |> LocalPageLoader.get(
-          "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
-        )
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
         |> Mechanizex.with_form()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, disabled: disabled} -> {name, disabled} end)
@@ -151,9 +147,7 @@ defmodule Mechanizex.FormTest do
     test "parse elements without name", %{agent: agent} do
       fields =
         agent
-        |> LocalPageLoader.get(
-          "https://htdocs.local/test/htdocs/form_with_inputs_without_name.html"
-        )
+        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_inputs_without_name.html")
         |> Mechanizex.with_form()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
@@ -166,9 +160,7 @@ defmodule Mechanizex.FormTest do
 
     test "parse all submit buttons", %{agent: agent} do
       assert agent
-             |> LocalPageLoader.get(
-               "https://htdocs.local/test/htdocs/form_with_all_kinds_of_buttons.html"
-             )
+             |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_all_kinds_of_buttons.html")
              |> Mechanizex.with_form()
              |> Form.fields()
              |> Enum.map(fn %{
@@ -242,9 +234,7 @@ defmodule Mechanizex.FormTest do
       end)
 
       agent
-      |> LocalPageLoader.get(
-        "https://htdocs.local/test/htdocs/form_method_attribute_missing.html"
-      )
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
@@ -263,8 +253,7 @@ defmodule Mechanizex.FormTest do
 
     test "method post", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{method: :post, url: "https://htdocs.local/login"} = req ->
+      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/login"} = req ->
         {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
@@ -279,8 +268,7 @@ defmodule Mechanizex.FormTest do
       |> expect(:request, fn _,
                              %Request{
                                method: :post,
-                               url:
-                                 "https://htdocs.local/test/htdocs/form_with_absent_action.html"
+                               url: "https://htdocs.local/test/htdocs/form_with_absent_action.html"
                              } = req ->
         {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
@@ -309,8 +297,7 @@ defmodule Mechanizex.FormTest do
 
     test "relative action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{method: :post, url: "https://htdocs.local/test/login"} = req ->
+      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/test/login"} = req ->
         {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
@@ -356,17 +343,14 @@ defmodule Mechanizex.FormTest do
       |> expect(:request, fn _,
                              %Request{
                                method: :post,
-                               url:
-                                 "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
+                               url: "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
                                params: [{"color1", "color1 value"}]
                              } = req ->
         {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
-      |> LocalPageLoader.get(
-        "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html"
-      )
+      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
       |> Mechanizex.with_form()
       |> Mechanizex.submit()
     end
@@ -378,8 +362,7 @@ defmodule Mechanizex.FormTest do
       |> expect(:request, fn _,
                              %Request{
                                method: :post,
-                               url:
-                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               url: "https://htdocs.local/test/htdocs/form_button_click_test.html",
                                params: [
                                  {"button1_name", "button1_value"},
                                  {"username", nil},
@@ -400,8 +383,7 @@ defmodule Mechanizex.FormTest do
       |> expect(:request, fn _,
                              %Request{
                                method: :post,
-                               url:
-                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               url: "https://htdocs.local/test/htdocs/form_button_click_test.html",
                                params: [
                                  {"button1_name", "button1_value"},
                                  {"username", nil},
@@ -422,8 +404,7 @@ defmodule Mechanizex.FormTest do
       |> expect(:request, fn _,
                              %Request{
                                method: :post,
-                               url:
-                                 "https://htdocs.local/test/htdocs/form_button_click_test.html",
+                               url: "https://htdocs.local/test/htdocs/form_button_click_test.html",
                                params: [
                                  {"button1_name", "button1_value"},
                                  {"username", nil},

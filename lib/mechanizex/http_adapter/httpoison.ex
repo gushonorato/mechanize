@@ -163,8 +163,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
          }}
 
       {:error, error} ->
-        {:error,
-         %Error{cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"}}
+        {:error, %Error{cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"}}
     end
   end
 end

@@ -205,8 +205,7 @@ defmodule Mechanizex.PageTest do
 
     test "click on first matched link by text", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{method: :get, url: "http://www.seomaster.com.br"} = req ->
+      |> expect(:request, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} = req ->
         {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 

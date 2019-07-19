@@ -39,8 +39,7 @@ defmodule Mechanizex.HTTPAdapterTest do
           Plug.Conn.resp(conn, 200, "Lero")
         end)
 
-        {:ok, page} =
-          adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:ok, page} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert Page.response_code(page) == 200
 
@@ -57,8 +56,7 @@ defmodule Mechanizex.HTTPAdapterTest do
       } do
         Bypass.down(bypass)
 
-        {:error, error} =
-          adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:error, error} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert error.message =~ ~r/connection refused/i
       end
@@ -100,11 +98,9 @@ defmodule Mechanizex.HTTPAdapterTest do
         adapter: adapter
       } do
         Bypass.expect(bypass, fn conn ->
-          assert [{_, "text/html"}] =
-                   Enum.filter(conn.req_headers, fn {k, _} -> k =~ ~r/content-type/i end)
+          assert [{_, "text/html"}] = Enum.filter(conn.req_headers, fn {k, _} -> k =~ ~r/content-type/i end)
 
-          assert [{_, "Gustabot"}] =
-                   Enum.filter(conn.req_headers, fn {k, _} -> k =~ ~r/user-agent/i end)
+          assert [{_, "Gustabot"}] = Enum.filter(conn.req_headers, fn {k, _} -> k =~ ~r/user-agent/i end)
 
           Plug.Conn.resp(conn, 200, "Lero")
         end)
@@ -128,8 +124,7 @@ defmodule Mechanizex.HTTPAdapterTest do
           |> Plug.Conn.put_resp_header("Location", "https://www.seomaster.com.br")
         end)
 
-        {:ok, page} =
-          adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:ok, page} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert [{_, "https://www.seomaster.com.br"}] =
                  Enum.filter(page.response.headers, fn {k, _} -> k =~ ~r/location/i end)

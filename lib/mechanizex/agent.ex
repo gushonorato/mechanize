@@ -55,10 +55,6 @@ defmodule Mechanizex.Agent do
           http_headers: keyword()
         }
 
-  defmodule ConnectionError do
-    defexception [:message, :error]
-  end
-
   defmodule InvalidUserAgentAlias do
     defexception [:message]
   end
@@ -172,7 +168,7 @@ defmodule Mechanizex.Agent do
   def request!(agent, request) do
     case request(agent, request) do
       {:ok, page} -> page
-      {:error, error} -> raise ConnectionError, message: error.message, error: error
+      {:error, error} -> raise error
     end
   end
 

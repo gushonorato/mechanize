@@ -310,5 +310,19 @@ defmodule Mechanizex.AgentTest do
                {"foo", "BAR"}
              ]
     end
+
+    test "raise error when connection fail", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request, fn _, _ ->
+        {:error, %Mechanizex.HTTPAdapter.Error{cause: nil, message: "Never mind"}}
+      end)
+
+      assert_raise Mechanizex.HTTPAdapter.Error, fn ->
+        Mechanizex.Agent.request!(agent, %Request{
+          method: :get,
+          url: "https://www.seomaster.com.br"
+        })
+      end
+    end
   end
 end

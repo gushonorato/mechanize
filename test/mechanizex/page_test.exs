@@ -3,7 +3,7 @@ defmodule Mechanizex.PageTest do
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.Page.{Element, Link}
-  alias Mechanizex.{Page, Request}
+  alias Mechanizex.{Page, Request, Response}
   import Mox
 
   setup_all do
@@ -194,8 +194,8 @@ defmodule Mechanizex.PageTest do
 
     test "click on first matched link", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "http://www.google.com"} ->
-        {:ok, nil}
+      |> expect(:request, fn _, %Request{method: :get, url: "http://www.google.com"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -205,8 +205,9 @@ defmodule Mechanizex.PageTest do
 
     test "click on first matched link by text", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "http://www.seomaster.com.br"} ->
-        {:ok, nil}
+      |> expect(:request, fn _,
+                             %Request{method: :get, url: "http://www.seomaster.com.br"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -216,8 +217,8 @@ defmodule Mechanizex.PageTest do
 
     test "relative link", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/test"} ->
-        {:ok, nil}
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/test"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -231,8 +232,8 @@ defmodule Mechanizex.PageTest do
                              %Request{
                                method: :get,
                                url: "https://htdocs.local/test/htdocs/sun.html"
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent

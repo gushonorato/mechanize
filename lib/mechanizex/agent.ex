@@ -1,6 +1,6 @@
 defmodule Mechanizex.Agent do
   use Agent
-  alias Mechanizex.{HTTPAdapter, HTMLParser, Request}
+  alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page}
 
   @user_agent_alias [
     mechanizex:
@@ -173,13 +173,24 @@ defmodule Mechanizex.Agent do
   end
 
   def request(agent, request) do
-    http_adapter(agent).request(agent, %Request{
-      request
-      | headers: merge_http_headers(http_headers(agent), normalize_headers(request.headers))
-    })
+    req_headers =
+      request.headers
+      |> normalize_headers()
+      |> merge_http_headers(http_headers(agent))
+
+    res = http_adapter(agent).request(agent, %Request{request | headers: req_headers})
+
+    case res do
+      {:ok, page} ->
+        res_headers = normalize_headers(page.response.headers)
+        {:ok, %Page{page | response: %Response{page.response | headers: res_headers}}}
+
+      res ->
+        res
+    end
   end
 
-  defp merge_http_headers(agent_headers, request_headers) do
+  defp merge_http_headers(request_headers, agent_headers) do
     Enum.uniq_by(request_headers ++ agent_headers, &elem(&1, 0))
   end
 end

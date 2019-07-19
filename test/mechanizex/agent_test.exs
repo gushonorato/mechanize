@@ -1,6 +1,6 @@
 defmodule Mechanizex.AgentTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{HTTPAdapter, Request}
+  alias Mechanizex.{HTTPAdapter, Request, Response, Page}
   import Mox
   doctest Mechanizex.Agent
 
@@ -197,8 +197,8 @@ defmodule Mechanizex.AgentTest do
                                  {"foo", "bar"},
                                  {"user-agent", ^ua}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       Mechanizex.Agent.request!(agent, %Request{
@@ -208,7 +208,7 @@ defmodule Mechanizex.AgentTest do
       })
     end
 
-    test "update default http header", %{agent: agent} do
+    test "ignore case on update default http header", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
       |> expect(:request, fn _,
                              %Request{
@@ -219,18 +219,18 @@ defmodule Mechanizex.AgentTest do
                                  {"user-agent", "Gustabot"},
                                  {"foo", "bar"}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       Mechanizex.Agent.request!(agent, %Request{
         method: :get,
         url: "https://www.seomaster.com.br",
-        headers: [{"custom-header", "lero"}, {"user-agent", "Gustabot"}]
+        headers: [{"custom-header", "lero"}, {"User-Agent", "Gustabot"}]
       })
     end
 
-    test "ensure header downcase", %{agent: agent} do
+    test "ensure downcase of request headers", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
       |> expect(:request, fn _,
                              %Request{
@@ -241,8 +241,8 @@ defmodule Mechanizex.AgentTest do
                                  {"user-agent", "Gustabot"},
                                  {"foo", "bar"}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       Mechanizex.Agent.request!(agent, %Request{
@@ -266,8 +266,8 @@ defmodule Mechanizex.AgentTest do
                                  {"foo", "bar"},
                                  {"user-agent", ^ua}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       Mechanizex.Agent.request!(agent, %Request{
@@ -275,6 +275,40 @@ defmodule Mechanizex.AgentTest do
         url: "https://www.seomaster.com.br",
         params: [{"query", "lero"}, {"start", "100"}]
       })
+    end
+
+    test "ensure downcase of response headers", %{agent: agent} do
+      Mechanizex.HTTPAdapter.Mock
+      |> expect(:request, fn _, req ->
+        {:ok,
+         %Page{
+           agent: agent,
+           request: req,
+           response: %Response{
+             body: [],
+             headers: [
+               {"Custom-Header", "lero"},
+               {"User-Agent", "Gustabot"},
+               {"FOO", "BAR"}
+             ],
+             code: 200,
+             url: "https://www.seomaster.com.br"
+           }
+         }}
+      end)
+
+      page =
+        Mechanizex.Agent.request!(agent, %Request{
+          method: :get,
+          url: "https://www.seomaster.com.br",
+          headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
+        })
+
+      assert page.response.headers == [
+               {"custom-header", "lero"},
+               {"user-agent", "Gustabot"},
+               {"foo", "BAR"}
+             ]
     end
   end
 end

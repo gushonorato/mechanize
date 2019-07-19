@@ -2,7 +2,7 @@ defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
-  alias Mechanizex.{Form, Request}
+  alias Mechanizex.{Form, Request, Response, Page}
   alias Mechanizex.Form.{TextInput, Submit}
   import Mox
 
@@ -237,8 +237,8 @@ defmodule Mechanizex.FormTest do
 
     test "method is get when method attribute missing", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
-        {:ok, nil}
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -251,8 +251,8 @@ defmodule Mechanizex.FormTest do
 
     test "method is get when method attribute is blank", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} ->
-        {:ok, nil}
+      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -263,8 +263,9 @@ defmodule Mechanizex.FormTest do
 
     test "method post", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/login"} ->
-        {:ok, nil}
+      |> expect(:request, fn _,
+                             %Request{method: :post, url: "https://htdocs.local/login"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -280,8 +281,8 @@ defmodule Mechanizex.FormTest do
                                method: :post,
                                url:
                                  "https://htdocs.local/test/htdocs/form_with_absent_action.html"
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -296,8 +297,8 @@ defmodule Mechanizex.FormTest do
                              %Request{
                                method: :post,
                                url: "https://htdocs.local/test/htdocs/form_with_blank_action.html"
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -308,8 +309,9 @@ defmodule Mechanizex.FormTest do
 
     test "relative action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/test/login"} ->
-        {:ok, nil}
+      |> expect(:request, fn _,
+                             %Request{method: :post, url: "https://htdocs.local/test/login"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -320,8 +322,8 @@ defmodule Mechanizex.FormTest do
 
     test "absolute action url", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://www.foo.com/login"} ->
-        {:ok, nil}
+      |> expect(:request, fn _, %Request{method: :post, url: "https://www.foo.com/login"} = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -337,8 +339,8 @@ defmodule Mechanizex.FormTest do
                                method: :post,
                                url: "https://www.foo.com/login",
                                params: [{"username", "gustavo"}, {"passwd", "gu123456"}]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -357,8 +359,8 @@ defmodule Mechanizex.FormTest do
                                url:
                                  "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
                                params: [{"color1", "color1 value"}]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -383,8 +385,8 @@ defmodule Mechanizex.FormTest do
                                  {"username", nil},
                                  {"passwd", nil}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -405,8 +407,8 @@ defmodule Mechanizex.FormTest do
                                  {"username", nil},
                                  {"passwd", nil}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent
@@ -427,8 +429,8 @@ defmodule Mechanizex.FormTest do
                                  {"username", nil},
                                  {"passwd", nil}
                                ]
-                             } ->
-        {:ok, nil}
+                             } = req ->
+        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
       end)
 
       agent

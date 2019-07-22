@@ -1,5 +1,37 @@
+defmodule Mechanizex.Agent.HTTPShortcuts do
+  alias Mechanizex.Request
+
+  defmacro __using__(_) do
+    [:get, :delete, :options, :patch, :post, :put, :head]
+    |> Enum.map(fn method ->
+      quote do
+        def unquote(method)(agent, url, params \\ [], headers \\ [])
+
+        def unquote(method)(agent, %URI{} = uri, params, headers) do
+          request(agent, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
+        end
+
+        def unquote(method)(agent, url, params, headers) do
+          request(agent, %Request{method: unquote(method), url: url, headers: headers, params: params})
+        end
+
+        def unquote(:"#{method}!")(agent, url, params \\ [], headers \\ [])
+
+        def unquote(:"#{method}!")(agent, %URI{} = uri, params, headers) do
+          request!(agent, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
+        end
+
+        def unquote(:"#{method}!")(agent, url, params, headers) do
+          request!(agent, %Request{method: unquote(method), url: url, headers: headers, params: params})
+        end
+      end
+    end)
+  end
+end
+
 defmodule Mechanizex.Agent do
   use Agent
+  use Mechanizex.Agent.HTTPShortcuts
   alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page}
 
   @user_agent_alias [
@@ -150,16 +182,6 @@ defmodule Mechanizex.Agent do
       user_agent_string ->
         user_agent_string
     end
-  end
-
-  def get!(agent, url, headers \\ [])
-
-  def get!(agent, %URI{} = uri, headers) do
-    get!(agent, URI.to_string(uri), headers)
-  end
-
-  def get!(agent, url, headers) do
-    request!(agent, %Request{method: :get, url: url, headers: headers})
   end
 
   def request!(agent, request) do

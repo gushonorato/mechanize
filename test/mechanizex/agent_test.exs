@@ -1,5 +1,63 @@
+defmodule Mechanizex.Agent.HTTPShortcutsTest do
+  alias Mechanizex.{Request, Response, Page}
+
+  defmacro __using__(_) do
+    [:get, :delete, :options, :patch, :post, :put, :head]
+    |> Enum.map(fn method ->
+      quote do
+        test "#{unquote(method)} delegate to request", %{agent: agent} do
+          Mechanizex.HTTPAdapter.Mock
+          |> Mox.expect(:request, fn _,
+                                     req = %Request{
+                                       method: unquote(method),
+                                       url: "https://www.seomaster.com.br",
+                                       params: params,
+                                       headers: headers
+                                     } ->
+            assert List.keyfind(params, "lero", 0) == {"lero", "lero"}
+            assert List.keyfind(headers, "accept", 0) == {"accept", "lero"}
+            {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+          end)
+
+          apply(Mechanizex.Agent, unquote(method), [
+            agent,
+            "https://www.seomaster.com.br",
+            [{"lero", "lero"}],
+            [{"accept", "lero"}]
+          ])
+        end
+
+        test "#{unquote(method)}! delegate to request", %{agent: agent} do
+          Mechanizex.HTTPAdapter.Mock
+          |> Mox.expect(:request, fn _,
+                                     req = %Request{
+                                       method: unquote(method),
+                                       url: "https://www.seomaster.com.br",
+                                       params: params,
+                                       headers: headers
+                                     } ->
+            assert List.keyfind(params, "lero", 0) == {"lero", "lero"}
+            assert List.keyfind(headers, "accept", 0) == {"accept", "lero"}
+            {:error, %Mechanizex.HTTPAdapter.Error{cause: nil, message: "Never mind"}}
+          end)
+
+          assert_raise Mechanizex.HTTPAdapter.Error, fn ->
+            apply(Mechanizex.Agent, unquote(:"#{method}!"), [
+              agent,
+              "https://www.seomaster.com.br",
+              [{"lero", "lero"}],
+              [{"accept", "lero"}]
+            ])
+          end
+        end
+      end
+    end)
+  end
+end
+
 defmodule Mechanizex.AgentTest do
   use ExUnit.Case, async: true
+  use Mechanizex.Agent.HTTPShortcutsTest
   alias Mechanizex.{HTTPAdapter, Request, Response, Page}
   import Mox
   doctest Mechanizex.Agent

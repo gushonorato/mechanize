@@ -3,7 +3,7 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.{Form, Request, Response, Page}
-  alias Mechanizex.Form.{TextInput, Submit}
+  alias Mechanizex.Form.{TextInput, SubmitButton}
   import Mox
 
   setup_all do
@@ -200,13 +200,13 @@ defmodule Mechanizex.FormTest do
           element: :fake,
           fields: [
             %TextInput{element: :fake, name: "username", value: "gustavo"},
-            %Submit{element: :fake, name: "submit1"},
-            %Submit{element: :fake, name: "submit2"}
+            %SubmitButton{element: :fake, name: "submit1"},
+            %SubmitButton{element: :fake, name: "submit2"}
           ]
         }
         |> Form.submit_buttons() == [
-          %Submit{element: :fake, name: "submit1"},
-          %Submit{element: :fake, name: "submit2"}
+          %SubmitButton{element: :fake, name: "submit1"},
+          %SubmitButton{element: :fake, name: "submit2"}
         ]
       )
     end

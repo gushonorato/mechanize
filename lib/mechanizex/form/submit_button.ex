@@ -1,4 +1,4 @@
-defmodule Mechanizex.Form.Submit do
+defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.Element
 
   defstruct element: nil, name: nil, value: nil, text: nil, id: nil, disabled: false
@@ -13,7 +13,7 @@ defmodule Mechanizex.Form.Submit do
         }
 
   def new(%Element{name: "button"} = el) do
-    %Mechanizex.Form.Submit{
+    %Mechanizex.Form.SubmitButton{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -24,7 +24,7 @@ defmodule Mechanizex.Form.Submit do
   end
 
   def new(%Element{name: "input", attrs: [{"type", "image"} | _]} = el) do
-    %Mechanizex.Form.Submit{
+    %Mechanizex.Form.SubmitButton{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -35,7 +35,7 @@ defmodule Mechanizex.Form.Submit do
   end
 
   def new(%Element{name: "input"} = el) do
-    %Mechanizex.Form.Submit{
+    %Mechanizex.Form.SubmitButton{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -45,7 +45,7 @@ defmodule Mechanizex.Form.Submit do
     }
   end
 
-  def is_submit?(field) do
+  def is_submit_button?(field) do
     match?(%__MODULE__{}, field)
   end
 end

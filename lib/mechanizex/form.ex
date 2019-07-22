@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, Submit}
+  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton}
   alias Mechanizex.{Query, Request}
 
   @derive [Mechanizex.Page.Elementable]
@@ -60,7 +60,7 @@ defmodule Mechanizex.Form do
     form.fields
   end
 
-  def submit_buttons(form), do: Enum.filter(form.fields, &Submit.is_submit?/1)
+  def submit_buttons(form), do: Enum.filter(form.fields, &SubmitButton.is_submit_button?/1)
 
   def submit(form, button \\ nil) do
     Mechanizex.Agent.request!(agent(form), %Request{
@@ -74,7 +74,7 @@ defmodule Mechanizex.Form do
     button =
       form
       |> submit_buttons()
-      |> Enum.filter(fn %Submit{text: text, id: id, name: name} ->
+      |> Enum.filter(fn %SubmitButton{text: text, id: id, name: name} ->
         locator == text or locator == id or locator == name
       end)
       |> List.first()
@@ -111,7 +111,7 @@ defmodule Mechanizex.Form do
 
   defp params(fields, button) do
     fields
-    |> Enum.reject(&Submit.is_submit?/1)
+    |> Enum.reject(&SubmitButton.is_submit_button?/1)
     |> maybe_add_submit_button(button)
     |> Enum.reject(fn f -> f.disabled == true or f.name == nil end)
     |> Enum.map(fn f -> {f.name, f.value} end)
@@ -140,10 +140,13 @@ defmodule Mechanizex.Form do
         nil
 
       name == "button" and (type == "submit" or type == nil or type == "") ->
-        Submit.new(el)
+        SubmitButton.new(el)
+
+      # name == "input" and type == "radio" ->
+      # RadioButton.new(el)
 
       name == "input" and (type == "submit" or type == "image") ->
-        Submit.new(el)
+        SubmitButton.new(el)
 
       name == "textarea" or name == "input" ->
         TextInput.new(el)

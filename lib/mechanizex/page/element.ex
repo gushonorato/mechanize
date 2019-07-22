@@ -22,6 +22,30 @@ defmodule Mechanizex.Page.Element do
   def attrs(el), do: el(el).attrs
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
 
+  def put_attr(el, attr_name, value) do
+    if attr_present?(el, attr_name) do
+      update_attr(el, attr_name, value)
+    else
+      add_attr(el, attr_name, value)
+    end
+  end
+
+  def add_attr(el, attr_name, value) do
+    element = %__MODULE__{el(el) | attrs: [{attr_name, value} | attrs(el)]}
+    Elementable.put_element(el, element)
+  end
+
+  def update_attr(el, attr_name, value) do
+    update_attrs(el(el), fn {k, v} ->
+      if k == attr_name, do: {k, value}, else: {k, v}
+    end)
+  end
+
+  def update_attrs(el, fun) do
+    element = %__MODULE__{el(el) | attrs: Enum.map(attrs(el), fun)}
+    Elementable.put_element(el, element)
+  end
+
   def attr(el, attr_name, opts \\ []) do
     default_opts = [default: nil, normalize: false]
     opts = Keyword.merge(default_opts, opts)
@@ -64,6 +88,7 @@ end
 
 defimpl Mechanizex.Page.Elementable, for: Mechanizex.Page.Element do
   def element(elementable), do: elementable
+  def put_element(_elementable, element), do: element
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do

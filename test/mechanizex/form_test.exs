@@ -15,7 +15,7 @@ defmodule Mechanizex.FormTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Form.fill_field("username", with: "gustavo")
         |> Form.fill_field("passwd", with: "123456")
         |> Form.fields()
@@ -30,7 +30,7 @@ defmodule Mechanizex.FormTest do
       fields =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Mechanizex.fill_field("captcha", with: "checked")
         |> Form.fields()
         |> Enum.map(&{&1.name, &1.value})
@@ -103,7 +103,7 @@ defmodule Mechanizex.FormTest do
       fields =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_all_generic_text_inputs.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
@@ -131,7 +131,7 @@ defmodule Mechanizex.FormTest do
       fields =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, disabled: disabled} -> {name, disabled} end)
 
@@ -148,7 +148,7 @@ defmodule Mechanizex.FormTest do
       fields =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_inputs_without_name.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Form.fields()
         |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
 
@@ -161,7 +161,7 @@ defmodule Mechanizex.FormTest do
     test "parse all submit buttons", %{agent: agent} do
       assert agent
              |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_all_kinds_of_buttons.html")
-             |> Mechanizex.with_form()
+             |> Page.form_with()
              |> Form.fields()
              |> Enum.map(fn %{
                               name: name,
@@ -235,7 +235,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -247,7 +247,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_blank.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -259,7 +259,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_post.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -275,7 +275,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absent_action.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -291,7 +291,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_blank_action.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -303,7 +303,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_relative_action.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -315,7 +315,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
 
@@ -332,7 +332,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.fill_field("username", with: "gustavo")
       |> Mechanizex.fill_field("passwd", with: "gu123456")
       |> Mechanizex.submit()
@@ -351,7 +351,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Mechanizex.submit()
     end
   end
@@ -374,7 +374,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Form.click_button("Button 1")
     end
 
@@ -395,7 +395,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Form.click_button("button1_name")
     end
 
@@ -416,7 +416,7 @@ defmodule Mechanizex.FormTest do
 
       agent
       |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
-      |> Mechanizex.with_form()
+      |> Page.form_with()
       |> Form.click_button("button1_id")
     end
 
@@ -424,7 +424,7 @@ defmodule Mechanizex.FormTest do
       assert_raise Mechanizex.Form.ButtonNotFound, fn ->
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_button_click_test.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
         |> Form.click_button("Unexistent button")
       end
     end

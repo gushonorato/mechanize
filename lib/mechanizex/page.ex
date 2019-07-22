@@ -19,28 +19,32 @@ defmodule Mechanizex.Page do
 
   def click_link(page, criterias) when is_list(criterias) do
     page
-    |> with_link(criterias)
+    |> link_with(criterias)
     |> Link.click()
   end
 
   def click_link(page, text) when is_binary(text) do
     page
-    |> with_link(text: text)
+    |> link_with(text: text)
     |> Link.click()
   end
 
-  defdelegate links(page), to: __MODULE__, as: :with_links
+  defdelegate links(page, criterias), to: __MODULE__, as: :links_with
 
-  def with_links(page, criterias \\ []) do
+  def links_with(page, criterias \\ [])
+
+  def links_with(page, criterias) do
     page
     |> search("a, area")
     |> Enum.filter(query(criterias))
     |> Element.to_links()
   end
 
-  def with_link(page, criterias \\ []) do
+  def link_with(page, criterias \\ [])
+
+  def link_with(page, criterias) do
     page
-    |> with_links(criterias)
+    |> links_with(criterias)
     |> List.first()
   end
 
@@ -48,9 +52,9 @@ defmodule Mechanizex.Page do
     page.response.url
   end
 
-  def with_form(page, criterias \\ [])
+  def form_with(page, criterias \\ [])
 
-  def with_form(page, criterias) do
+  def form_with(page, criterias) do
     page
     |> Query.search("form")
     |> Enum.filter(query(criterias))

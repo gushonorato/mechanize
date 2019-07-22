@@ -10,12 +10,12 @@ defmodule Mechanizex.PageTest do
     {:ok, agent: Mechanizex.new(http_adapter: :mock)}
   end
 
-  describe ".with_form" do
+  describe ".form_with" do
     test "return only the first form", %{agent: agent} do
       form =
         agent
         |> LocalPageLoader.get("test/htdocs/two_forms.html")
-        |> Mechanizex.with_form()
+        |> Page.form_with()
 
       assert Element.attrs(form) == [
                {"id", "form-id-1"},
@@ -34,7 +34,7 @@ defmodule Mechanizex.PageTest do
       form =
         agent
         |> LocalPageLoader.get("test/htdocs/two_forms.html")
-        |> Mechanizex.with_form(attr: [name: "form-name-2"])
+        |> Page.form_with(attr: [name: "form-name-2"])
 
       assert Element.attrs(form) == [
                {"id", "form-id-2"},
@@ -50,19 +50,19 @@ defmodule Mechanizex.PageTest do
     end
   end
 
-  describe ".with_links" do
+  describe ".links_with" do
     test "returns list of %Link struct", %{agent: agent} do
       [%Link{}] =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(attrs: [href: ~r/google.com/])
+        |> Page.links_with(attrs: [href: ~r/google.com/])
     end
 
     test "with one attribute criteria", %{agent: agent} do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(attrs: [href: ~r/google.com/])
+        |> Page.links_with(attrs: [href: ~r/google.com/])
         |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
       )
     end
@@ -71,7 +71,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(attrs: [class: ~r/great-company/, rel: "search"])
+        |> Page.links_with(attrs: [class: ~r/great-company/, rel: "search"])
         |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
       )
     end
@@ -80,7 +80,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(text: "Google")
+        |> Page.links_with(text: "Google")
         |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
       )
     end
@@ -89,7 +89,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(text: ~r/Google/)
+        |> Page.links_with(text: ~r/Google/)
         |> Enum.map(&Element.attr(&1, :href)) == [
           "http://www.google.com",
           "http://www.android.com"
@@ -101,7 +101,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_links(attrs: [class: ~r/great-company/])
+        |> Page.links_with(attrs: [class: ~r/great-company/])
         |> Enum.map(&Element.text/1) == [
           "Google",
           "Google Android",
@@ -116,7 +116,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
-        |> Page.with_links()
+        |> Page.links_with()
         |> Enum.map(&Element.attr(&1, :alt)) == [
           "Sun",
           "Mercury",
@@ -126,19 +126,19 @@ defmodule Mechanizex.PageTest do
     end
   end
 
-  describe ".with_link" do
+  describe ".link_with" do
     test "returns list of %Link struct", %{agent: agent} do
       %Link{} =
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(attr: [href: ~r/google.com/])
+        |> Page.link_with(attr: [href: ~r/google.com/])
     end
 
     test "with one attribute criteria", %{agent: agent} do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(attr: [href: ~r/google.com/])
+        |> Page.link_with(attr: [href: ~r/google.com/])
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
@@ -147,7 +147,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(attrs: [class: ~r/great-company/, rel: "search"])
+        |> Page.link_with(attrs: [class: ~r/great-company/, rel: "search"])
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
@@ -156,7 +156,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(text: "Google")
+        |> Page.link_with(text: "Google")
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
@@ -165,7 +165,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(text: ~r/Google/)
+        |> Page.link_with(text: ~r/Google/)
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
@@ -174,7 +174,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_links.html")
-        |> Page.with_link(attr: [class: ~r/great-company/])
+        |> Page.link_with(attr: [class: ~r/great-company/])
         |> Element.attr(:href) == "http://www.google.com"
       )
     end
@@ -183,7 +183,7 @@ defmodule Mechanizex.PageTest do
       assert(
         agent
         |> LocalPageLoader.get("https://htdocs.local/test/htdocs/page_with_image_area_links.html")
-        |> Page.with_link()
+        |> Page.link_with()
         |> Element.attr(:alt) == "Sun"
       )
     end

@@ -2,46 +2,59 @@ defmodule Mechanizex.Query do
   alias Mechanizex.Page.Element
   alias Mechanizex.HTMLParser.Parseable
 
-  def select(elements, names, criterias \\ [])
-
-  def select(elements, :all, criterias) do
-    elements
-    |> Enum.filter(&all_criterias_meet?(&1, criterias))
+  defmacro query(criteria) do
+    quote do
+      &Mechanizex.Query.query(&1, unquote(criteria))
+    end
   end
 
-  def select(elements, names, criterias) do
-    elements
-    |> Enum.filter(fn element -> String.to_atom(Element.name(element)) in names end)
-    |> Enum.filter(&all_criterias_meet?(&1, criterias))
+  def query(_element, []), do: true
+
+  def query(element, [{:tag, tag} | criterias]) do
+    query(element, [{:tags, [tag]} | criterias])
   end
 
-  defp all_criterias_meet?(elements, [h | t]) do
-    criteria_meet?(elements, h) and all_criterias_meet?(elements, t)
+  def query(element, [{:tags, tags} | criterias]) do
+    String.to_atom(Element.name(element)) in tags and query(element, criterias)
   end
 
-  defp all_criterias_meet?(_, []) do
-    true
+  def query(element, [{:attr, attributes} | criterias]) do
+    query(element, [{:attrs, attributes} | criterias])
   end
 
-  defp criteria_meet?(element, {:text, value}) when is_binary(value) do
-    Element.text(element) == value
+  def query(element, [{:attrs, attributes} | criterias]) do
+    attributes_match?(element, attributes) and query(element, criterias)
   end
 
-  defp criteria_meet?(element, {:text, value}) do
-    Element.text(element) =~ value
+  def query(element, [{:text, text} | criterias]) do
+    text_match?(element, text) and query(element, criterias)
   end
 
-  defp criteria_meet?(element, {attr_name, nil}) do
-    Element.attr(element, attr_name) == nil
+  def attributes_match?(_element, []), do: true
+
+  def attributes_match?(element, [{attr_name, nil} | t]) do
+    Element.attr(element, attr_name) == nil and attributes_match?(element, t)
   end
 
-  defp criteria_meet?(element, {attr_name, value}) when is_binary(value) do
-    Element.attr(element, attr_name) == value
+  def attributes_match?(element, [{attr_name, value} | t]) when is_binary(value) do
+    Element.attr(element, attr_name) == value and attributes_match?(element, t)
   end
 
-  defp criteria_meet?(element, {attr_name, value}) do
+  def attributes_match?(element, [{attr_name, value} | t]) do
     attr_value = Element.attr(element, attr_name)
-    attr_value != nil and attr_value =~ value
+    attr_value != nil and attr_value =~ value and attributes_match?(element, t)
+  end
+
+  defp text_match?(element, nil) do
+    Element.text(element) == nil
+  end
+
+  defp text_match?(element, text) when is_binary(text) do
+    Element.text(element) == text
+  end
+
+  defp text_match?(element, text) do
+    Element.text(element) =~ text
   end
 
   def search(elements, selector), do: parser(elements).search(elements, selector)
@@ -51,3 +64,5 @@ defmodule Mechanizex.Query do
 
   def parser(element), do: Parseable.parser(element)
 end
+
+#

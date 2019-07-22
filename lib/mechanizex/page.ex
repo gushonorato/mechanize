@@ -1,6 +1,7 @@
 defmodule Mechanizex.Page do
   alias Mechanizex.{Request, Response, Query, Form}
   alias Mechanizex.Page.{Link, Element}
+  import Mechanizex.Query
 
   @enforce_keys [:request, :response, :agent]
   defstruct request: nil, response: nil, agent: nil, parser: nil
@@ -32,8 +33,8 @@ defmodule Mechanizex.Page do
 
   def with_links(page, criterias \\ []) do
     page
-    |> Query.search("a, area")
-    |> Query.select(:all, criterias)
+    |> search("a, area")
+    |> Enum.filter(query(criterias))
     |> Element.to_links()
   end
 
@@ -52,7 +53,7 @@ defmodule Mechanizex.Page do
   def with_form(page, criterias) do
     page
     |> Query.search("form")
-    |> Query.select(:all, criterias)
+    |> Enum.filter(query(criterias))
     |> List.first()
     |> Form.new()
   end

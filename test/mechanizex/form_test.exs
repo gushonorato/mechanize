@@ -44,7 +44,7 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".update_field" do
-    test "updates first field when duplicated" do
+    test "updates all fields with same name" do
       assert(
         %Form{
           element: :fake,
@@ -57,7 +57,7 @@ defmodule Mechanizex.FormTest do
         |> Form.fields()
         |> Enum.map(&{&1.name, &1.value}) == [
           {"article[categories][]", "3"},
-          {"article[categories][]", "2"}
+          {"article[categories][]", "3"}
         ]
       )
     end

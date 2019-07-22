@@ -26,28 +26,34 @@ defmodule Mechanizex.Form do
     if updated_form == form, do: add_field(form, field, value), else: updated_form
   end
 
-  def update_field(form, field, value) do
-    Map.put(form, :fields, do_update_field(form.fields, field, value))
-  end
-
-  defp do_update_field([], _, _) do
-    []
-  end
-
-  defp do_update_field([field | t], field_key, value) do
-    if field.name == field_key do
-      [%{field | value: value} | t]
-    else
-      [field | do_update_field(t, field_key, value)]
-    end
+  def update_field(form, field_name, value) do
+    update_fields(form, fn field ->
+      if field.name == field_name, do: %{field | value: value}, else: field
+    end)
   end
 
   def add_field(form, field, value) do
-    Map.put(form, :fields, [DetachedField.new(field, value) | form.fields])
+    create_field(form, DetachedField.new(field, value))
   end
 
   def delete_field(form, field_name) do
-    Map.put(form, :fields, Enum.reject(form.fields, fn field -> field.name == field_name end))
+    remove_fields(form, fn field -> field.name == field_name end)
+  end
+
+  def create_field(form, field) do
+    Map.put(form, :fields, [field | form.fields])
+  end
+
+  def retrieve_fields(form, fun) do
+    Enum.filter(form.fields, fun)
+  end
+
+  def update_fields(form, fun) do
+    %__MODULE__{form | fields: Enum.map(form.fields, fun)}
+  end
+
+  def remove_fields(form, fun) do
+    %__MODULE__{form | fields: Enum.reject(form.fields, fun)}
   end
 
   def fields(form) do

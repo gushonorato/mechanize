@@ -8,8 +8,7 @@ defmodule Mechanizex.Form.SubmitButton do
           element: Element.t(),
           name: String.t(),
           value: String.t(),
-          text: String.t(),
-          id: String.t()
+          text: String.t()
         }
 
   def new(%Element{name: "button"} = el) do
@@ -17,8 +16,7 @@ defmodule Mechanizex.Form.SubmitButton do
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
-      text: Element.text(el),
-      id: Element.attr(el, :id)
+      text: Element.text(el)
     }
   end
 
@@ -27,8 +25,7 @@ defmodule Mechanizex.Form.SubmitButton do
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
-      text: nil,
-      id: Element.attr(el, :id)
+      text: nil
     }
   end
 
@@ -37,8 +34,7 @@ defmodule Mechanizex.Form.SubmitButton do
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
-      text: Element.attr(el, :value),
-      id: Element.attr(el, :id)
+      text: Element.attr(el, :value)
     }
   end
 

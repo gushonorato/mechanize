@@ -164,31 +164,32 @@ defmodule Mechanizex.FormTest do
              |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_all_kinds_of_buttons.html")
              |> Page.form_with()
              |> Form.fields()
-             |> Enum.map(fn %{
-                              name: name,
-                              value: value,
-                              text: text,
-                              id: id
-                            } ->
-               {name, value, text, id}
-             end) == [
-               {"button1", "button1_value", "button1_value", nil},
-               {"button2", "button2_value", "button2_value", nil},
-               {nil, "button3_value", "button3_value", nil},
-               {"button4", "button4_value", nil, nil},
-               {"button5", "button5_value", "Button 5", nil},
-               {nil, "button6_value", "Button 6", nil},
-               {"button7", "button7_value", "Button 7", nil},
-               {"button8", "button8_value", "Button 8", nil},
-               {nil, nil, "Button 9", "button9"},
-               {"button10", "button10_value", "Button 10", nil},
-               {"button14", "button14_value", "Button 14", nil},
-               {"button15", "button15_value", "Button 15", nil},
-               {"button16", "button16_value", "Button 16", nil},
-               {"button17", "button17_value", "Button 17", nil},
-               {"button18", "button18_value", "Button 18", nil},
-               {"button19", "button19_value", "Button 19", nil},
-               {"BUTTON20", "button20_value", "Button 20", nil}
+             |> Enum.map(
+               fn f = %{
+                    name: name,
+                    value: value,
+                    text: text
+                  } ->
+                 {name, value, text, Element.attr(f, :id), Element.attr_present?(f, :disabled)}
+               end
+             ) == [
+               {"button1", "button1_value", "button1_value", nil, false},
+               {"button2", "button2_value", "button2_value", nil, false},
+               {nil, "button3_value", "button3_value", nil, false},
+               {"button4", "button4_value", nil, nil, false},
+               {"button5", "button5_value", "Button 5", nil, false},
+               {nil, "button6_value", "Button 6", nil, false},
+               {"button7", "button7_value", "Button 7", nil, false},
+               {"button8", "button8_value", "Button 8", nil, false},
+               {nil, nil, "Button 9", "button9", true},
+               {"button10", "button10_value", "Button 10", nil, false},
+               {"button14", "button14_value", "Button 14", nil, false},
+               {"button15", "button15_value", "Button 15", nil, false},
+               {"button16", "button16_value", "Button 16", nil, false},
+               {"button17", "button17_value", "Button 17", nil, false},
+               {"button18", "button18_value", "Button 18", nil, false},
+               {"button19", "button19_value", "Button 19", nil, false},
+               {"BUTTON20", "button20_value", "Button 20", nil, false}
              ]
     end
   end

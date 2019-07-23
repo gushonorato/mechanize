@@ -74,8 +74,8 @@ defmodule Mechanizex.Form do
     button =
       form
       |> submit_buttons()
-      |> Enum.filter(fn %SubmitButton{text: text, id: id, name: name} ->
-        locator == text or locator == id or locator == name
+      |> Enum.filter(fn f = %SubmitButton{text: text, name: name} ->
+        locator == text or locator == Element.attr(f, :id) or locator == name
       end)
       |> List.first()
 

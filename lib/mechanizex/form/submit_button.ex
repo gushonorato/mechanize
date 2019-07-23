@@ -1,15 +1,15 @@
 defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.Element
 
-  defstruct element: nil, name: nil, value: nil, text: nil, id: nil, disabled: false
+  @derive [Mechanizex.Page.Elementable]
+  defstruct element: nil, name: nil, value: nil, text: nil, id: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),
           name: String.t(),
           value: String.t(),
           text: String.t(),
-          id: String.t(),
-          disabled: boolean()
+          id: String.t()
         }
 
   def new(%Element{name: "button"} = el) do
@@ -18,8 +18,7 @@ defmodule Mechanizex.Form.SubmitButton do
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
       text: Element.text(el),
-      id: Element.attr(el, :id),
-      disabled: Element.attr_present?(el, :disabled)
+      id: Element.attr(el, :id)
     }
   end
 
@@ -29,8 +28,7 @@ defmodule Mechanizex.Form.SubmitButton do
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
       text: nil,
-      id: Element.attr(el, :id),
-      disabled: Element.attr_present?(el, :disabled)
+      id: Element.attr(el, :id)
     }
   end
 
@@ -40,8 +38,7 @@ defmodule Mechanizex.Form.SubmitButton do
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
       text: Element.attr(el, :value),
-      id: Element.attr(el, :id),
-      disabled: Element.attr_present?(el, :disabled)
+      id: Element.attr(el, :id)
     }
   end
 

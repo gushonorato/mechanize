@@ -3,22 +3,20 @@ defmodule Mechanizex.Form.TextInput do
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
-  defstruct element: nil, label: nil, name: nil, value: nil, disabled: nil
+  defstruct element: nil, label: nil, name: nil, value: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),
           label: String.t(),
           name: String.t(),
-          value: String.t(),
-          disabled: boolean()
+          value: String.t()
         }
 
   def new(%Element{name: "input"} = el) do
     %Mechanizex.Form.TextInput{
       element: el,
       name: Element.attr(el, :name),
-      value: Element.attr(el, :value),
-      disabled: Element.attr_present?(el, :disabled)
+      value: Element.attr(el, :value)
     }
   end
 
@@ -26,8 +24,7 @@ defmodule Mechanizex.Form.TextInput do
     %Mechanizex.Form.TextInput{
       element: el,
       name: Element.attr(el, :name),
-      value: Element.text(el),
-      disabled: Element.attr_present?(el, :disabled)
+      value: Element.text(el)
     }
   end
 end

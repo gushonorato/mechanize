@@ -113,7 +113,7 @@ defmodule Mechanizex.Form do
     fields
     |> Enum.reject(&SubmitButton.is_submit_button?/1)
     |> maybe_add_submit_button(button)
-    |> Enum.reject(fn f -> f.disabled == true or f.name == nil end)
+    |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
     |> Enum.map(fn f -> {f.name, f.value} end)
   end
 

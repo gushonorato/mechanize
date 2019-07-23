@@ -21,6 +21,10 @@ defmodule Mechanizex.Form do
     }
   end
 
+  defmodule ButtonNotFound do
+    defexception [:message]
+  end
+
   def fill_field(form, field, with: value) do
     updated_form = update_field(form, field, value)
     if updated_form == form, do: add_field(form, field, value), else: updated_form
@@ -155,8 +159,4 @@ defmodule Mechanizex.Form do
         nil
     end
   end
-end
-
-defmodule Mechanizex.Form.ButtonNotFound do
-  defexception [:message]
 end

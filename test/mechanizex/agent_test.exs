@@ -198,7 +198,7 @@ defmodule Mechanizex.AgentTest do
     end
 
     test "raise error when invalid alias passed", %{agent: agent} do
-      assert_raise Mechanizex.Agent.InvalidUserAgentAlias, fn ->
+      assert_raise Mechanizex.Agent.InvalidUserAgentAliasError, fn ->
         Mechanizex.Agent.set_user_agent_alias(agent, :windows_chrom)
       end
     end

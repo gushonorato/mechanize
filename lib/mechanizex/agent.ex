@@ -84,7 +84,7 @@ defmodule Mechanizex.Agent do
           http_headers: keyword()
         }
 
-  defmodule InvalidUserAgentAlias do
+  defmodule InvalidUserAgentAliasError do
     defexception [:message]
   end
 
@@ -176,7 +176,7 @@ defmodule Mechanizex.Agent do
   def user_agent_string!(user_agent_alias) do
     case @user_agent_alias[user_agent_alias] do
       nil ->
-        raise Mechanizex.Agent.InvalidUserAgentAlias,
+        raise Mechanizex.Agent.InvalidUserAgentAliasError,
           message: "Invalid user agent alias \"#{user_agent_alias}\""
 
       user_agent_string ->

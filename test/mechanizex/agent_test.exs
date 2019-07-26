@@ -38,10 +38,10 @@ defmodule Mechanizex.Agent.HTTPShortcutsTest do
                                      } ->
             assert List.keyfind(params, "lero", 0) == {"lero", "lero"}
             assert List.keyfind(headers, "accept", 0) == {"accept", "lero"}
-            {:error, %Mechanizex.HTTPAdapter.Error{cause: nil, message: "Never mind"}}
+            {:error, %Mechanizex.HTTPAdapter.NetworkError{cause: nil, message: "Never mind"}}
           end)
 
-          assert_raise Mechanizex.HTTPAdapter.Error, fn ->
+          assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
             apply(Mechanizex.Agent, unquote(:"#{method}!"), [
               agent,
               "https://www.seomaster.com.br",
@@ -372,10 +372,10 @@ defmodule Mechanizex.AgentTest do
     test "raise error when connection fail", %{agent: agent} do
       Mechanizex.HTTPAdapter.Mock
       |> expect(:request, fn _, _ ->
-        {:error, %Mechanizex.HTTPAdapter.Error{cause: nil, message: "Never mind"}}
+        {:error, %Mechanizex.HTTPAdapter.NetworkError{cause: nil, message: "Never mind"}}
       end)
 
-      assert_raise Mechanizex.HTTPAdapter.Error, fn ->
+      assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
         Mechanizex.Agent.request!(agent, %Request{
           method: :get,
           url: "https://www.seomaster.com.br"

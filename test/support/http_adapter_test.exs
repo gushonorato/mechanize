@@ -58,6 +58,7 @@ defmodule Mechanizex.HTTPAdapterTest do
 
         {:error, error} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
+        assert %Mechanizex.HTTPAdapter.NetworkError{} = error
         assert error.message =~ ~r/connection refused/i
       end
 

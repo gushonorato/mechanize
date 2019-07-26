@@ -1,7 +1,7 @@
 defmodule Mechanizex.HTTPAdapter.Httpoison do
   @behaviour Mechanizex.HTTPAdapter
   alias Mechanizex.{Request, Response, Page, Agent}
-  alias Mechanizex.HTTPAdapter.Error
+  alias Mechanizex.HTTPAdapter.NetworkError
 
   @posix_errors [
     e2big: "Too long argument list",
@@ -163,7 +163,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
          }}
 
       {:error, error} ->
-        {:error, %Error{cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"}}
+        {:error, %NetworkError{cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"}}
     end
   end
 end

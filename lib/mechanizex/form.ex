@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton}
+  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox}
   alias Mechanizex.{Query, Request}
+  import Mechanizex.Query, only: [query: 1]
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -21,7 +22,15 @@ defmodule Mechanizex.Form do
     }
   end
 
-  defmodule ButtonNotFound do
+  defmodule MultipleFormComponentsFound do
+    defexception [:message]
+  end
+
+  defmodule FormComponentNotFound do
+    defexception [:message]
+  end
+
+  defmodule InconsistentForm do
     defexception [:message]
   end
 
@@ -48,10 +57,6 @@ defmodule Mechanizex.Form do
     Map.put(form, :fields, [field | form.fields])
   end
 
-  def retrieve_fields(form, fun) do
-    Enum.filter(form.fields, fun)
-  end
-
   def update_fields(form, fun) do
     %__MODULE__{form | fields: Enum.map(form.fields, fun)}
   end
@@ -64,7 +69,110 @@ defmodule Mechanizex.Form do
     form.fields
   end
 
-  def submit_buttons(form), do: Enum.filter(form.fields, &SubmitButton.is_submit_button?/1)
+  def submit_buttons(form, criteria \\ [])
+  def submit_buttons(form, criteria), do: submit_buttons_with(form, criteria)
+  def submit_buttons_with(form, criteria), do: fields_with(form, SubmitButton, criteria)
+
+  def radio_buttons(form, criteria \\ [])
+  def radio_buttons(form, criteria), do: radio_buttons_with(form, criteria)
+  def radio_buttons_with(form, criteria), do: fields_with(form, RadioButton, criteria)
+
+  def fields_with(form, type, fun) when is_function(fun) do
+    form.fields
+    |> Stream.filter(&type.is_type?/1)
+    |> Enum.filter(fun)
+  end
+
+  def fields_with(form, type, criteria) do
+    form.fields
+    |> Stream.filter(&type.is_type?/1)
+    |> Enum.filter(query(attrs: criteria))
+  end
+
+  def check_radio_button!(form, criteria) do
+    case check_radio_button(form, criteria) do
+      {:error, error} -> raise error
+      {:ok, form} -> {:ok, form}
+    end
+  end
+
+  def check_radio_button(form, criteria) do
+    update_radio_buttons_with(form, criteria, fn field, matched_fields ->
+      group_name =
+        matched_fields
+        |> List.first()
+        |> Element.attr(:name)
+
+      cond do
+        field in matched_fields ->
+          %RadioButton{field | checked: true}
+
+        field.name == group_name ->
+          %RadioButton{field | checked: false}
+
+        true ->
+          field
+      end
+    end)
+  end
+
+  def uncheck_radio_button!(form, criteria) do
+    case uncheck_radio_button(form, criteria) do
+      {:error, error} -> raise error
+      {:ok, form} -> {:ok, form}
+    end
+  end
+
+  def uncheck_radio_button(form, criteria) do
+    update_radio_buttons_with(form, criteria, fn field, matched_fields ->
+      if field in matched_fields do
+        %RadioButton{field | checked: false}
+      else
+        field
+      end
+    end)
+  end
+
+  def update_radio_buttons_with(form, criteria, fun) do
+    form
+    |> radio_buttons(criteria)
+    |> case do
+      [] ->
+        {:error, %FormComponentNotFound{message: "Radio button with criteria #{inspect(criteria)} not found"}}
+
+      radios ->
+        form
+        |> update_fields(fn field -> if RadioButton.is_type?(field), do: fun.(field, radios), else: field end)
+        |> assert_single_radio_in_group_checked()
+    end
+  end
+
+  defp assert_single_radio_in_group_checked(form) do
+    radio_names =
+      form
+      |> radio_buttons(fn radio -> radio.checked end)
+      |> Enum.group_by(&Element.attr(&1, :name))
+      |> Enum.filter(fn {_, v} -> length(v) > 1 end)
+      |> Enum.map(fn {k, _} -> k end)
+
+    if Enum.empty?(radio_names) do
+      {:ok, form}
+    else
+      radio_names = Enum.join(radio_names, ",")
+
+      {:error,
+       %InconsistentForm{
+         message: "Multiple radio buttons with same name (#{radio_names}) are checked"
+       }}
+    end
+  end
+
+  def check_radio_button!(form, criteria) do
+    case check_radio_button(form, criteria) do
+      {:error, error} -> raise error
+      {:ok, form} -> form
+    end
+  end
 
   def submit(form, button \\ nil) do
     Mechanizex.Agent.request(agent(form), %Request{
@@ -141,7 +249,7 @@ defmodule Mechanizex.Form do
 
   defp params(fields, button) do
     fields
-    |> Enum.reject(&SubmitButton.is_submit_button?/1)
+    |> Enum.reject(&SubmitButton.is_type?/1)
     |> maybe_add_submit_button(button)
     |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
     |> Enum.map(fn f -> {f.name, f.value} end)
@@ -172,8 +280,11 @@ defmodule Mechanizex.Form do
       name == "button" and (type == "submit" or type == nil or type == "") ->
         SubmitButton.new(el)
 
-      # name == "input" and type == "radio" ->
-      # RadioButton.new(el)
+      name == "input" and type == "radio" ->
+        RadioButton.new(el)
+
+      name == "input" and type == "checkbox" ->
+        Checkbox.new(el)
 
       name == "input" and (type == "submit" or type == "image") ->
         SubmitButton.new(el)

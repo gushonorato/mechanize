@@ -37,16 +37,16 @@ defmodule Mechanizex.QueryTest do
              |> Enum.map(&Element.text/1) == ["Microsoft"]
     end
 
-    test "select without attributes" do
-      assert @subject
-             |> Enum.filter(query(attrs: [disabled: nil]))
-             |> Enum.map(&Element.text/1) == ["Microsoft", "Amazon"]
-    end
-
     test "more than one selected by attribute" do
       assert @subject
              |> Enum.filter(query(attrs: [rel: "follow"]))
              |> Enum.map(&Element.text/1) == ["Google", "Amazon"]
+    end
+
+    test "select without attributes" do
+      assert @subject
+             |> Enum.filter(query(attrs: [disabled: nil]))
+             |> Enum.map(&Element.text/1) == ["Microsoft", "Amazon"]
     end
 
     test "both by attributes and element name" do
@@ -85,7 +85,7 @@ defmodule Mechanizex.QueryTest do
              |> Enum.map(&Element.text/1) == []
     end
 
-    test "only one selected by attribute with regex " do
+    test "only one selected by attribute with regex" do
       assert @subject
              |> Enum.filter(query(attrs: [rel: ~r/no/]))
              |> Enum.map(&Element.text/1) == ["Microsoft"]

@@ -4,30 +4,30 @@ defmodule Mechanizex.Query do
 
   defmacro query(criteria) do
     quote do
-      &Mechanizex.Query.query(&1, unquote(criteria))
+      &Mechanizex.Query.match?(&1, unquote(criteria))
     end
   end
 
-  def query(_element, []), do: true
+  def match?(_element, []), do: true
 
-  def query(element, [{:tag, tag} | criterias]) do
-    query(element, [{:tags, [tag]} | criterias])
+  def match?(element, [{:tag, tag} | criterias]) do
+    __MODULE__.match?(element, [{:tags, [tag]} | criterias])
   end
 
-  def query(element, [{:tags, tags} | criterias]) do
-    String.to_atom(Element.name(element)) in tags and query(element, criterias)
+  def match?(element, [{:tags, tags} | criterias]) do
+    String.to_atom(Element.name(element)) in tags and __MODULE__.match?(element, criterias)
   end
 
-  def query(element, [{:attr, attributes} | criterias]) do
-    query(element, [{:attrs, attributes} | criterias])
+  def match?(element, [{:attr, attributes} | criterias]) do
+    __MODULE__.match?(element, [{:attrs, attributes} | criterias])
   end
 
-  def query(element, [{:attrs, attributes} | criterias]) do
-    attributes_match?(element, attributes) and query(element, criterias)
+  def match?(element, [{:attrs, attributes} | criterias]) do
+    attributes_match?(element, attributes) and __MODULE__.match?(element, criterias)
   end
 
-  def query(element, [{:text, text} | criterias]) do
-    text_match?(element, text) and query(element, criterias)
+  def match?(element, [{:text, text} | criterias]) do
+    text_match?(element, text) and __MODULE__.match?(element, criterias)
   end
 
   def attributes_match?(_element, []), do: true

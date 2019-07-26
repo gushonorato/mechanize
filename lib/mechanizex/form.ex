@@ -67,29 +67,55 @@ defmodule Mechanizex.Form do
   def submit_buttons(form), do: Enum.filter(form.fields, &SubmitButton.is_submit_button?/1)
 
   def submit(form, button \\ nil) do
-    Mechanizex.Agent.request!(agent(form), %Request{
+    Mechanizex.Agent.request(agent(form), %Request{
       method: method(form),
       url: action_url(form),
       params: params(form.fields, button)
     })
   end
 
-  def click_button(form, locator) do
-    button =
-      form
-      |> submit_buttons()
-      |> Enum.filter(fn f = %SubmitButton{text: text, name: name} ->
-        locator == text or locator == Element.attr(f, :id) or locator == name
-      end)
-      |> List.first()
+  def click_button(_form, nil) do
+    {:error, %ArgumentError{message: "Can't click on button because button is nil."}}
+  end
 
-    case button do
-      nil ->
-        raise Mechanizex.Form.ButtonNotFound,
-          message: "Unable to click on button with id, name or text equal to \"#{locator}\"."
+  def click_button(form, criteria) when is_list(criteria) do
+    form
+    |> submit_buttons(criteria)
+    |> maybe_click_on_button(form)
+  end
 
-      _ ->
-        submit(form, button)
+  def click_button(form, label) when is_binary(label) do
+    form
+    |> submit_buttons(fn button -> button.label == label end)
+    |> maybe_click_on_button(form)
+  end
+
+  def click_button(form, %SubmitButton{} = button) do
+    submit(form, button)
+  end
+
+  def click_button(form, label) do
+    form
+    |> submit_buttons_with(fn button -> button.label != nil and button.label =~ label end)
+    |> maybe_click_on_button(form)
+  end
+
+  defp maybe_click_on_button(buttons, form) do
+    case buttons do
+      [] ->
+        {:error,
+         %FormComponentNotFound{
+           message: "Can't click on button because it was not found."
+         }}
+
+      [button] ->
+        click_button(form, button)
+
+      buttons ->
+        {:error,
+         %MultipleFormComponentsFound{
+           message: "Can't click on button because #{length(buttons)} buttons were found."
+         }}
     end
   end
 

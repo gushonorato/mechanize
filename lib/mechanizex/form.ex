@@ -22,15 +22,15 @@ defmodule Mechanizex.Form do
     }
   end
 
-  defmodule MultipleFormComponentsFound do
+  defmodule MultipleFormComponentsFoundError do
     defexception [:message]
   end
 
-  defmodule FormComponentNotFound do
+  defmodule FormComponentNotFoundError do
     defexception [:message]
   end
 
-  defmodule InconsistentForm do
+  defmodule InconsistentFormError do
     defexception [:message]
   end
 
@@ -138,7 +138,7 @@ defmodule Mechanizex.Form do
     |> radio_buttons(criteria)
     |> case do
       [] ->
-        {:error, %FormComponentNotFound{message: "Radio button with criteria #{inspect(criteria)} not found"}}
+        {:error, %FormComponentNotFoundError{message: "Radio button with criteria #{inspect(criteria)} not found"}}
 
       radios ->
         form
@@ -161,7 +161,7 @@ defmodule Mechanizex.Form do
       radio_names = Enum.join(radio_names, ",")
 
       {:error,
-       %InconsistentForm{
+       %InconsistentFormError{
          message: "Multiple radio buttons with same name (#{radio_names}) are checked"
        }}
     end
@@ -212,7 +212,7 @@ defmodule Mechanizex.Form do
     case buttons do
       [] ->
         {:error,
-         %FormComponentNotFound{
+         %FormComponentNotFoundError{
            message: "Can't click on button because it was not found."
          }}
 
@@ -221,7 +221,7 @@ defmodule Mechanizex.Form do
 
       buttons ->
         {:error,
-         %MultipleFormComponentsFound{
+         %MultipleFormComponentsFoundError{
            message: "Can't click on button because #{length(buttons)} buttons were found."
          }}
     end

@@ -2,7 +2,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{FormComponentNotFound, MultipleFormComponentsFound}
+  alias Mechanizex.Form.{FormComponentNotFoundError, MultipleFormComponentsFoundError}
   import TestHelper
 
   setup do
@@ -49,7 +49,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         form
         |> Form.click_button("Button 1")
 
-      assert %FormComponentNotFound{} = error
+      assert %FormComponentNotFoundError{} = error
       assert error.message =~ ~r/not found/i
     end
 
@@ -58,7 +58,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         form
         |> Form.click_button(name: "lero")
 
-      assert %FormComponentNotFound{} = error
+      assert %FormComponentNotFoundError{} = error
       assert error.message =~ ~r/not found/i
     end
 
@@ -67,7 +67,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         form
         |> Form.click_button(~r/Button/i)
 
-      assert %MultipleFormComponentsFound{} = error
+      assert %MultipleFormComponentsFoundError{} = error
       assert error.message =~ ~r/16 buttons were found./i
     end
 
@@ -76,7 +76,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         form
         |> Form.click_button(name: ~r/button/)
 
-      assert %MultipleFormComponentsFound{} = error
+      assert %MultipleFormComponentsFoundError{} = error
       assert error.message =~ ~r/13 buttons were found./i
     end
 

@@ -47,14 +47,14 @@ defmodule Mechanizex.Form.RadioButtonTest do
 
   describe ".check_radio_button!" do
     test "check multiple radios with same name", %{form: form} do
-      assert_raise Mechanizex.Form.InconsistentForm, fn ->
+      assert_raise Mechanizex.Form.InconsistentFormError, fn ->
         form
         |> Form.check_radio_button!(name: "download")
       end
     end
 
     test "check inexistent radio button", %{form: form} do
-      assert_raise Mechanizex.Form.FormComponentNotFound, fn ->
+      assert_raise Mechanizex.Form.FormComponentNotFoundError, fn ->
         form
         |> Form.check_radio_button!(name: "lero")
       end
@@ -89,7 +89,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
         form
         |> Form.check_radio_button(name: "download")
 
-      assert %Mechanizex.Form.InconsistentForm{} = error
+      assert %Mechanizex.Form.InconsistentFormError{} = error
       assert error.message =~ ~r/same name \(download\)/
     end
 
@@ -98,14 +98,14 @@ defmodule Mechanizex.Form.RadioButtonTest do
         form
         |> Form.check_radio_button(name: "lero")
 
-      assert %Mechanizex.Form.FormComponentNotFound{} = error
+      assert %Mechanizex.Form.FormComponentNotFoundError{} = error
       assert error.message =~ ~r/\[name: "lero"\] not found/
     end
   end
 
   describe ".uncheck_radio_button!" do
     test "uncheck radio by name and value", %{form: form} do
-      assert_raise Mechanizex.Form.FormComponentNotFound, fn ->
+      assert_raise Mechanizex.Form.FormComponentNotFoundError, fn ->
         form
         |> Form.uncheck_radio_button!(name: "lero")
       end

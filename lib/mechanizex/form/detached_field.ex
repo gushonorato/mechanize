@@ -1,4 +1,7 @@
 defmodule Mechanizex.Form.DetachedField do
+  alias Mechanizex.Form.ParameterizableField
+
+  @derive [ParameterizableField]
   @enforce_keys [:name, :value]
   defstruct label: nil, name: nil, value: nil
 

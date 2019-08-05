@@ -1,8 +1,8 @@
 defmodule Mechanizex.Form.RadioButton do
   use Mechanizex.Form.GenericField
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
 
-  @derive [Mechanizex.Page.Elementable]
+  @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
 

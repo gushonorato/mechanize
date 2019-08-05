@@ -6,4 +6,8 @@ defmodule Mechanizex.Form.GenericField do
       end
     end
   end
+
+  def to_param(field) do
+    Mechanizex.Form.ParameterizableField.to_param(field)
+  end
 end

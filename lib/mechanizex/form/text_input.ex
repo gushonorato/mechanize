@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.TextInput do
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
+  alias Mechanizex.Form.ParameterizableField
 
-  @derive [Mechanizex.Page.Elementable]
+  @derive [Elementable, ParameterizableField]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil
 

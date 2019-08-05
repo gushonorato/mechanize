@@ -1,8 +1,10 @@
 defmodule Mechanizex.Form.SubmitButton do
   use Mechanizex.Form.GenericField
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
+  alias Mechanizex.Form.{ParameterizableField}
 
-  @derive [Mechanizex.Page.Elementable]
+  @derive [Elementable, ParameterizableField]
+  defstruct element: nil, name: nil, value: nil, label: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),

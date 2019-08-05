@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox}
+  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox, GenericField}
   alias Mechanizex.{Query, Request}
   import Mechanizex.Query, only: [query: 1]
 
@@ -245,7 +245,8 @@ defmodule Mechanizex.Form do
     |> Enum.reject(&SubmitButton.is_type?/1)
     |> maybe_add_submit_button(button)
     |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
-    |> Enum.map(fn f -> {f.name, f.value} end)
+    |> Enum.map(&GenericField.to_param/1)
+    |> List.flatten()
   end
 
   defp maybe_add_submit_button(params, nil), do: params

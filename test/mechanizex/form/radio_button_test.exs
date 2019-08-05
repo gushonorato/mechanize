@@ -54,7 +54,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
     end
 
     test "check inexistent radio button", %{form: form} do
-      assert_raise Mechanizex.Form.FormComponentNotFoundError, fn ->
+      assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
         form
         |> Form.check_radio_button!(name: "lero")
       end
@@ -98,14 +98,14 @@ defmodule Mechanizex.Form.RadioButtonTest do
         form
         |> Form.check_radio_button(name: "lero")
 
-      assert %Mechanizex.Form.FormComponentNotFoundError{} = error
-      assert error.message =~ ~r/\[name: "lero"\] not found/
+      assert %Mechanizex.Form.FormNotUpdatedError{} = error
+      assert error.message =~ ~r/Can't check radio/
     end
   end
 
   describe ".uncheck_radio_button!" do
     test "uncheck radio by name and value", %{form: form} do
-      assert_raise Mechanizex.Form.FormComponentNotFoundError, fn ->
+      assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
         form
         |> Form.uncheck_radio_button!(name: "lero")
       end

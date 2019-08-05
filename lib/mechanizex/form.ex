@@ -26,6 +26,10 @@ defmodule Mechanizex.Form do
     defexception [:message]
   end
 
+  defmodule FormNotUpdatedError do
+    defexception [:message]
+  end
+
   defmodule FormComponentNotFoundError do
     defexception [:message]
   end
@@ -61,6 +65,30 @@ defmodule Mechanizex.Form do
     %__MODULE__{form | fields: Enum.map(form.fields, fun)}
   end
 
+  def update_fields(form, type, fun) when is_atom(type) do
+    update_fields(form, [type], fun)
+  end
+
+  def update_fields(form, types, fun) do
+    update_fields(form, fn field ->
+      if field.__struct__ in types do
+        fun.(field)
+      else
+        field
+      end
+    end)
+  end
+
+  def update_fields(form, types, criteria, fun) do
+    update_fields(form, types, fn field ->
+      if Query.match?(field, attrs: criteria) do
+        fun.(field)
+      else
+        field
+      end
+    end)
+  end
+
   def remove_fields(form, fun) do
     %__MODULE__{form | fields: Enum.reject(form.fields, fun)}
   end
@@ -89,81 +117,77 @@ defmodule Mechanizex.Form do
     |> Enum.filter(query(attrs: criteria))
   end
 
-  def check_radio_button!(form, criteria) do
-    case check_radio_button(form, criteria) do
-      {:error, error} -> raise error
-      {:ok, form} -> {:ok, form}
+  def check_radio_button(form, criteria) do
+    try do
+      {:ok, check_radio_button!(form, criteria)}
+    rescue
+      e in [InconsistentFormError, FormNotUpdatedError] ->
+        {:error, e}
     end
   end
 
-  def check_radio_button(form, criteria) do
-    update_radio_buttons_with(form, criteria, fn field, matched_fields ->
-      group_name =
-        matched_fields
-        |> List.first()
-        |> Element.attr(:name)
+  def check_radio_button!(form, criteria) do
+    matched_names =
+      form
+      |> radio_buttons(criteria)
+      |> Enum.map(& &1.name)
+      |> Enum.uniq()
 
+    form
+    |> update_fields(RadioButton, fn field ->
       cond do
-        field in matched_fields ->
+        Query.match?(field, attrs: criteria) ->
           %RadioButton{field | checked: true}
 
-        field.name == group_name ->
+        field.name in matched_names ->
           %RadioButton{field | checked: false}
 
         true ->
           field
       end
     end)
-  end
-
-  def uncheck_radio_button!(form, criteria) do
-    case uncheck_radio_button(form, criteria) do
-      {:error, error} -> raise error
-      {:ok, form} -> {:ok, form}
-    end
+    |> assert_single_radio_in_group_checked!()
+    |> assert_form_updated!(form, "Can't check radio button, it probably does not exist")
   end
 
   def uncheck_radio_button(form, criteria) do
-    update_radio_buttons_with(form, criteria, fn field, matched_fields ->
-      if field in matched_fields do
-        %RadioButton{field | checked: false}
-      else
-        field
-      end
-    end)
-  end
-
-  def update_radio_buttons_with(form, criteria, fun) do
-    form
-    |> radio_buttons(criteria)
-    |> case do
-      [] ->
-        {:error, %FormComponentNotFoundError{message: "Radio button with criteria #{inspect(criteria)} not found"}}
-
-      radios ->
-        form
-        |> update_fields(fn field -> if RadioButton.is_type?(field), do: fun.(field, radios), else: field end)
-        |> assert_single_radio_in_group_checked()
+    try do
+      {:ok, uncheck_radio_button!(form, criteria)}
+    rescue
+      e in [FormNotUpdatedError] -> {:error, e}
     end
   end
 
-  defp assert_single_radio_in_group_checked(form) do
-    radio_names =
+  def uncheck_radio_button!(form, criteria) do
+    form
+    |> update_fields(RadioButton, criteria, &%RadioButton{&1 | checked: false})
+    |> assert_form_updated!(form, "Can't uncheck radio button, it probably does not exist")
+  end
+
+  defp assert_form_updated!(new_form, old_form, message) do
+    if new_form.fields != old_form.fields do
+      new_form
+    else
+      raise FormNotUpdatedError, message: message
+    end
+  end
+
+  defp assert_single_radio_in_group_checked!(form) do
+    radio_groups =
       form
       |> radio_buttons(fn radio -> radio.checked end)
       |> Enum.group_by(&Element.attr(&1, :name))
-      |> Enum.filter(fn {_, v} -> length(v) > 1 end)
-      |> Enum.map(fn {k, _} -> k end)
+      |> Enum.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
 
-    if Enum.empty?(radio_names) do
-      {:ok, form}
+    if Enum.empty?(radio_groups) do
+      form
     else
-      radio_names = Enum.join(radio_names, ",")
+      group_names =
+        radio_groups
+        |> Enum.map(fn {group_name, _} -> group_name end)
+        |> Enum.join(",")
 
-      {:error,
-       %InconsistentFormError{
-         message: "Multiple radio buttons with same name (#{radio_names}) are checked"
-       }}
+      raise InconsistentFormError, message: "Multiple radio buttons with same name (#{group_names}) are checked"
     end
   end
 

@@ -3,7 +3,6 @@ defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.Element
 
   @derive [Mechanizex.Page.Elementable]
-  defstruct element: nil, name: nil, value: nil, label: nil, id: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),

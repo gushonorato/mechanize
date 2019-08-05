@@ -167,13 +167,6 @@ defmodule Mechanizex.Form do
     end
   end
 
-  def check_radio_button!(form, criteria) do
-    case check_radio_button(form, criteria) do
-      {:error, error} -> raise error
-      {:ok, form} -> form
-    end
-  end
-
   def submit(form, button \\ nil) do
     Mechanizex.Agent.request(agent(form), %Request{
       method: method(form),

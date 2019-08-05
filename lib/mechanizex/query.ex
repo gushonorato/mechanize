@@ -18,31 +18,25 @@ defmodule Mechanizex.Query do
     String.to_atom(Element.name(element)) in tags and __MODULE__.match?(element, criterias)
   end
 
-  def match?(element, [{:attr, attributes} | criterias]) do
-    __MODULE__.match?(element, [{:attrs, attributes} | criterias])
-  end
-
-  def match?(element, [{:attrs, attributes} | criterias]) do
-    attributes_match?(element, attributes) and __MODULE__.match?(element, criterias)
-  end
-
   def match?(element, [{:text, text} | criterias]) do
     text_match?(element, text) and __MODULE__.match?(element, criterias)
   end
 
-  def attributes_match?(_element, []), do: true
-
-  def attributes_match?(element, [{attr_name, nil} | t]) do
-    Element.attr(element, attr_name) == nil and attributes_match?(element, t)
+  def match?(element, [attributes | criterias]) do
+    attribute_match?(element, attributes) and __MODULE__.match?(element, criterias)
   end
 
-  def attributes_match?(element, [{attr_name, value} | t]) when is_binary(value) do
-    Element.attr(element, attr_name) == value and attributes_match?(element, t)
+  def attribute_match?(element, {attr_name, nil}) do
+    Element.attr(element, attr_name) == nil
   end
 
-  def attributes_match?(element, [{attr_name, value} | t]) do
+  def attribute_match?(element, {attr_name, value}) when is_binary(value) do
+    Element.attr(element, attr_name) == value
+  end
+
+  def attribute_match?(element, {attr_name, value}) do
     attr_value = Element.attr(element, attr_name)
-    attr_value != nil and attr_value =~ value and attributes_match?(element, t)
+    attr_value != nil and attr_value =~ value
   end
 
   defp text_match?(element, nil) do

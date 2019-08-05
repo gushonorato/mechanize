@@ -81,7 +81,7 @@ defmodule Mechanizex.Form do
 
   def update_fields(form, types, criteria, fun) do
     update_fields(form, types, fn field ->
-      if Query.match?(field, attrs: criteria) do
+      if Query.match?(field, criteria) do
         fun.(field)
       else
         field
@@ -114,7 +114,7 @@ defmodule Mechanizex.Form do
   def fields_with(form, type, criteria) do
     form.fields
     |> Stream.filter(&type.is_type?/1)
-    |> Enum.filter(query(attrs: criteria))
+    |> Enum.filter(query(criteria))
   end
 
   def check_radio_button(form, criteria) do
@@ -136,7 +136,7 @@ defmodule Mechanizex.Form do
     form
     |> update_fields(RadioButton, fn field ->
       cond do
-        Query.match?(field, attrs: criteria) ->
+        Query.match?(field, criteria) ->
           %RadioButton{field | checked: true}
 
         field.name in matched_names ->

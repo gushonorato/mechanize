@@ -33,25 +33,25 @@ defmodule Mechanizex.QueryTest do
 
     test "only one selected by attribute" do
       assert @subject
-             |> Enum.filter(query(attr: [rel: "nofollow"]))
+             |> Enum.filter(query(rel: "nofollow"))
              |> Enum.map(&Element.text/1) == ["Microsoft"]
     end
 
     test "more than one selected by attribute" do
       assert @subject
-             |> Enum.filter(query(attrs: [rel: "follow"]))
+             |> Enum.filter(query(rel: "follow"))
              |> Enum.map(&Element.text/1) == ["Google", "Amazon"]
     end
 
     test "select without attributes" do
       assert @subject
-             |> Enum.filter(query(attrs: [disabled: nil]))
+             |> Enum.filter(query(disabled: nil))
              |> Enum.map(&Element.text/1) == ["Microsoft", "Amazon"]
     end
 
     test "both by attributes and element name" do
       assert @subject
-             |> Enum.filter(query(tag: :a, attrs: [rel: "follow"]))
+             |> Enum.filter(query(tag: :a, rel: "follow"))
              |> Enum.map(&Element.text/1) == ["Google"]
     end
 
@@ -69,7 +69,7 @@ defmodule Mechanizex.QueryTest do
 
     test "select by string only attribute is a exact match" do
       assert @subject
-             |> Enum.filter(query(attrs: [href: "google"]))
+             |> Enum.filter(query(href: "google"))
              |> Enum.map(&Element.text/1) == []
     end
 
@@ -81,31 +81,31 @@ defmodule Mechanizex.QueryTest do
 
     test "none selected" do
       assert @subject
-             |> Enum.filter(query(attrs: [rel: "strange"]))
+             |> Enum.filter(query(rel: "strange"))
              |> Enum.map(&Element.text/1) == []
     end
 
     test "only one selected by attribute with regex" do
       assert @subject
-             |> Enum.filter(query(attrs: [rel: ~r/no/]))
+             |> Enum.filter(query(rel: ~r/no/))
              |> Enum.map(&Element.text/1) == ["Microsoft"]
     end
 
     test "more than one selected by attribute with regex" do
       assert @subject
-             |> Enum.filter(query(attrs: [href: ~r/www\.am|www\.goo/]))
+             |> Enum.filter(query(href: ~r/www\.am|www\.goo/))
              |> Enum.map(&Element.text/1) == ["Google", "Amazon"]
     end
 
     test "both by attributes and element name with regex" do
       assert @subject
-             |> Enum.filter(query(tag: :a, attrs: [href: ~r/google/]))
+             |> Enum.filter(query(tag: :a, href: ~r/google/))
              |> Enum.map(&Element.text/1) == ["Google"]
     end
 
     test "both by attributes and text with regex" do
       assert @subject
-             |> Enum.filter(query(tag: :a, attrs: [href: ~r/google/]))
+             |> Enum.filter(query(tag: :a, href: ~r/google/))
              |> Enum.map(&Element.text/1) == ["Google"]
     end
   end

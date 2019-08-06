@@ -3,12 +3,12 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.Page.Element
-  alias Mechanizex.{Form, Request, Response, Page}
+  alias Mechanizex.{Form, Page}
   alias Mechanizex.Form.{TextInput}
-  import Mox
+  import TestHelper
 
-  setup_all do
-    {:ok, agent: Mechanizex.new(http_adapter: :mock)}
+  setup do
+    stub_requests("/test/htdocs/form_test.html")
   end
 
   describe ".fill_field" do
@@ -161,134 +161,127 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".submit" do
-    setup :verify_on_exit!
-
-    test "method is get when method attribute missing", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "method is get when method attribute missing", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.method == "GET"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_missing.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "method_missing")
+      |> Form.submit()
     end
 
-    test "method is get when method attribute is blank", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :get, url: "https://htdocs.local/login"} = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "method is get when method attribute is blank", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.method == "GET"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_blank.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "method_blank")
+      |> Form.submit()
     end
 
-    test "method post", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/login"} = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "method post", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.method == "POST"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_method_attribute_post.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "method_post")
+      |> Form.submit()
     end
 
-    test "absent action attribute", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :post,
-                               url: "https://htdocs.local/test/htdocs/form_with_absent_action.html"
-                             } = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "method post is case insensitive", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.method == "POST"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absent_action.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "method_post_case_insensitive")
+      |> Form.submit()
     end
 
-    test "empty action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :post,
-                               url: "https://htdocs.local/test/htdocs/form_with_blank_action.html"
-                             } = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "absent action attribute must send request to current page path", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.request_path == "/test/htdocs/form_test.html"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_blank_action.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "absent_action")
+      |> Form.submit()
     end
 
-    test "relative action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://htdocs.local/test/login"} = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "empty action url must send request to current page path", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.request_path == "/test/htdocs/form_test.html"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_relative_action.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "empty_action")
+      |> Form.submit()
     end
 
-    test "absolute action url", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, %Request{method: :post, url: "https://www.foo.com/login"} = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "relative action url", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.request_path == "/test/login"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "relative_action_url")
+      |> Form.submit()
     end
 
-    test "input fields submission", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :post,
-                               url: "https://www.foo.com/login",
-                               params: [{"username", "gustavo"}, {"passwd", "gu123456"}]
-                             } = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "does not submit buttons", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.query_string == "username=gustavo&pass=123456"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_absolute_action.html")
-      |> Page.form_with()
-      |> Mechanizex.fill_field("username", with: "gustavo")
-      |> Mechanizex.fill_field("passwd", with: "gu123456")
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "do_not_submit_buttons")
+      |> Form.submit()
     end
 
-    test "doest not submit disabled fields", %{agent: agent} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :post,
-                               url: "https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html",
-                               params: [{"color1", "color1 value"}]
-                             } = req ->
-        {:ok, %Page{agent: agent, request: req, response: %Response{}}}
+    test "does not submit disabled fields", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.query_string == "pass=123456"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      agent
-      |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
-      |> Page.form_with()
-      |> Mechanizex.submit()
+      page
+      |> Page.form_with(name: "with_disabled_fields")
+      |> Form.submit()
+    end
+
+    test "does not submit input without name", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.query_string == "username=gustavo"
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.form_with(name: "field_without_name")
+      |> Form.submit()
+    end
+
+    test "returns a page", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      {:ok, new_page} =
+        page
+        |> Page.form_with(name: "login_form")
+        |> Form.submit()
+
+      assert Page.body(new_page) == "OK"
     end
   end
 end

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <form action="/login" name="method_missing">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="method_blank">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="method_post" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="method_post_case_insensitive" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form name="absent_action" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action=" " name="empty_action" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="../login" name="relative_action_url" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="https://www.seomaster.com.br" name="absolute_action_url" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="do_not_submit_buttons" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="button1" value="button1_value" />
+    <input type="submit" name="button2" value="button2_value">Lero lero</input>
+    <input type="submit" value="button3_value" />
+    <input type="image" name="button4" value="button4_value" />
+    <button type="submit" name="button5" value="button5_value">Button 5</button>
+    <button value="button6_value">Button 6</button>
+    <button name="button7" value="button7_value">Button 7</button>
+    <button type="submit" name="button8" value="button8_value">Button 8</button>
+    <button id="button9" disabled>Button 9</button>
+    <button type="" name="button10" value="button10_value">Button 10</button>
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="login" name="with_disabled_fields" method="post">
+    <input type="text" name="username" value="gustavo" disabled>
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="login_form" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" name="pass" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+  <form action="/login" name="field_without_name" method="post">
+    <input type="text" name="username" value="gustavo">
+    <input type="password" value="123456">
+    <input type="submit" name="send" value="Send">
+    <input type="reset" name="reset" value="Clear">
+  </form>
+
+</body>
+
+</html>

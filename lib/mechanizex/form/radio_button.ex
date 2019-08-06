@@ -1,5 +1,5 @@
 defmodule Mechanizex.Form.RadioButton do
-  use Mechanizex.Form.GenericField
+  use Mechanizex.Form.FieldMatchHelper
   alias Mechanizex.Page.{Element, Elementable}
 
   @derive [Elementable]
@@ -21,5 +21,13 @@ defmodule Mechanizex.Form.RadioButton do
       value: Element.attr(el, :value),
       checked: Element.attr_present?(el, :checked)
     }
+  end
+
+  defmacro __using__(_opts) do
+    quote do
+      alias unquote(__MODULE__)
+
+      field_match_helper_for(unquote(__MODULE__))
+    end
   end
 end

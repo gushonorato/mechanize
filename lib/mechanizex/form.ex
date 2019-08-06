@@ -1,8 +1,9 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox, ParameterizableField}
+  alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
   alias Mechanizex.{Query, Request}
   import Mechanizex.Query, only: [query: 1]
+  use Mechanizex.Form.{RadioButton, SubmitButton}
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -96,15 +97,6 @@ defmodule Mechanizex.Form do
   def fields(form) do
     form.fields
   end
-
-  def submit_buttons(form), do: submit_buttons_with(form, [])
-  def submit_buttons_with(form, criteria), do: fields_with(form, SubmitButton, criteria)
-
-  def radio_buttons(form), do: radio_buttons_with(form, [])
-  def radio_buttons_with(form, criteria), do: fields_with(form, RadioButton, criteria)
-
-  def update_radio_buttons(form, fun), do: update_fields(form, RadioButton, fun)
-  def update_radio_buttons_with(form, criteria, fun), do: update_fields(form, RadioButton, criteria, fun)
 
   def fields_with(form, type, fun) when is_function(fun) do
     form.fields

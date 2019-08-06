@@ -1,6 +1,7 @@
 defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.Form.{ParameterizableField}
+  use Mechanizex.Form.FieldMatchHelper
 
   @derive [Elementable, ParameterizableField]
   defstruct element: nil, name: nil, value: nil, label: nil
@@ -37,5 +38,13 @@ defmodule Mechanizex.Form.SubmitButton do
       value: Element.attr(el, :value),
       label: Element.attr(el, :value)
     }
+  end
+
+  defmacro __using__(_opts) do
+    quote do
+      alias unquote(__MODULE__)
+
+      field_match_helper_for(unquote(__MODULE__))
+    end
   end
 end

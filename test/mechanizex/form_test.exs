@@ -160,6 +160,56 @@ defmodule Mechanizex.FormTest do
     end
   end
 
+  describe ".check_radio_button" do
+    test "check multiple radios with same name", %{page: page} do
+      {:error, error} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_radio_button(name: "color")
+
+      assert %Mechanizex.Form.InconsistentFormError{} = error
+      assert error.message =~ ~r/same name \(color\)/
+    end
+
+    test "check inexistent radio button", %{page: page} do
+      {:error, error} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_radio_button(name: "lero")
+
+      assert %Mechanizex.Form.FormNotUpdatedError{} = error
+      assert error.message =~ ~r/Can't check radio/
+    end
+  end
+
+  describe ".check_radio_button!" do
+    test "check multiple radios with same name", %{page: page} do
+      assert_raise Mechanizex.Form.InconsistentFormError, fn ->
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_radio_button!(name: "color")
+      end
+    end
+
+    test "check inexistent radio button", %{page: page} do
+      assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_radio_button!(name: "lero")
+      end
+    end
+  end
+
+  describe ".uncheck_radio_button!" do
+    test "uncheck radio by name and value", %{page: page} do
+      assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.uncheck_radio_button!(name: "lero")
+      end
+    end
+  end
+
   describe ".submit" do
     test "method is get when method attribute missing", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->

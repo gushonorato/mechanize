@@ -110,62 +110,43 @@ defmodule Mechanizex.Form do
     |> Enum.filter(query(criteria))
   end
 
-  def check_radio_button(form, criteria) do
-    try do
-      {:ok, check_radio_button!(form, criteria)}
-    rescue
-      e in [InconsistentFormError, FormNotUpdatedError] ->
-        {:error, e}
-    end
-  end
-
   def check_radio_button!(form, criteria) do
-    matched_names =
-      form
-      |> radio_buttons_with(criteria)
-      |> Enum.map(& &1.name)
-      |> Enum.uniq()
-
-    form
-    |> update_radio_buttons(fn field ->
-      cond do
-        Query.match?(field, criteria) ->
-          %RadioButton{field | checked: true}
-
-        field.name in matched_names ->
-          %RadioButton{field | checked: false}
-
-        true ->
-          field
-      end
-    end)
-    |> assert_single_radio_in_group_checked!()
-    |> assert_form_updated!(form, "Can't check radio button, it probably does not exist")
+    case check_radio_button(form, criteria) do
+      {:ok, form} -> form
+      {:error, error} -> raise error
+    end
   end
 
-  def uncheck_radio_button(form, criteria) do
-    try do
-      {:ok, uncheck_radio_button!(form, criteria)}
-    rescue
-      e in [FormNotUpdatedError] -> {:error, e}
-    end
+  def check_radio_button(form, criteria) do
+    new_form = RadioButton.check(form, criteria)
+
+    with {:ok, new_form} <- assert_single_radio_in_group_checked(new_form),
+         {:ok, new_form} <- assert_form_updated(new_form, form, "Can't check radio button, it probably does not exist"),
+         do: {:ok, new_form}
   end
 
   def uncheck_radio_button!(form, criteria) do
-    form
-    |> update_radio_buttons_with(criteria, &%RadioButton{&1 | checked: false})
-    |> assert_form_updated!(form, "Can't uncheck radio button, it probably does not exist")
-  end
-
-  defp assert_form_updated!(new_form, old_form, message) do
-    if new_form.fields != old_form.fields do
-      new_form
-    else
-      raise FormNotUpdatedError, message: message
+    case uncheck_radio_button(form, criteria) do
+      {:ok, form} -> form
+      {:error, error} -> raise error
     end
   end
 
-  defp assert_single_radio_in_group_checked!(form) do
+  def uncheck_radio_button(form, criteria) do
+    form
+    |> RadioButton.uncheck(criteria)
+    |> assert_form_updated(form, "Can't uncheck radio button, it probably does not exist")
+  end
+
+  defp assert_form_updated(new_form, old_form, message) do
+    if new_form.fields != old_form.fields do
+      {:ok, new_form}
+    else
+      {:error, %FormNotUpdatedError{message: message}}
+    end
+  end
+
+  defp assert_single_radio_in_group_checked(form) do
     radio_groups =
       form
       |> radio_buttons_with(fn radio -> radio.checked end)
@@ -173,14 +154,14 @@ defmodule Mechanizex.Form do
       |> Enum.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
 
     if Enum.empty?(radio_groups) do
-      form
+      {:ok, form}
     else
       group_names =
         radio_groups
         |> Enum.map(fn {group_name, _} -> group_name end)
         |> Enum.join(",")
 
-      raise InconsistentFormError, message: "Multiple radio buttons with same name (#{group_names}) are checked"
+      {:error, %InconsistentFormError{message: "Multiple radio buttons with same name (#{group_names}) are checked"}}
     end
   end
 

@@ -34,7 +34,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
     test "retrieving radios which matches query", %{form: form} do
       assert(
         form
-        |> Form.radio_buttons(name: "download")
+        |> Form.radio_buttons_with(name: "download")
         |> Enum.map(fn f = %{name: name, value: value, checked: checked} ->
           {name, value, Element.attr(f, :id), Element.attr_present?(f, :disabled), checked}
         end) == [
@@ -78,7 +78,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
         form
         |> Form.check_radio_button(name: "download", value: "no")
         |> (fn {:ok, form} -> form end).()
-        |> Form.radio_buttons(fn f -> f.checked end)
+        |> Form.radio_buttons_with(fn f -> f.checked end)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert fields == [{"color", "orange", true}, {"download", "no", true}]
@@ -116,7 +116,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
     test "uncheck radio by name and value", %{form: form} do
       fields =
         form
-        |> Form.radio_buttons(fn f -> f.checked end)
+        |> Form.radio_buttons_with(fn f -> f.checked end)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert fields == [{"color", "orange", true}]
@@ -125,7 +125,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
         form
         |> Form.uncheck_radio_button(name: "color")
         |> (fn {:ok, form} -> form end).()
-        |> Form.radio_buttons(fn f -> f.checked end)
+        |> Form.radio_buttons_with(fn f -> f.checked end)
 
       assert fields == []
     end

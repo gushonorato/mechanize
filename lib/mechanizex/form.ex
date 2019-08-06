@@ -97,13 +97,14 @@ defmodule Mechanizex.Form do
     form.fields
   end
 
-  def submit_buttons(form, criteria \\ [])
-  def submit_buttons(form, criteria), do: submit_buttons_with(form, criteria)
+  def submit_buttons(form), do: submit_buttons_with(form, [])
   def submit_buttons_with(form, criteria), do: fields_with(form, SubmitButton, criteria)
 
-  def radio_buttons(form, criteria \\ [])
-  def radio_buttons(form, criteria), do: radio_buttons_with(form, criteria)
+  def radio_buttons(form), do: radio_buttons_with(form, [])
   def radio_buttons_with(form, criteria), do: fields_with(form, RadioButton, criteria)
+
+  def update_radio_buttons(form, fun), do: update_fields(form, RadioButton, fun)
+  def update_radio_buttons_with(form, criteria, fun), do: update_fields(form, RadioButton, criteria, fun)
 
   def fields_with(form, type, fun) when is_function(fun) do
     form.fields
@@ -129,12 +130,12 @@ defmodule Mechanizex.Form do
   def check_radio_button!(form, criteria) do
     matched_names =
       form
-      |> radio_buttons(criteria)
+      |> radio_buttons_with(criteria)
       |> Enum.map(& &1.name)
       |> Enum.uniq()
 
     form
-    |> update_fields(RadioButton, fn field ->
+    |> update_radio_buttons(fn field ->
       cond do
         Query.match?(field, criteria) ->
           %RadioButton{field | checked: true}
@@ -160,7 +161,7 @@ defmodule Mechanizex.Form do
 
   def uncheck_radio_button!(form, criteria) do
     form
-    |> update_fields(RadioButton, criteria, &%RadioButton{&1 | checked: false})
+    |> update_radio_buttons_with(criteria, &%RadioButton{&1 | checked: false})
     |> assert_form_updated!(form, "Can't uncheck radio button, it probably does not exist")
   end
 
@@ -175,7 +176,7 @@ defmodule Mechanizex.Form do
   defp assert_single_radio_in_group_checked!(form) do
     radio_groups =
       form
-      |> radio_buttons(fn radio -> radio.checked end)
+      |> radio_buttons_with(fn radio -> radio.checked end)
       |> Enum.group_by(&Element.attr(&1, :name))
       |> Enum.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
 
@@ -205,13 +206,13 @@ defmodule Mechanizex.Form do
 
   def click_button(form, criteria) when is_list(criteria) do
     form
-    |> submit_buttons(criteria)
+    |> submit_buttons_with(criteria)
     |> maybe_click_on_button(form)
   end
 
   def click_button(form, label) when is_binary(label) do
     form
-    |> submit_buttons(fn button -> button.label == label end)
+    |> submit_buttons_with(fn button -> button.label == label end)
     |> maybe_click_on_button(form)
   end
 
@@ -269,8 +270,7 @@ defmodule Mechanizex.Form do
     |> Enum.reject(&SubmitButton.is_type?/1)
     |> maybe_add_submit_button(button)
     |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
-    |> Enum.map(&GenericField.to_param/1)
-    |> List.flatten()
+    |> Enum.flat_map(&GenericField.to_param/1)
   end
 
   defp maybe_add_submit_button(params, nil), do: params

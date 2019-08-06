@@ -31,3 +31,9 @@ defmodule Mechanizex.Form.RadioButton do
     end
   end
 end
+
+defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.RadioButton do
+  def to_param(field) do
+    if field.checked, do: [{field.name, field.value}], else: []
+  end
+end

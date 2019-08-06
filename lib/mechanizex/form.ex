@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox, GenericField}
+  alias Mechanizex.Form.{TextInput, DetachedField, SubmitButton, RadioButton, Checkbox, ParameterizableField}
   alias Mechanizex.{Query, Request}
   import Mechanizex.Query, only: [query: 1]
 
@@ -108,13 +108,13 @@ defmodule Mechanizex.Form do
 
   def fields_with(form, type, fun) when is_function(fun) do
     form.fields
-    |> Stream.filter(&type.is_type?/1)
+    |> Stream.filter(&(type == &1.__struct__))
     |> Enum.filter(fun)
   end
 
   def fields_with(form, type, criteria) do
     form.fields
-    |> Stream.filter(&type.is_type?/1)
+    |> Stream.filter(&(type == &1.__struct__))
     |> Enum.filter(query(criteria))
   end
 
@@ -267,10 +267,10 @@ defmodule Mechanizex.Form do
 
   defp params(fields, button) do
     fields
-    |> Enum.reject(&SubmitButton.is_type?/1)
+    |> Enum.reject(&match?(%SubmitButton{}, &1))
     |> maybe_add_submit_button(button)
     |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
-    |> Enum.flat_map(&GenericField.to_param/1)
+    |> Enum.flat_map(&ParameterizableField.to_param/1)
   end
 
   defp maybe_add_submit_button(params, nil), do: params

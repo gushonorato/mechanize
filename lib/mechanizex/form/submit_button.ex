@@ -1,5 +1,4 @@
 defmodule Mechanizex.Form.SubmitButton do
-  use Mechanizex.Form.GenericField
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.Form.{ParameterizableField}
 

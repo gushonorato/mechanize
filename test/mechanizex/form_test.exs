@@ -230,7 +230,7 @@ defmodule Mechanizex.FormTest do
         |> Form.check_radio_button(name: "lero")
 
       assert %Mechanizex.Form.FormNotUpdatedError{} = error
-      assert error.message =~ ~r/Can't check radio/
+      assert error.message =~ ~r/Can't check radio button with criteria \[name: "lero"\]/
     end
   end
 
@@ -259,6 +259,18 @@ defmodule Mechanizex.FormTest do
         |> Page.form_with(name: "form_with_radios")
         |> Form.uncheck_radio_button!(name: "lero")
       end
+    end
+  end
+
+  describe ".uncheck_radio_button" do
+    test "uncheck inexistent radio button", %{page: page} do
+      {:error, error} =
+        page
+        |> Page.form_with(name: "form_with_radios")
+        |> Form.uncheck_radio_button(name: "lero")
+
+      assert %Mechanizex.Form.FormNotUpdatedError{} = error
+      assert error.message =~ ~r/Can't uncheck radio button with criteria \[name: "lero"\]/
     end
   end
 

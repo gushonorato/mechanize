@@ -162,7 +162,12 @@ defmodule Mechanizex.Form do
     new_form = RadioButton.check(form, criteria)
 
     with {:ok, new_form} <- assert_single_radio_in_group_checked(new_form),
-         {:ok, new_form} <- assert_form_updated(new_form, form, "Can't check radio button, it probably does not exist"),
+         {:ok, new_form} <-
+           assert_form_updated(
+             new_form,
+             form,
+             "Can't check radio button with criteria #{inspect(criteria)}, it probably does not exist"
+           ),
          do: {:ok, new_form}
   end
 
@@ -180,7 +185,10 @@ defmodule Mechanizex.Form do
   def uncheck_radio_button(form, criteria) do
     form
     |> RadioButton.uncheck(criteria)
-    |> assert_form_updated(form, "Can't uncheck radio button, it probably does not exist")
+    |> assert_form_updated(
+      form,
+      "Can't uncheck radio button with criteria #{inspect(criteria)}, it probably does not exist"
+    )
   end
 
   defp assert_form_updated(new_form, old_form, message) do

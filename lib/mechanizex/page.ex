@@ -52,6 +52,8 @@ defmodule Mechanizex.Page do
     page.response.url
   end
 
+  defdelegate form(page), to: __MODULE__, as: :form_with
+
   def form_with(page, criterias \\ [])
 
   def form_with(page, criterias) do

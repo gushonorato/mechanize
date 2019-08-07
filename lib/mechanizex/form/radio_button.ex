@@ -1,7 +1,5 @@
 defmodule Mechanizex.Form.RadioButton do
-  use Mechanizex.Form.FieldMatchHelper
   alias Mechanizex.{Form, Query}
-  alias Mechanizex.Form.InconsistentFormError
   alias Mechanizex.Page.{Element, Elementable}
 
   @derive [Elementable]
@@ -28,8 +26,7 @@ defmodule Mechanizex.Form.RadioButton do
   defmacro __using__(_opts) do
     quote do
       alias unquote(__MODULE__)
-
-      field_match_helper_for(unquote(__MODULE__))
+      use Mechanizex.Form.FieldMatchHelper, for: unquote(__MODULE__)
     end
   end
 

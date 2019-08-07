@@ -1,13 +1,6 @@
 defmodule Mechanizex.Form.FieldMatchHelper do
-  defmacro __using__(_opts) do
-    quote do
-      import Mechanizex.Form.FieldMatchHelper
-    end
-  end
-
-  defmacro field_match_helper_for(module, opts \\ [])
-
-  defmacro field_match_helper_for(module, opts) do
+  defmacro __using__(opts) do
+    {module, opts} = Keyword.pop(opts, :for)
     {suffix, _} = Keyword.pop(opts, :suffix, "s")
 
     module_name =

@@ -3,7 +3,7 @@ defmodule Mechanizex.Form do
   alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
   alias Mechanizex.{Query, Request}
   import Mechanizex.Query, only: [query: 1]
-  use Mechanizex.Form.{RadioButton, SubmitButton}
+  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox}
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -110,12 +110,16 @@ defmodule Mechanizex.Form do
     |> Enum.filter(query(criteria))
   end
 
+  defdelegate check_radio_buttons!(form, criteria), to: __MODULE__, as: :check_radio_button!
+
   def check_radio_button!(form, criteria) do
     case check_radio_button(form, criteria) do
       {:ok, form} -> form
       {:error, error} -> raise error
     end
   end
+
+  defdelegate check_radio_buttons(form, criteria), to: __MODULE__, as: :check_radio_button
 
   def check_radio_button(form, criteria) do
     new_form = RadioButton.check(form, criteria)
@@ -125,12 +129,16 @@ defmodule Mechanizex.Form do
          do: {:ok, new_form}
   end
 
+  defdelegate uncheck_radio_buttons!(form, criteria), to: __MODULE__, as: :uncheck_radio_button!
+
   def uncheck_radio_button!(form, criteria) do
     case uncheck_radio_button(form, criteria) do
       {:ok, form} -> form
       {:error, error} -> raise error
     end
   end
+
+  defdelegate uncheck_radio_buttons(form, criteria), to: __MODULE__, as: :uncheck_radio_button
 
   def uncheck_radio_button(form, criteria) do
     form

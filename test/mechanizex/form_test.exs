@@ -160,11 +160,63 @@ defmodule Mechanizex.FormTest do
     end
   end
 
+  describe ".check_checkbox" do
+    test "correct check", %{page: page} do
+      {:ok, form} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_checkbox(name: "blue")
+
+      checked =
+        form
+        |> Form.checkboxes_with(& &1.checked)
+        |> Enum.map(& &1.name)
+
+      assert checked == ["red", "blue"]
+    end
+
+    test "error when checkbox doesnt exist", %{page: page} do
+      {:error, error} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.check_checkbox(name: "lero")
+
+      assert %Mechanizex.Form.FormNotUpdatedError{} = error
+      assert error.message =~ ~r/Can't check checkbox with criteria \[name: "lero"\]/
+    end
+  end
+
+  describe ".uncheck_checkbox" do
+    test "correct uncheck", %{page: page} do
+      {:ok, form} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.uncheck_checkbox(name: "red")
+
+      checked =
+        form
+        |> Form.checkboxes_with(& &1.checked)
+        |> Enum.map(& &1.name)
+
+      assert checked == []
+    end
+
+    test "error when checkbox doesnt exist", %{page: page} do
+      {:error, error} =
+        page
+        |> Page.form_with(name: "form_with_checkboxes")
+        |> Form.uncheck_checkbox(name: "lero")
+
+      assert %Mechanizex.Form.FormNotUpdatedError{} = error
+      assert error.message =~ ~r/Can't uncheck checkbox with criteria \[name: "lero"\]/
+    end
+  end
+
   describe ".check_radio_button" do
     test "check multiple radios with same name", %{page: page} do
       {:error, error} =
         page
-        |> Page.form_with(name: "form_with_checkboxes")
+        |> Page.form_with(name: "form_with_radios")
         |> Form.check_radio_button(name: "color")
 
       assert %Mechanizex.Form.InconsistentFormError{} = error
@@ -174,7 +226,7 @@ defmodule Mechanizex.FormTest do
     test "check inexistent radio button", %{page: page} do
       {:error, error} =
         page
-        |> Page.form_with(name: "form_with_checkboxes")
+        |> Page.form_with(name: "form_with_radios")
         |> Form.check_radio_button(name: "lero")
 
       assert %Mechanizex.Form.FormNotUpdatedError{} = error
@@ -186,7 +238,7 @@ defmodule Mechanizex.FormTest do
     test "check multiple radios with same name", %{page: page} do
       assert_raise Mechanizex.Form.InconsistentFormError, fn ->
         page
-        |> Page.form_with(name: "form_with_checkboxes")
+        |> Page.form_with(name: "form_with_radios")
         |> Form.check_radio_button!(name: "color")
       end
     end
@@ -194,7 +246,7 @@ defmodule Mechanizex.FormTest do
     test "check inexistent radio button", %{page: page} do
       assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
         page
-        |> Page.form_with(name: "form_with_checkboxes")
+        |> Page.form_with(name: "form_with_radios")
         |> Form.check_radio_button!(name: "lero")
       end
     end
@@ -204,7 +256,7 @@ defmodule Mechanizex.FormTest do
     test "uncheck radio by name and value", %{page: page} do
       assert_raise Mechanizex.Form.FormNotUpdatedError, fn ->
         page
-        |> Page.form_with(name: "form_with_checkboxes")
+        |> Page.form_with(name: "form_with_radios")
         |> Form.uncheck_radio_button!(name: "lero")
       end
     end

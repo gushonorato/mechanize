@@ -21,7 +21,7 @@ defmodule Mechanizex.Form.CheckboxTest do
                {nil, "female", nil, false},
                {nil, "green", nil, false},
                {nil, "green", nil, false},
-               {nil, "red", nil, false},
+               {nil, "red", "", true},
                {nil, "blue", nil, false},
                {nil, "yellow", nil, false},
                {nil, "brown", nil, false},
@@ -40,7 +40,7 @@ defmodule Mechanizex.Form.CheckboxTest do
         |> Form.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
-      assert checked == ["male", "female", "download"]
+      assert checked == ["male", "female", "red", "download"]
     end
 
     test "check by criteria with name and value", %{form: form} do
@@ -50,7 +50,7 @@ defmodule Mechanizex.Form.CheckboxTest do
         |> Form.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
-      assert checked == ["male", "download", "download"]
+      assert checked == ["male", "red", "download", "download"]
     end
   end
 
@@ -62,7 +62,7 @@ defmodule Mechanizex.Form.CheckboxTest do
         |> Form.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
-      assert checked == ["download"]
+      assert checked == ["red", "download"]
     end
 
     test "uncheck by criteria with name and value", %{form: form} do
@@ -72,7 +72,27 @@ defmodule Mechanizex.Form.CheckboxTest do
         |> Form.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
-      assert checked == ["male"]
+      assert checked == ["male", "red"]
+    end
+  end
+
+  describe ".submit" do
+    test "submit only checked checkboxes", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert(
+          Plug.Conn.fetch_query_params(conn).params == %{
+            "male" => "on",
+            "red" => "",
+            "download" => "yes"
+          }
+        )
+
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.form_with()
+      |> Form.submit()
     end
   end
 end

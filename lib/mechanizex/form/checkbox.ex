@@ -45,6 +45,6 @@ end
 
 defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.Checkbox do
   def to_param(field) do
-    if field.checked, do: [{field.name, field.value}], else: []
+    if field.checked, do: [{field.name, field.value || "on"}], else: []
   end
 end

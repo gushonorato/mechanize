@@ -102,30 +102,12 @@ defmodule Mechanizex.Form do
     |> Enum.filter(query(criteria))
   end
 
-  defdelegate check_checkboxes!(form, criteria), to: __MODULE__, as: :check_checkbox!
-
-  def check_checkbox!(form, criteria) do
-    case check_checkbox(form, criteria) do
-      {:ok, form} -> form
-      {:error, error} -> raise error
-    end
-  end
-
   defdelegate check_checkboxes(form, criteria), to: __MODULE__, as: :check_checkbox
 
   def check_checkbox(form, criteria) do
     form
     |> Checkbox.check(criteria)
     |> assert_form_updated(form, "Can't check checkbox with criteria #{inspect(criteria)}, it probably does not exist")
-  end
-
-  defdelegate uncheck_checkboxes!(form, criteria), to: __MODULE__, as: :uncheck_checkbox!
-
-  def uncheck_checkbox!(form, criteria) do
-    case uncheck_checkbox(form, criteria) do
-      {:ok, form} -> form
-      {:error, error} -> raise error
-    end
   end
 
   defdelegate uncheck_checkboxes(form, criteria), to: __MODULE__, as: :uncheck_checkbox
@@ -139,37 +121,16 @@ defmodule Mechanizex.Form do
     )
   end
 
-  defdelegate check_radio_buttons!(form, criteria), to: __MODULE__, as: :check_radio_button!
-
-  def check_radio_button!(form, criteria) do
-    case check_radio_button(form, criteria) do
-      {:ok, form} -> form
-      {:error, error} -> raise error
-    end
-  end
-
   defdelegate check_radio_buttons(form, criteria), to: __MODULE__, as: :check_radio_button
 
   def check_radio_button(form, criteria) do
-    new_form = RadioButton.check(form, criteria)
-
-    with {:ok, new_form} <- assert_single_radio_in_group_checked(new_form),
-         {:ok, new_form} <-
-           assert_form_updated(
-             new_form,
-             form,
-             "Can't check radio button with criteria #{inspect(criteria)}, it probably does not exist"
-           ),
-         do: {:ok, new_form}
-  end
-
-  defdelegate uncheck_radio_buttons!(form, criteria), to: __MODULE__, as: :uncheck_radio_button!
-
-  def uncheck_radio_button!(form, criteria) do
-    case uncheck_radio_button(form, criteria) do
-      {:ok, form} -> form
-      {:error, error} -> raise error
-    end
+    form
+    |> RadioButton.check(criteria)
+    |> assert_single_radio_in_group_checked()
+    |> assert_form_updated(
+      form,
+      "Can't check radio button with criteria #{inspect(criteria)}, it probably does not exist"
+    )
   end
 
   defdelegate uncheck_radio_buttons(form, criteria), to: __MODULE__, as: :uncheck_radio_button
@@ -185,42 +146,32 @@ defmodule Mechanizex.Form do
 
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
 
-  def click_button!(form, criteria) do
-    case click_button(form, criteria) do
-      {:ok, page} -> page
-      {:error, error} -> raise error
-    end
-  end
-
   defp assert_form_updated(new_form, old_form, message) do
     if new_form.fields != old_form.fields do
-      {:ok, new_form}
+      new_form
     else
-      {:error, %FormNotUpdatedError{message: message}}
+      raise FormNotUpdatedError, message: message
     end
   end
 
   defp assert_single_radio_in_group_checked(form) do
-    radio_groups =
-      form
-      |> radio_buttons_with(fn radio -> radio.checked end)
-      |> Enum.group_by(&Element.attr(&1, :name))
-      |> Enum.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
+    form
+    |> radio_buttons_with(fn radio -> radio.checked end)
+    |> Enum.group_by(&Element.attr(&1, :name))
+    |> Stream.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
+    |> Enum.map(fn {group_name, _} -> group_name end)
+    |> case do
+      [] ->
+        form
 
-    if Enum.empty?(radio_groups) do
-      {:ok, form}
-    else
-      group_names =
-        radio_groups
-        |> Enum.map(fn {group_name, _} -> group_name end)
-        |> Enum.join(",")
-
-      {:error, %InconsistentFormError{message: "Multiple radio buttons with same name (#{group_names}) are checked"}}
+      group_names ->
+        raise InconsistentFormError,
+          message: "Multiple radio buttons with same name (#{Enum.join(group_names, ",")}) are checked"
     end
   end
 
   def submit(form, button \\ nil) do
-    Mechanizex.Agent.request(agent(form), %Request{
+    Mechanizex.Agent.request!(agent(form), %Request{
       method: method(form),
       url: action_url(form),
       params: params(form.fields, button)

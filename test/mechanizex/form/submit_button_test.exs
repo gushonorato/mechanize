@@ -45,48 +45,33 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
   describe ".click_button" do
     test "label not match", %{form: form} do
-      {:error, error} =
-        form
-        |> SubmitButton.click("Button 1")
-
-      assert %ClickError{} = error
-      assert error.message =~ ~r/not found/i
+      assert_raise ClickError, ~r/not found/i, fn ->
+        SubmitButton.click(form, "Button 1")
+      end
     end
 
     test "criteria not match", %{form: form} do
-      {:error, error} =
-        form
-        |> SubmitButton.click(name: "lero")
-
-      assert %ClickError{} = error
-      assert error.message =~ ~r/not found/i
+      assert_raise ClickError, ~r/not found/i, fn ->
+        SubmitButton.click(form, name: "lero")
+      end
     end
 
     test "multiple labels match", %{form: form} do
-      {:error, error} =
-        form
-        |> SubmitButton.click(~r/Button/i)
-
-      assert %ClickError{} = error
-      assert error.message =~ ~r/16 buttons were found./i
+      assert_raise ClickError, ~r/16 buttons were found./i, fn ->
+        SubmitButton.click(form, ~r/Button/i)
+      end
     end
 
     test "multiple criteria match", %{form: form} do
-      {:error, error} =
-        form
-        |> SubmitButton.click(name: ~r/button/)
-
-      assert %ClickError{} = error
-      assert error.message =~ ~r/13 buttons were found./i
+      assert_raise ClickError, ~r/13 buttons were found./i, fn ->
+        SubmitButton.click(form, name: ~r/button/)
+      end
     end
 
     test "a nil button", %{form: form} do
-      {:error, error} =
-        form
-        |> SubmitButton.click(nil)
-
-      assert %ArgumentError{} = error
-      assert error.message =~ ~r/button is nil./i
+      assert_raise ArgumentError, ~r/button is nil./i, fn ->
+        SubmitButton.click(form, nil)
+      end
     end
 
     test "button click success with label", %{form: form, bypass: bypass} do
@@ -96,11 +81,11 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         Plug.Conn.resp(conn, 200, "Lero lero")
       end)
 
-      {:ok, page} =
+      assert(
         form
         |> SubmitButton.click("Button 6")
-
-      assert Page.body(page) == "Lero lero"
+        |> Page.body() == "Lero lero"
+      )
     end
 
     test "button click success with name", %{form: form, bypass: bypass} do
@@ -110,11 +95,11 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         Plug.Conn.resp(conn, 200, "Lero lero")
       end)
 
-      {:ok, page} =
+      assert(
         form
         |> SubmitButton.click(name: "button1")
-
-      assert Page.body(page) == "Lero lero"
+        |> Page.body() == "Lero lero"
+      )
     end
   end
 end

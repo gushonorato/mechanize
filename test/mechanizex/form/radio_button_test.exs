@@ -102,8 +102,8 @@ defmodule Mechanizex.Form.RadioButtonTest do
 
       page
       |> Page.form_with()
-      |> Form.check_radio_button!(name: "download", value: "yes")
-      |> Form.check_radio_button!(name: "color", value: "red")
+      |> Form.check_radio_button(name: "download", value: "yes")
+      |> Form.check_radio_button(name: "color", value: "red")
       |> Form.submit()
     end
   end

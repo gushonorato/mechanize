@@ -48,7 +48,7 @@ defmodule Mechanizex.Form.SubmitButton do
   end
 
   def click(_form, nil) do
-    {:error, %ArgumentError{message: "Can't click on button because button is nil."}}
+    raise ArgumentError, message: "Can't click on button because button is nil."
   end
 
   def click(form, criteria) when is_list(criteria) do
@@ -76,19 +76,14 @@ defmodule Mechanizex.Form.SubmitButton do
   defp maybe_click_on_button(buttons, form) do
     case buttons do
       [] ->
-        {:error,
-         %ClickError{
-           message: "Can't click on submit button because it was not found."
-         }}
+        raise ClickError, message: "Can't click on submit button because it was not found."
 
       [button] ->
         click(form, button)
 
       buttons ->
-        {:error,
-         %ClickError{
-           message: "Can't decide which submit button to click because #{length(buttons)} buttons were found."
-         }}
+        raise ClickError,
+          message: "Can't decide which submit button to click because #{length(buttons)} buttons were found."
     end
   end
 end

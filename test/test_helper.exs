@@ -25,11 +25,11 @@ defmodule TestHelper do
     page =
       Mechanizex.Agent.get!(
         agent,
-        endpoint_url(bypass.port, local_path)
+        endpoint_url(bypass, local_path)
       )
 
     {:ok, %{bypass: bypass, agent: agent, page: page}}
   end
 
-  def endpoint_url(port, path \\ ""), do: URI.merge("http://localhost:#{port}/", path)
+  def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path)
 end

@@ -23,15 +23,7 @@ defmodule Mechanizex.Form do
     }
   end
 
-  defmodule MultipleFormComponentsFoundError do
-    defexception [:message]
-  end
-
   defmodule FormNotUpdatedError do
-    defexception [:message]
-  end
-
-  defmodule FormComponentNotFoundError do
     defexception [:message]
   end
 
@@ -191,6 +183,15 @@ defmodule Mechanizex.Form do
     )
   end
 
+  defdelegate click_button(form, criteria), to: SubmitButton, as: :click
+
+  def click_button!(form, criteria) do
+    case click_button(form, criteria) do
+      {:ok, page} -> page
+      {:error, error} -> raise error
+    end
+  end
+
   defp assert_form_updated(new_form, old_form, message) do
     if new_form.fields != old_form.fields do
       {:ok, new_form}
@@ -224,51 +225,6 @@ defmodule Mechanizex.Form do
       url: action_url(form),
       params: params(form.fields, button)
     })
-  end
-
-  def click_button(_form, nil) do
-    {:error, %ArgumentError{message: "Can't click on button because button is nil."}}
-  end
-
-  def click_button(form, criteria) when is_list(criteria) do
-    form
-    |> submit_buttons_with(criteria)
-    |> maybe_click_on_button(form)
-  end
-
-  def click_button(form, label) when is_binary(label) do
-    form
-    |> submit_buttons_with(fn button -> button.label == label end)
-    |> maybe_click_on_button(form)
-  end
-
-  def click_button(form, %SubmitButton{} = button) do
-    submit(form, button)
-  end
-
-  def click_button(form, label) do
-    form
-    |> submit_buttons_with(fn button -> button.label != nil and button.label =~ label end)
-    |> maybe_click_on_button(form)
-  end
-
-  defp maybe_click_on_button(buttons, form) do
-    case buttons do
-      [] ->
-        {:error,
-         %FormComponentNotFoundError{
-           message: "Can't click on button because it was not found."
-         }}
-
-      [button] ->
-        click_button(form, button)
-
-      buttons ->
-        {:error,
-         %MultipleFormComponentsFoundError{
-           message: "Can't click on button because #{length(buttons)} buttons were found."
-         }}
-    end
   end
 
   defp method(form) do

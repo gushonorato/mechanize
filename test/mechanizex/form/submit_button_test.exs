@@ -2,7 +2,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{FormComponentNotFoundError, MultipleFormComponentsFoundError}
+  alias Mechanizex.Form.{ClickError, SubmitButton}
   import TestHelper
 
   setup do
@@ -47,43 +47,43 @@ defmodule Mechanizex.Form.SubmitButtonTest do
     test "label not match", %{form: form} do
       {:error, error} =
         form
-        |> Form.click_button("Button 1")
+        |> SubmitButton.click("Button 1")
 
-      assert %FormComponentNotFoundError{} = error
+      assert %ClickError{} = error
       assert error.message =~ ~r/not found/i
     end
 
     test "criteria not match", %{form: form} do
       {:error, error} =
         form
-        |> Form.click_button(name: "lero")
+        |> SubmitButton.click(name: "lero")
 
-      assert %FormComponentNotFoundError{} = error
+      assert %ClickError{} = error
       assert error.message =~ ~r/not found/i
     end
 
     test "multiple labels match", %{form: form} do
       {:error, error} =
         form
-        |> Form.click_button(~r/Button/i)
+        |> SubmitButton.click(~r/Button/i)
 
-      assert %MultipleFormComponentsFoundError{} = error
+      assert %ClickError{} = error
       assert error.message =~ ~r/16 buttons were found./i
     end
 
     test "multiple criteria match", %{form: form} do
       {:error, error} =
         form
-        |> Form.click_button(name: ~r/button/)
+        |> SubmitButton.click(name: ~r/button/)
 
-      assert %MultipleFormComponentsFoundError{} = error
+      assert %ClickError{} = error
       assert error.message =~ ~r/13 buttons were found./i
     end
 
     test "a nil button", %{form: form} do
       {:error, error} =
         form
-        |> Form.click_button(nil)
+        |> SubmitButton.click(nil)
 
       assert %ArgumentError{} = error
       assert error.message =~ ~r/button is nil./i
@@ -98,7 +98,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
       {:ok, page} =
         form
-        |> Form.click_button("Button 6")
+        |> SubmitButton.click("Button 6")
 
       assert Page.body(page) == "Lero lero"
     end
@@ -112,7 +112,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
       {:ok, page} =
         form
-        |> Form.click_button(name: "button1")
+        |> SubmitButton.click(name: "button1")
 
       assert Page.body(page) == "Lero lero"
     end

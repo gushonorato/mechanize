@@ -3,7 +3,7 @@ defmodule Mechanizex.Form do
   alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
   alias Mechanizex.{Query, Request}
   import Mechanizex.Query, only: [query: 1]
-  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox}
+  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox, ImageInput}
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -200,14 +200,18 @@ defmodule Mechanizex.Form do
 
   defp params(fields, button) do
     fields
-    |> Enum.reject(&match?(%SubmitButton{}, &1))
-    |> maybe_add_submit_button(button)
+    |> Enum.reject(&is_submit?/1)
+    |> maybe_add_clicked_button(button)
     |> Enum.reject(fn f -> Element.attr_present?(f, :disabled) or f.name == nil end)
     |> Enum.flat_map(&ParameterizableField.to_param/1)
   end
 
-  defp maybe_add_submit_button(params, nil), do: params
-  defp maybe_add_submit_button(params, button), do: [button | params]
+  defp is_submit?(field) do
+    match?(%SubmitButton{}, field) or match?(%ImageInput{}, field)
+  end
+
+  defp maybe_add_clicked_button(params, nil), do: params
+  defp maybe_add_clicked_button(params, button), do: [button | params]
 
   defp agent(form) do
     form.element.page.agent
@@ -239,6 +243,9 @@ defmodule Mechanizex.Form do
 
       name == "input" and type == "submit" ->
         SubmitButton.new(el)
+
+      name == "input" and type == "image" ->
+        ImageInput.new(el)
 
       name == "textarea" or name == "input" ->
         TextInput.new(el)

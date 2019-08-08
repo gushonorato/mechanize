@@ -16,7 +16,6 @@ defmodule Mechanizex.Form.SubmitButtonTest do
         {"button1", "button1_value", "button1_value", nil, false},
         {"button2", "button2_value", "button2_value", nil, false},
         {nil, "button3_value", "button3_value", nil, false},
-        {"button4", "button4_value", nil, nil, false},
         {"button5", "button5_value", "Button 5", nil, false},
         {nil, "button6_value", "Button 6", nil, false},
         {"button7", "button7_value", "Button 7", nil, false},
@@ -63,7 +62,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
     end
 
     test "multiple criteria match", %{form: form} do
-      assert_raise ClickError, ~r/13 buttons were found./i, fn ->
+      assert_raise ClickError, ~r/12 buttons were found./i, fn ->
         SubmitButton.click(form, name: ~r/button/)
       end
     end

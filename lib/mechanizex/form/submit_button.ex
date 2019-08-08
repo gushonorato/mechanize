@@ -22,15 +22,6 @@ defmodule Mechanizex.Form.SubmitButton do
     }
   end
 
-  def new(%Element{name: "input", attrs: [{"type", "image"} | _]} = el) do
-    %Mechanizex.Form.SubmitButton{
-      element: el,
-      name: Element.attr(el, :name),
-      value: Element.attr(el, :value),
-      label: nil
-    }
-  end
-
   def new(%Element{name: "input"} = el) do
     %Mechanizex.Form.SubmitButton{
       element: el,

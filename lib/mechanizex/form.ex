@@ -237,7 +237,7 @@ defmodule Mechanizex.Form do
       name == "input" and type == "checkbox" ->
         Checkbox.new(el)
 
-      name == "input" and (type == "submit" or type == "image") ->
+      name == "input" and type == "submit" ->
         SubmitButton.new(el)
 
       name == "textarea" or name == "input" ->

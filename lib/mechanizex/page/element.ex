@@ -16,35 +16,17 @@ defmodule Mechanizex.Page.Element do
           page: Page.t()
         }
 
-  def page(el), do: el(el).page
-  def text(el), do: el(el).text
-  def name(el), do: maybe_normalize_value(el(el).name, true)
-  def attrs(el), do: el(el).attrs
+  def page(el), do: Elementable.page(el)
+  def text(el), do: Elementable.text(el)
+
+  def name(el) do
+    el
+    |> Elementable.name()
+    |> normalize_value()
+  end
+
+  def attrs(el), do: Elementable.attrs(el)
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
-
-  def put_attr(el, attr_name, value) do
-    if attr_present?(el, attr_name) do
-      update_attr(el, attr_name, value)
-    else
-      add_attr(el, attr_name, value)
-    end
-  end
-
-  def add_attr(el, attr_name, value) do
-    element = %__MODULE__{el(el) | attrs: [{attr_name, value} | attrs(el)]}
-    Elementable.put_element(el, element)
-  end
-
-  def update_attr(el, attr_name, value) do
-    update_attrs(el(el), fn {k, v} ->
-      if k == attr_name, do: {k, value}, else: {k, v}
-    end)
-  end
-
-  def update_attrs(el, fun) do
-    element = %__MODULE__{el(el) | attrs: Enum.map(attrs(el), fun)}
-    Elementable.put_element(el, element)
-  end
 
   def attr(el, attr_name, opts \\ []) do
     default_opts = [default: nil, normalize: false]
@@ -65,13 +47,15 @@ defmodule Mechanizex.Page.Element do
     nil
   end
 
-  defp maybe_normalize_value(value, _) do
+  defp maybe_normalize_value(value, true) do
+    normalize_value(value)
+  end
+
+  defp normalize_value(value) do
     value
     |> String.downcase()
     |> String.trim()
   end
-
-  defp el(elementable), do: Elementable.element(elementable)
 
   def to_links(elements) when is_list(elements) do
     Enum.map(elements, &to_link/1)
@@ -87,14 +71,15 @@ defmodule Mechanizex.Page.Element do
 end
 
 defimpl Mechanizex.Page.Elementable, for: Mechanizex.Page.Element do
-  def element(elementable), do: elementable
-  def put_element(_elementable, element), do: element
+  def page(e), do: e.page
+  def attrs(e), do: e.attrs
+  def name(e), do: e.name
+  def text(e), do: e.text
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do
-  alias Mechanizex.Page.Elementable
   alias Mechanizex.HTMLParser.Parseable
-  def parser(element), do: Parseable.parser(Elementable.element(element).page)
-  def parser_data(element), do: Elementable.element(element).parser_data
-  def page(element), do: Elementable.element(element).page
+  def parser(e), do: Parseable.parser(e.page)
+  def parser_data(e), do: e.parser_data
+  def page(e), do: e.page
 end

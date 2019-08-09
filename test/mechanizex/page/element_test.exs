@@ -36,45 +36,4 @@ defmodule Mechanizex.Page.ElementTest do
       assert Element.attr(@subject, :value, default: " LERo", normalize: true) == "lero"
     end
   end
-
-  describe ".put_attr" do
-    test "creates a new attribute if doesn't exists" do
-      assert Element.put_attr(@subject, "value", "lero") == %Element{
-               name: "input",
-               attrs: [{"value", "lero"}, {"type", " TExT   "}]
-             }
-    end
-
-    test "updates attribute if already exists" do
-      assert Element.put_attr(@subject, "type", "lero") == %Element{
-               name: "input",
-               attrs: [{"type", "lero"}]
-             }
-    end
-  end
-
-  describe ".add_attr" do
-    test "add new attribute even if exists" do
-      assert Element.add_attr(@subject, "type", "lero") == %Element{
-               name: "input",
-               attrs: [{"type", "lero"}, {"type", " TExT   "}]
-             }
-    end
-  end
-
-  describe ".update_attr" do
-    test "does nothing if attr name doesn't exists" do
-      assert Element.update_attr(@subject, "value", "lero") == %Element{
-               name: "input",
-               attrs: [{"type", " TExT   "}]
-             }
-    end
-
-    test "update attr if attr name exists" do
-      assert Element.update_attr(@subject, "type", "lero") == %Element{
-               name: "input",
-               attrs: [{"type", "lero"}]
-             }
-    end
-  end
 end

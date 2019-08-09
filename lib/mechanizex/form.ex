@@ -1,8 +1,7 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
   alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
-  alias Mechanizex.{Query, Request}
-  import Mechanizex.Query, only: [query: 1]
+  alias Mechanizex.{Criteria, Request}
   use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox, ImageInput}
 
   @derive [Mechanizex.Page.Elementable]
@@ -78,7 +77,7 @@ defmodule Mechanizex.Form do
 
   def update_fields(form, types, criteria, fun) do
     update_fields(form, types, fn field ->
-      if Query.match?(field, criteria) do
+      if Criteria.match?(field, criteria) do
         fun.(field)
       else
         field
@@ -103,7 +102,7 @@ defmodule Mechanizex.Form do
   def fields_with(form, type, criteria) do
     form.fields
     |> Stream.filter(&(type == &1.__struct__))
-    |> Enum.filter(query(criteria))
+    |> Enum.filter(&Criteria.match?(&1, criteria))
   end
 
   defdelegate check_checkboxes(form, criteria), to: __MODULE__, as: :check_checkbox
@@ -224,7 +223,7 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Query.search("input, textarea, button")
+    |> Criteria.search("input, textarea, button")
     |> Enum.map(&create_field/1)
     |> Enum.reject(&is_nil/1)
   end

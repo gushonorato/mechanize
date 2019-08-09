@@ -1,7 +1,6 @@
 defmodule Mechanizex.Page do
-  alias Mechanizex.{Request, Response, Query, Form}
+  alias Mechanizex.{Request, Response, Criteria, Form}
   alias Mechanizex.Page.{Link, Element}
-  import Mechanizex.Query
 
   @enforce_keys [:request, :response, :agent]
   defstruct request: nil, response: nil, agent: nil, parser: nil
@@ -29,14 +28,14 @@ defmodule Mechanizex.Page do
     |> Link.click()
   end
 
-  defdelegate links(page, criterias), to: __MODULE__, as: :links_with
+  defdelegate links(page, criteria), to: __MODULE__, as: :links_with
 
-  def links_with(page, criterias \\ [])
+  def links_with(page, criteria \\ [])
 
-  def links_with(page, criterias) do
+  def links_with(page, criteria) do
     page
-    |> search("a, area")
-    |> Enum.filter(query(criterias))
+    |> Criteria.search("a, area")
+    |> Enum.filter(&Criteria.match?(&1, criteria))
     |> Element.to_links()
   end
 
@@ -54,12 +53,12 @@ defmodule Mechanizex.Page do
 
   defdelegate form(page), to: __MODULE__, as: :form_with
 
-  def form_with(page, criterias \\ [])
+  def form_with(page, criteria \\ [])
 
-  def form_with(page, criterias) do
+  def form_with(page, criteria) do
     page
-    |> Query.search("form")
-    |> Enum.filter(query(criterias))
+    |> Criteria.search("form")
+    |> Enum.filter(&Criteria.match?(&1, criteria))
     |> List.first()
     |> Form.new()
   end

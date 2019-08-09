@@ -1,5 +1,5 @@
 defmodule Mechanizex.Form.RadioButton do
-  alias Mechanizex.{Form, Query}
+  alias Mechanizex.{Form, Criteria}
   alias Mechanizex.Page.{Element, Elementable}
 
   @enforce_keys [:element]
@@ -39,7 +39,7 @@ defmodule Mechanizex.Form.RadioButton do
     form
     |> Form.update_radio_buttons(fn field ->
       cond do
-        Query.match?(field, criteria) ->
+        Criteria.match?(field, criteria) ->
           %__MODULE__{field | checked: true}
 
         field.name in radio_groups ->

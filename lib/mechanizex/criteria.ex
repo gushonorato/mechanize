@@ -1,12 +1,6 @@
-defmodule Mechanizex.Query do
+defmodule Mechanizex.Criteria do
   alias Mechanizex.Page.Element
   alias Mechanizex.HTMLParser.Parseable
-
-  defmacro query(criteria) do
-    quote do
-      &Mechanizex.Query.match?(&1, unquote(criteria))
-    end
-  end
 
   def match?(_element, []), do: true
 
@@ -58,5 +52,3 @@ defmodule Mechanizex.Query do
 
   def parser(element), do: Parseable.parser(element)
 end
-
-#

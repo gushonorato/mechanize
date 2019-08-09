@@ -1,6 +1,5 @@
 defmodule Mechanizex.Page.Element do
   alias Mechanizex.Page.Elementable
-  alias Mechanizex.Page.Link
 
   defstruct name: nil,
             attrs: nil,
@@ -55,18 +54,6 @@ defmodule Mechanizex.Page.Element do
     value
     |> String.downcase()
     |> String.trim()
-  end
-
-  def to_links(elements) when is_list(elements) do
-    Enum.map(elements, &to_link/1)
-  end
-
-  def to_link(%Mechanizex.Page.Element{name: "a"} = element) do
-    %Link{element: element}
-  end
-
-  def to_link(%Mechanizex.Page.Element{name: "area"} = element) do
-    %Link{element: element}
   end
 end
 

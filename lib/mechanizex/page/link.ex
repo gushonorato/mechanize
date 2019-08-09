@@ -18,4 +18,8 @@ defmodule Mechanizex.Page.Link do
     |> Page.agent()
     |> Mechanizex.Agent.get!(URI.merge(base_url, url))
   end
+
+  def new(el) do
+    %__MODULE__{element: el}
+  end
 end

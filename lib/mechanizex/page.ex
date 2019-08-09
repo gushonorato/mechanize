@@ -1,6 +1,6 @@
 defmodule Mechanizex.Page do
   alias Mechanizex.{Request, Response, Criteria, Form}
-  alias Mechanizex.Page.{Link, Element}
+  alias Mechanizex.Page.Link
 
   @enforce_keys [:request, :response, :agent]
   defstruct request: nil, response: nil, agent: nil, parser: nil
@@ -28,39 +28,43 @@ defmodule Mechanizex.Page do
     |> Link.click()
   end
 
-  defdelegate links(page, criteria), to: __MODULE__, as: :links_with
+  defdelegate links(page), to: __MODULE__, as: :links_with
 
-  def links_with(page, criteria \\ [])
-
-  def links_with(page, criteria) do
+  def link_with(page, criteria \\ []) do
     page
-    |> Criteria.search("a, area")
-    |> Enum.filter(&Criteria.match?(&1, criteria))
-    |> Element.to_links()
+    |> links_with(criteria)
+    |> List.first()
   end
 
-  def link_with(page, criterias \\ [])
+  def links_with(page, criteria \\ []), do: elements_with(page, "a, area", criteria, &Link.new/1)
 
-  def link_with(page, criterias) do
+  def form(page) do
     page
-    |> links_with(criterias)
+    |> forms()
     |> List.first()
+  end
+
+  defdelegate forms(page), to: __MODULE__, as: :forms_with
+
+  def form_with(page, criteria \\ []) do
+    page
+    |> forms_with(criteria)
+    |> List.first()
+  end
+
+  def forms_with(page, criteria \\ []), do: elements_with(page, "form", criteria, &Form.new/1)
+
+  def elements_with(page, selector, criteria \\ [], construct_fun \\ fn x -> x end)
+
+  def elements_with(page, selector, criteria, construct_fun) do
+    page
+    |> Criteria.search(selector)
+    |> Enum.filter(&Criteria.match?(&1, criteria))
+    |> Enum.map(construct_fun)
   end
 
   def url(page) do
     page.response.url
-  end
-
-  defdelegate form(page), to: __MODULE__, as: :form_with
-
-  def form_with(page, criteria \\ [])
-
-  def form_with(page, criteria) do
-    page
-    |> Criteria.search("form")
-    |> Enum.filter(&Criteria.match?(&1, criteria))
-    |> List.first()
-    |> Form.new()
   end
 end
 

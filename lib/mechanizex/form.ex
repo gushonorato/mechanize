@@ -145,6 +145,7 @@ defmodule Mechanizex.Form do
   end
 
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
+  defdelegate click_image(form, criteria), to: ImageInput, as: :click
 
   defp assert_form_updated(new_form, old_form, message) do
     if new_form.fields != old_form.fields do

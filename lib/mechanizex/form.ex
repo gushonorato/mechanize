@@ -2,7 +2,7 @@ defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
   alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
   alias Mechanizex.{Criteria, Request}
-  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox, ImageInput}
+  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox, ImageInput, SelectList}
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -223,7 +223,7 @@ defmodule Mechanizex.Form do
 
   defp parse_fields(element) do
     element
-    |> Criteria.search("input, textarea, button")
+    |> Criteria.search("input, textarea, button, select")
     |> Enum.map(&create_field/1)
     |> Enum.reject(&is_nil/1)
   end
@@ -253,6 +253,9 @@ defmodule Mechanizex.Form do
 
       name == "textarea" or name == "input" ->
         TextInput.new(el)
+
+      name == "select" ->
+        SelectList.new(el)
 
       true ->
         nil

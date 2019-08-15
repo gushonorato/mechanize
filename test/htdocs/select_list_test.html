@@ -10,17 +10,28 @@
 
 <body>
   <form name="basic_select_form" method="post" action="/form_post">
-    <select name="list1">
+    <select name="select1">
       <option value="1">Option 1</option>
       <option value="2" selected>Option 2</option>
       <option label="Label 3" value="3">Option 3</option>
       <option>Option 4</option>
     </select>
 
-    <select name="list2">
+    <select name="select2">
       <option value="5">Option 5</option>
     </select>
-    <br />
+
+    <select multiple name="multiple1">
+      <option value="1">Option 1</option>
+      <option value="2" selected>Option 2</option>
+      <option label="Label 3" value="3">Option 3</option>
+      <option>Option 4</option>
+    </select>
+
+    <input type="submit" value="Submit" />
+  </form>
+
+  <form action="" method="post" name="empty_form">
     <input type="submit" value="Submit" />
   </form>
 </body>

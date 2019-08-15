@@ -1,6 +1,7 @@
 defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.SelectListOptions
+  alias Mechanizex.Form.SelectListOption
+  alias Mechanizex.Form
   alias Mechanizex.Criteria
 
   @enforce_keys [:element]
@@ -28,14 +29,33 @@ defmodule Mechanizex.Form.SelectList do
   defp fetch_options(el) do
     el
     |> Criteria.search("option")
-    |> Enum.map(&SelectListOptions.new(&1))
+    |> Enum.with_index()
+    |> Enum.map(&SelectListOption.new(&1))
   end
 
   defmacro __using__(_opts) do
     quote do
       alias unquote(__MODULE__)
       use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
+    end
+  end
+
+  def update_select_lists(form, fun) do
+    update_select_lists_with(form, [], fun)
+  end
+
+  def update_select_lists_with(form, criteria, fun) do
+    Form.update_fields(form, __MODULE__, fn select ->
+      options = Enum.map(select.options, &update_option(&1, select, criteria, fun))
+      %__MODULE__{select | options: options}
+    end)
+  end
+
+  defp update_option(option, select, criteria, fun) do
+    if Criteria.match?(select, criteria) do
+      fun.(select, option)
+    else
+      option
     end
   end
 end

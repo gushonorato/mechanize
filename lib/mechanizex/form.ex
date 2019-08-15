@@ -105,6 +105,9 @@ defmodule Mechanizex.Form do
     |> Enum.filter(&Criteria.match?(&1, criteria))
   end
 
+  defdelegate update_select_lists(form, fun), to: SelectList
+  defdelegate update_select_lists_with(form, criteria, fun), to: SelectList
+
   defdelegate check_checkboxes(form, criteria), to: __MODULE__, as: :check_checkbox
 
   def check_checkbox(form, criteria) do

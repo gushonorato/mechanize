@@ -1,7 +1,7 @@
 defmodule Mechanizex.Form.SelectTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.SelectList
+  alias Mechanizex.Form.{SelectList, SelectListOption}
   alias Mechanizex.Page.Element
   import TestHelper
 
@@ -14,7 +14,7 @@ defmodule Mechanizex.Form.SelectTest do
     test "get all select lists", %{form: form} do
       assert form
              |> Form.select_lists()
-             |> Enum.map(& &1.name) == ["list1", "list2"]
+             |> Enum.map(& &1.name) == ["select1", "select2", "multiple1"]
     end
   end
 
@@ -25,27 +25,27 @@ defmodule Mechanizex.Form.SelectTest do
 
     test "select list found by name", %{form: form} do
       assert form
-             |> Form.select_lists_with(name: "list1")
-             |> Enum.map(& &1.name) == ["list1"]
+             |> Form.select_lists_with(name: "select1")
+             |> Enum.map(& &1.name) == ["select1"]
     end
   end
 
   describe ".options" do
     test "get option from a list with just one SelectList", %{form: form} do
       assert form
-             |> Form.select_lists_with(name: "list1")
+             |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
-               {"Option 2", "2", "Option 2", true},
-               {"Label 3", "3", "Option 3", false},
-               {"Option 4", "Option 4", "Option 4", false}
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected, &1.index}) == [
+               {"Option 1", "1", "Option 1", false, 0},
+               {"Option 2", "2", "Option 2", true, 1},
+               {"Label 3", "3", "Option 3", false, 2},
+               {"Option 4", "Option 4", "Option 4", false, 3}
              ]
     end
 
     test "get options from all SelectLists inside a list", %{form: form} do
       assert form
-             |> Form.select_lists_with(name: ~r/list/)
+             |> Form.select_lists_with(name: ~r/^select/)
              |> SelectList.options()
              |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
                {"Option 1", "1", "Option 1", false},
@@ -58,7 +58,7 @@ defmodule Mechanizex.Form.SelectTest do
 
     test "get options from a SelectList struct", %{form: form} do
       assert form
-             |> Form.select_lists_with(name: "list2")
+             |> Form.select_lists_with(name: "select2")
              |> List.first()
              |> SelectList.options()
              |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
@@ -67,9 +67,134 @@ defmodule Mechanizex.Form.SelectTest do
     end
   end
 
+  describe ".update_select_lists" do
+    test "select by list name and option value", %{form: form} do
+      assert form
+             |> Form.update_select_lists(fn select, option ->
+               cond do
+                 select.name == "select1" and option.value == "3" ->
+                   %SelectListOption{option | selected: true}
+
+                 select.name == "select1" ->
+                   %SelectListOption{option | selected: false}
+
+                 true ->
+                   option
+               end
+             end)
+             |> Form.select_lists()
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false},
+               {"Option 5", "5", "Option 5", false},
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", true},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+
+    test "select first element of select1 by index", %{form: form} do
+      assert form
+             |> Form.update_select_lists(fn select, option ->
+               cond do
+                 select.name == "select1" and option.index == 0 ->
+                   %SelectListOption{option | selected: true}
+
+                 select.name == "select1" ->
+                   %SelectListOption{option | selected: false}
+
+                 true ->
+                   option
+               end
+             end)
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", true},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+
+    test "no select list in form", %{page: page} do
+      page
+      |> Page.form_with(name: "empty_form")
+      |> Form.update_select_lists(fn -> raise "Should not be called." end)
+    end
+
+    test "select third option of all selects", %{form: form} do
+      assert form
+             |> Form.update_select_lists(fn _select, option ->
+               if option.index == 2 do
+                 %SelectListOption{option | selected: true}
+               else
+                 %SelectListOption{option | selected: false}
+               end
+             end)
+             |> Form.select_lists()
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false},
+               {"Option 5", "5", "Option 5", false},
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+  end
+
   describe ".update_select_lists_with" do
-    test "by criteria with name"
-    test "update more than one select list at once"
+    test "select by list name and option value", %{form: form} do
+      assert form
+             |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
+               if option.value == "3" do
+                 %SelectListOption{option | selected: true}
+               else
+                 %SelectListOption{option | selected: false}
+               end
+             end)
+             |> Form.select_lists()
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false},
+               {"Option 5", "5", "Option 5", false},
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", true},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+
+    test "select first element of select1 by index", %{form: form} do
+      assert form
+             |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
+               if option.index == 0 do
+                 %SelectListOption{option | selected: true}
+               else
+                 %SelectListOption{option | selected: false}
+               end
+             end)
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", true},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
   end
 
   describe ".select_options" do
@@ -78,6 +203,8 @@ defmodule Mechanizex.Form.SelectTest do
     test "raise when many options selected on single selection select list"
     test "on success return form"
     test "select by option index"
+    test "nil"
+    test "empty"
   end
 
   describe ".unselect_options" do
@@ -85,5 +212,7 @@ defmodule Mechanizex.Form.SelectTest do
     test "raise when select list not found"
     test "on success return form"
     test "select by option index"
+    test "nil"
+    test "empty"
   end
 end

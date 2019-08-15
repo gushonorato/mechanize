@@ -68,6 +68,10 @@ defmodule Mechanizex.Form.SelectTest do
   end
 
   describe ".update_select_lists" do
+    test "on success return form", %{form: form} do
+      assert match?(%Form{}, Form.update_select_lists(form, fn _select, option -> option end))
+    end
+
     test "select by list name and option value", %{form: form} do
       assert form
              |> Form.update_select_lists(fn select, option ->

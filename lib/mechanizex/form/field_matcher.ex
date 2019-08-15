@@ -1,4 +1,4 @@
-defmodule Mechanizex.Form.FieldMatchHelper do
+defmodule Mechanizex.Form.FieldMatcher do
   defmacro __using__(opts) do
     {module, opts} = Keyword.pop(opts, :for)
     {suffix, _} = Keyword.pop(opts, :suffix, "s")
@@ -14,14 +14,6 @@ defmodule Mechanizex.Form.FieldMatchHelper do
 
       def unquote(:"#{module_name}#{suffix}_with")(form, criteria) do
         Mechanizex.Form.fields_with(form, unquote(module), criteria)
-      end
-
-      def unquote(:"update_#{module_name}#{suffix}")(form, fun) do
-        Mechanizex.Form.update_fields(form, unquote(module), fun)
-      end
-
-      def unquote(:"update_#{module_name}#{suffix}_with")(form, criteria, fun) do
-        Mechanizex.Form.update_fields(form, unquote(module), criteria, fun)
       end
     end
   end

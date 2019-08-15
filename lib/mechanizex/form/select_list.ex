@@ -34,7 +34,8 @@ defmodule Mechanizex.Form.SelectList do
   defmacro __using__(_opts) do
     quote do
       alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatchHelper, for: unquote(__MODULE__)
+      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
+      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
     end
   end
 end

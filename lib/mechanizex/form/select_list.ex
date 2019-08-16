@@ -1,9 +1,9 @@
 defmodule Mechanizex.Form.SelectList do
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.Form.SelectListOption
   alias Mechanizex.{Form, Query, Queryable}
 
-  @derive [Queryable]
+  @derive [Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, options: []
 
@@ -70,11 +70,4 @@ defmodule Mechanizex.Form.SelectList do
       option
     end
   end
-end
-
-defimpl Mechanizex.Page.Elementable, for: Mechanizex.Form.SelectList do
-  defdelegate page(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate name(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate text(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate attrs(e), to: Mechanizex.Page.Elementable.LabeledElementable
 end

@@ -3,7 +3,7 @@ defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.{Form, Queryable}
   alias(Mechanizex.Form.{ParameterizableField, ClickError})
 
-  @derive [ParameterizableField, Queryable]
+  @derive [ParameterizableField, Queryable, Elementable]
   defstruct element: nil, name: nil, value: nil, label: nil
 
   @type t :: %__MODULE__{
@@ -78,11 +78,4 @@ defmodule Mechanizex.Form.SubmitButton do
           message: "Can't decide which submit button to click because #{length(buttons)} buttons were found."
     end
   end
-end
-
-defimpl Mechanizex.Page.Elementable, for: Mechanizex.Form.SubmitButton do
-  defdelegate page(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate name(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate text(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate attrs(e), to: Mechanizex.Page.Elementable.LabeledElementable
 end

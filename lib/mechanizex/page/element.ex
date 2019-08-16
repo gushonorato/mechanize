@@ -17,16 +17,17 @@ defmodule Mechanizex.Page.Element do
           page: Page.t()
         }
 
-  def page(el), do: Elementable.page(el)
-  def text(el), do: Elementable.text(el)
+  def page(el), do: Elementable.element(el).page
+  def text(el), do: Elementable.element(el).text
 
   def name(el) do
     el
-    |> Elementable.name()
+    |> Elementable.element()
+    |> Map.get(:name)
     |> normalize_value()
   end
 
-  def attrs(el), do: Elementable.attrs(el)
+  def attrs(el), do: Elementable.element(el).attrs
   def attr_present?(el, attr_name), do: attr(el, attr_name) != nil
 
   def attr(el, attr_name, opts \\ []) do
@@ -60,10 +61,7 @@ defmodule Mechanizex.Page.Element do
 end
 
 defimpl Mechanizex.Page.Elementable, for: Mechanizex.Page.Element do
-  def page(e), do: e.page
-  def attrs(e), do: e.attrs
-  def name(e), do: e.name
-  def text(e), do: e.text
+  def element(e), do: e
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do

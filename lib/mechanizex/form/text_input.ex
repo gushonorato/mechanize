@@ -1,9 +1,9 @@
 defmodule Mechanizex.Form.TextInput do
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.Form.ParameterizableField
   alias Mechanizex.Queryable
 
-  @derive [ParameterizableField, Queryable]
+  @derive [ParameterizableField, Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil
 
@@ -29,11 +29,4 @@ defmodule Mechanizex.Form.TextInput do
       value: Element.text(el)
     }
   end
-end
-
-defimpl Mechanizex.Page.Elementable, for: Mechanizex.Form.TextInput do
-  defdelegate page(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate name(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate text(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate attrs(e), to: Mechanizex.Page.Elementable.LabeledElementable
 end

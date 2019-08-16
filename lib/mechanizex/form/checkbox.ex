@@ -1,8 +1,8 @@
 defmodule Mechanizex.Form.Checkbox do
-  alias Mechanizex.Page.Element
+  alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.{Form, Queryable}
 
-  @derive [Queryable]
+  @derive [Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
 
@@ -48,11 +48,4 @@ defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.Checkbox do
   def to_param(field) do
     if field.checked, do: [{field.name, field.value || "on"}], else: []
   end
-end
-
-defimpl Mechanizex.Page.Elementable, for: Mechanizex.Form.Checkbox do
-  defdelegate page(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate name(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate text(e), to: Mechanizex.Page.Elementable.LabeledElementable
-  defdelegate attrs(e), to: Mechanizex.Page.Elementable.LabeledElementable
 end

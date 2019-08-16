@@ -1,6 +1,8 @@
 defmodule Mechanizex.Page.Element do
   alias Mechanizex.Page.Elementable
+  alias Mechanizex.Queryable
 
+  @derive [Queryable]
   defstruct name: nil,
             attrs: nil,
             parser_data: nil,

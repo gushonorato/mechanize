@@ -1,9 +1,9 @@
 defmodule Mechanizex.Form.ImageInput do
   alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form
+  alias Mechanizex.{Form, Queryable}
   alias Mechanizex.Form.{ClickError}
 
-  @derive [Elementable]
+  @derive [Elementable, Queryable]
   defstruct element: nil, name: nil, x: 0, y: 0
 
   @type t :: %__MODULE__{

@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.RadioButton do
-  alias Mechanizex.{Form, Query}
+  alias Mechanizex.{Form, Query, Queryable}
   alias Mechanizex.Page.{Element, Elementable}
 
+  @derive [Queryable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
 

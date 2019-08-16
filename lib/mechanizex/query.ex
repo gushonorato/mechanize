@@ -1,6 +1,6 @@
 defmodule Mechanizex.Query do
-  alias Mechanizex.Page.Element
   alias Mechanizex.HTMLParser.Parseable
+  alias Mechanizex.Queryable
 
   def match?(_element, []), do: true
 
@@ -9,7 +9,7 @@ defmodule Mechanizex.Query do
   end
 
   def match?(element, [{:tags, tags} | criterias]) do
-    String.to_atom(Element.name(element)) in tags and __MODULE__.match?(element, criterias)
+    String.to_atom(Queryable.name(element)) in tags and __MODULE__.match?(element, criterias)
   end
 
   def match?(element, [{:text, text} | criterias]) do
@@ -21,28 +21,28 @@ defmodule Mechanizex.Query do
   end
 
   def attribute_match?(element, {attr_name, nil}) do
-    Element.attr(element, attr_name) == nil
+    attr(element, attr_name) == nil
   end
 
   def attribute_match?(element, {attr_name, value}) when is_binary(value) do
-    Element.attr(element, attr_name) == value
+    attr(element, attr_name) == value
   end
 
   def attribute_match?(element, {attr_name, value}) do
-    attr_value = Element.attr(element, attr_name)
+    attr_value = attr(element, attr_name)
     attr_value != nil and attr_value =~ value
   end
 
   defp text_match?(element, nil) do
-    Element.text(element) == nil
+    Queryable.text(element) == nil
   end
 
   defp text_match?(element, text) when is_binary(text) do
-    Element.text(element) == text
+    Queryable.text(element) == text
   end
 
   defp text_match?(element, text) do
-    Element.text(element) =~ text
+    Queryable.text(element) =~ text
   end
 
   def search(elements, selector), do: parser(elements).search(elements, selector)
@@ -51,4 +51,11 @@ defmodule Mechanizex.Query do
     do: elements |> List.first() |> Parseable.parser()
 
   def parser(element), do: Parseable.parser(element)
+
+  defp attr(queryable, attr_name) do
+    queryable
+    |> Queryable.attrs()
+    |> List.keyfind(Atom.to_string(attr_name), 0, {nil, nil})
+    |> elem(1)
+  end
 end

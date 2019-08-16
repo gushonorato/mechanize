@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.Checkbox do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form
+  alias Mechanizex.{Form, Queryable}
 
+  @derive [Queryable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
 

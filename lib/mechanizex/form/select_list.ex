@@ -1,9 +1,9 @@
 defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.Element
   alias Mechanizex.Form.SelectListOption
-  alias Mechanizex.Form
-  alias Mechanizex.Query
+  alias Mechanizex.{Form, Query, Queryable}
 
+  @derive [Queryable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, options: []
 

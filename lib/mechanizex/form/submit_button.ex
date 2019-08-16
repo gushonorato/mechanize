@@ -1,9 +1,9 @@
 defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form
+  alias Mechanizex.{Form, Queryable}
   alias(Mechanizex.Form.{ParameterizableField, ClickError})
 
-  @derive [ParameterizableField]
+  @derive [ParameterizableField, Queryable]
   defstruct element: nil, name: nil, value: nil, label: nil
 
   @type t :: %__MODULE__{

@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.SelectListOption do
   alias Mechanizex.Page.{Element, Elementable}
+  alias Mechanizex.Queryable
 
-  @derive [Elementable]
+  @derive [Elementable, Queryable]
   @enforce_keys [:element, :index]
   defstruct element: nil, label: nil, value: nil, selected: false, index: nil
 

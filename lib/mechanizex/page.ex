@@ -1,5 +1,5 @@
 defmodule Mechanizex.Page do
-  alias Mechanizex.{Request, Response, Criteria, Form}
+  alias Mechanizex.{Request, Response, Query, Form}
   alias Mechanizex.Page.Link
 
   @enforce_keys [:request, :response, :agent]
@@ -58,8 +58,8 @@ defmodule Mechanizex.Page do
 
   def elements_with(page, selector, criteria, construct_fun) do
     page
-    |> Criteria.search(selector)
-    |> Enum.filter(&Criteria.match?(&1, criteria))
+    |> Query.search(selector)
+    |> Enum.filter(&Query.match?(&1, criteria))
     |> Enum.map(construct_fun)
   end
 

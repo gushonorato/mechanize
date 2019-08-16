@@ -1,4 +1,4 @@
-defmodule Mechanizex.Criteria do
+defmodule Mechanizex.Query do
   alias Mechanizex.Page.Element
   alias Mechanizex.HTMLParser.Parseable
 

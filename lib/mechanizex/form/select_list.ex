@@ -2,7 +2,7 @@ defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.Element
   alias Mechanizex.Form.SelectListOption
   alias Mechanizex.Form
-  alias Mechanizex.Criteria
+  alias Mechanizex.Query
 
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, options: []
@@ -28,7 +28,7 @@ defmodule Mechanizex.Form.SelectList do
 
   defp fetch_options(el) do
     el
-    |> Criteria.search("option")
+    |> Query.search("option")
     |> Enum.with_index()
     |> Enum.map(&SelectListOption.new(&1))
   end
@@ -44,7 +44,7 @@ defmodule Mechanizex.Form.SelectList do
     {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
 
     update_select_lists_with(form, criteria, fn _select, option ->
-      if Criteria.match?(option, opts_criteria) do
+      if Query.match?(option, opts_criteria) do
         %SelectListOption{option | selected: true}
       else
         %SelectListOption{option | selected: false}
@@ -64,7 +64,7 @@ defmodule Mechanizex.Form.SelectList do
   end
 
   defp update_option(option, select, criteria, fun) do
-    if Criteria.match?(select, criteria) do
+    if Query.match?(select, criteria) do
       fun.(select, option)
     else
       option

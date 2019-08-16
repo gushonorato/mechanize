@@ -205,10 +205,24 @@ defmodule Mechanizex.Form.SelectTest do
     test "raise when option not found"
     test "raise when select list not found"
     test "raise when many options selected on single selection select list"
-    test "on success return form"
-    test "select by option index"
-    test "nil"
-    test "empty"
+
+    test "on success return form", %{form: form} do
+      form = SelectList.select(form, name: "select1", options: [value: "1"])
+      assert match?(%Form{}, form)
+    end
+
+    test "select by criteria with select name and option value", %{form: form} do
+      assert form
+             |> SelectList.select(name: "select1", options: [value: "1"])
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", true},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
   end
 
   describe ".unselect_options" do

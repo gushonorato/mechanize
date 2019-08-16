@@ -40,6 +40,18 @@ defmodule Mechanizex.Form.SelectList do
     end
   end
 
+  def select(form, criteria) do
+    {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
+
+    update_select_lists_with(form, criteria, fn _select, option ->
+      if Criteria.match?(option, opts_criteria) do
+        %SelectListOption{option | selected: true}
+      else
+        %SelectListOption{option | selected: false}
+      end
+    end)
+  end
+
   def update_select_lists(form, fun) do
     update_select_lists_with(form, [], fun)
   end

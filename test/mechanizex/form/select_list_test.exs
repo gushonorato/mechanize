@@ -201,10 +201,24 @@ defmodule Mechanizex.Form.SelectTest do
     end
   end
 
-  describe ".select_options" do
+  describe ".select" do
     test "raise when option not found"
     test "raise when select list not found"
+
     test "raise when many options selected on single selection select list"
+
+    test "select multi select list", %{form: form} do
+      assert form
+             |> SelectList.select(name: "multiple1", options: [value: "1"])
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", true},
+               {"Option 2", "2", "Option 2", true},
+               {"Label 3", "3", "Option 3", false},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
 
     test "on success return form", %{form: form} do
       form = SelectList.select(form, name: "select1", options: [value: "1"])
@@ -264,7 +278,7 @@ defmodule Mechanizex.Form.SelectTest do
     end
   end
 
-  describe ".unselect_options" do
+  describe ".unselect" do
     test "raise when option not found"
     test "raise when select list not found"
     test "on success return form"

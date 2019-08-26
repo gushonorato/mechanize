@@ -223,6 +223,19 @@ defmodule Mechanizex.Form.SelectTest do
                {"Option 4", "Option 4", "Option 4", false}
              ]
     end
+
+    test "select option by 0-based index", %{form: form} do
+      assert form
+             |> SelectList.select(name: "select1", options: [index: 2])
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
   end
 
   describe ".unselect_options" do

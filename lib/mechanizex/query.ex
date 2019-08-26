@@ -24,7 +24,7 @@ defmodule Mechanizex.Query do
     attr(element, attr_name) == nil
   end
 
-  def attribute_match?(element, {attr_name, value}) when is_binary(value) do
+  def attribute_match?(element, {attr_name, value}) when is_binary(value) or is_integer(value) do
     attr(element, attr_name) == value
   end
 

@@ -49,6 +49,18 @@ defmodule Mechanizex.QueryTest do
              |> Enum.map(&Element.text/1) == ["Microsoft", "Amazon"]
     end
 
+    test "select without attributes using boolean criteria" do
+      assert @subject
+             |> Enum.filter(&Query.match?(&1, disabled: false))
+             |> Enum.map(&Element.text/1) == ["Microsoft", "Amazon"]
+    end
+
+    test "select elements if attribute is present using boolean criteria" do
+      assert @subject
+             |> Enum.filter(&Query.match?(&1, disabled: true))
+             |> Enum.map(&Element.text/1) == ["Google"]
+    end
+
     test "both by attributes and element name" do
       assert @subject
              |> Enum.filter(&Query.match?(&1, tag: :a, rel: "follow"))

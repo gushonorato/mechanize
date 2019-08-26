@@ -14,10 +14,10 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
     </head>
     <body>
       <div id="main" class="container" data-method="get">
-        <a href="http://google.com" class="company js-google js-cool">Google</a>
+        <a disabled href="http://google.com" class="company js-google js-cool">Google</a>
       </div>
       <div class="content">
-        <a href="http://google.com" class="company js-google js-cool">Google</a>
+        <a disabled href="http://google.com" class="company js-google js-cool">Google</a>
         <a href="http://elixir-lang.org" class="js-elixir js-cool">Elixir lang</a>
         <a href="http://java.com" class="js-java">Java</a>
       </div>
@@ -58,11 +58,11 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @google %Element{
     name: "a",
-    attrs: [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
+    attrs: [{"disabled", "disabled"}, {"href", "http://google.com"}, {"class", "company js-google js-cool"}],
     text: "Google",
     parser_data: {
       "a",
-      [{"href", "http://google.com"}, {"class", "company js-google js-cool"}],
+      [{"disabled", "disabled"}, {"href", "http://google.com"}, {"class", "company js-google js-cool"}],
       ["Google"]
     },
     page: @page
@@ -84,6 +84,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
           [
             {"a",
              [
+               {"disabled", "disabled"},
                {"href", "http://google.com"},
                {"class", "company js-google js-cool"}
              ], ["Google"]}

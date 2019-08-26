@@ -20,8 +20,12 @@ defmodule Mechanizex.Query do
     attribute_match?(element, attributes) and __MODULE__.match?(element, criterias)
   end
 
-  def attribute_match?(element, {attr_name, nil}) do
+  def attribute_match?(element, {attr_name, value}) when value == nil or value == false do
     attr(element, attr_name) == nil
+  end
+
+  def attribute_match?(element, {attr_name, true}) do
+    attr(element, attr_name) != nil
   end
 
   def attribute_match?(element, {attr_name, value}) when is_binary(value) or is_integer(value) do

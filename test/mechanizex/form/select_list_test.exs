@@ -211,7 +211,33 @@ defmodule Mechanizex.Form.SelectTest do
       assert match?(%Form{}, form)
     end
 
-    test "select by criteria with select name and option value", %{form: form} do
+    test "select option by text", %{form: form} do
+      assert form
+             |> SelectList.select(name: "select1", options: [text: "Option 3"])
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+
+    test "select option by label", %{form: form} do
+      assert form
+             |> SelectList.select(name: "select1", options: [label: "Label 3"])
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
+               {"Option 1", "1", "Option 1", false},
+               {"Option 2", "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {"Option 4", "Option 4", "Option 4", false}
+             ]
+    end
+
+    test "select by criteria with attributes name and option value", %{form: form} do
       assert form
              |> SelectList.select(name: "select1", options: [value: "1"])
              |> Form.select_lists_with(name: "select1")

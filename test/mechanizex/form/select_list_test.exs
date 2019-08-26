@@ -1,7 +1,7 @@
 defmodule Mechanizex.Form.SelectTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.{SelectList, SelectListOption}
+  alias Mechanizex.Form.{SelectList, Option}
   alias Mechanizex.Page.Element
   import TestHelper
 
@@ -77,10 +77,10 @@ defmodule Mechanizex.Form.SelectTest do
              |> Form.update_select_lists(fn select, option ->
                cond do
                  select.name == "select1" and option.value == "3" ->
-                   %SelectListOption{option | selected: true}
+                   %Option{option | selected: true}
 
                  select.name == "select1" ->
-                   %SelectListOption{option | selected: false}
+                   %Option{option | selected: false}
 
                  true ->
                    option
@@ -106,10 +106,10 @@ defmodule Mechanizex.Form.SelectTest do
              |> Form.update_select_lists(fn select, option ->
                cond do
                  select.name == "select1" and option.index == 0 ->
-                   %SelectListOption{option | selected: true}
+                   %Option{option | selected: true}
 
                  select.name == "select1" ->
-                   %SelectListOption{option | selected: false}
+                   %Option{option | selected: false}
 
                  true ->
                    option
@@ -135,9 +135,9 @@ defmodule Mechanizex.Form.SelectTest do
       assert form
              |> Form.update_select_lists(fn _select, option ->
                if option.index == 2 do
-                 %SelectListOption{option | selected: true}
+                 %Option{option | selected: true}
                else
-                 %SelectListOption{option | selected: false}
+                 %Option{option | selected: false}
                end
              end)
              |> Form.select_lists()
@@ -161,9 +161,9 @@ defmodule Mechanizex.Form.SelectTest do
       assert form
              |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
                if option.value == "3" do
-                 %SelectListOption{option | selected: true}
+                 %Option{option | selected: true}
                else
-                 %SelectListOption{option | selected: false}
+                 %Option{option | selected: false}
                end
              end)
              |> Form.select_lists()
@@ -185,9 +185,9 @@ defmodule Mechanizex.Form.SelectTest do
       assert form
              |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
                if option.index == 0 do
-                 %SelectListOption{option | selected: true}
+                 %Option{option | selected: true}
                else
-                 %SelectListOption{option | selected: false}
+                 %Option{option | selected: false}
                end
              end)
              |> Form.select_lists_with(name: "select1")

@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form.SelectListOption
+  alias Mechanizex.Form.Option
   alias Mechanizex.{Form, Query, Queryable}
 
   @derive [Queryable, Elementable]
@@ -30,7 +30,7 @@ defmodule Mechanizex.Form.SelectList do
     el
     |> Query.search("option")
     |> Enum.with_index()
-    |> Enum.map(&SelectListOption.new(&1))
+    |> Enum.map(&Option.new(&1))
   end
 
   defmacro __using__(_opts) do
@@ -45,9 +45,9 @@ defmodule Mechanizex.Form.SelectList do
 
     update_select_lists_with(form, criteria, fn _select, option ->
       if Query.match?(option, opts_criteria) do
-        %SelectListOption{option | selected: true}
       else
-        %SelectListOption{option | selected: false}
+          %Option{option | selected: true}
+          %Option{option | selected: false}
       end
     end)
   end

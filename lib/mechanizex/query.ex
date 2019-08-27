@@ -2,6 +2,10 @@ defmodule Mechanizex.Query do
   alias Mechanizex.HTMLParser.Parseable
   alias Mechanizex.Queryable
 
+  defmodule BadCriteriaError do
+    defexception [:message]
+  end
+
   def match?(_element, []), do: true
 
   def match?(element, [{:tag, tag} | criterias]) do

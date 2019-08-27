@@ -213,19 +213,19 @@ defmodule Mechanizex.Form.SelectTest do
 
   describe ".select" do
     test "raise when option not found", %{form: form} do
-      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/No option found/, fn ->
+      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No option found/, fn ->
         SelectList.select(form, name: "select1", options: [label: ~r/Lero/])
       end
     end
 
     test "raise when select list not found", %{form: form} do
-      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/No select found/, fn ->
+      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No select found/, fn ->
         SelectList.select(form, name: "lero", options: [label: ~r/Option/])
       end
     end
 
     test "raise when many options selected on single selection select list", %{form: form} do
-      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/Multiple selected/, fn ->
+      assert_raise Mechanizex.Form.InconsistentFormError, ~r/Multiple selected/, fn ->
         SelectList.select(form, name: "select1", options: [label: ~r/Option/])
       end
     end

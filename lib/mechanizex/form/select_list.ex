@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form.Option
+  alias Mechanizex.Form.{Option, InconsistentFormError}
   alias Mechanizex.Query
+  alias Mechanizex.Query.BadCriteriaError
   alias Mechanizex.{Form, Query, Queryable}
 
   @derive [Queryable, Elementable]
@@ -22,10 +23,6 @@ defmodule Mechanizex.Form.SelectList do
       label: Element.attr(el, :label),
       options: fetch_options(el)
     }
-  end
-
-  defmodule SelectError do
-    defexception [:message]
   end
 
   def options(%__MODULE__{} = select), do: options([select])
@@ -81,12 +78,12 @@ defmodule Mechanizex.Form.SelectList do
 
   defp assert_select_found(form, criteria) do
     if Form.select_lists_with(form, criteria) == [],
-      do: raise(SelectError, "No select found with criteria #{inspect(criteria)}")
+      do: raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
   end
 
   defp assert_options_found(options, criteria) do
     if Enum.filter(options, &Query.match?(&1, criteria)) == [],
-      do: raise(SelectError, "No option found with criteria #{inspect(criteria)} in select")
+      do: raise(BadCriteriaError, "No option found with criteria #{inspect(criteria)} in select")
   end
 
   defp assert_single_option_selected(form) do
@@ -100,7 +97,7 @@ defmodule Mechanizex.Form.SelectList do
         form
 
       names ->
-        raise SelectError, "Multiple selected options on single select list with name(s) #{names}"
+        raise InconsistentFormError, "Multiple selected options on single select list with name(s) #{names}"
     end
   end
 end

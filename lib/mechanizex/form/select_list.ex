@@ -1,6 +1,7 @@
 defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.Form.Option
+  alias Mechanizex.Query
   alias Mechanizex.{Form, Query, Queryable}
 
   @derive [Queryable, Elementable]
@@ -23,8 +24,18 @@ defmodule Mechanizex.Form.SelectList do
     }
   end
 
-  def options(%__MODULE__{} = select_list), do: options([select_list])
-  def options(list), do: Enum.flat_map(list, & &1.options)
+  defmodule SelectError do
+    defexception [:message]
+  end
+
+  def options(%__MODULE__{} = select), do: options([select])
+  def options(selects), do: Enum.flat_map(selects, & &1.options)
+
+  def selected_options(selects) do
+    selects
+    |> options()
+    |> Enum.filter(fn opt -> opt.selected end)
+  end
 
   defp fetch_options(el) do
     el
@@ -33,46 +44,63 @@ defmodule Mechanizex.Form.SelectList do
     |> Enum.map(&Option.new(&1))
   end
 
+  def update_options(select, fun) do
+    %__MODULE__{select | options: Enum.map(select.options, fun)}
+  end
+
   defmacro __using__(_opts) do
     quote do
       alias unquote(__MODULE__)
       use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
+      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
     end
   end
 
   def select(form, criteria) do
     {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
+    assert_select_found(form, criteria)
 
-    update_select_lists_with(form, criteria, fn select, option ->
-      cond do
-        Query.match?(option, opts_criteria) ->
-          %Option{option | selected: true}
+    Form.update_select_lists_with(form, criteria, fn select ->
+      assert_options_found(select.options, opts_criteria)
 
-        Element.attr_present?(select, :multiple) ->
-          option
+      update_options(select, fn opt ->
+        cond do
+          Query.match?(opt, opts_criteria) ->
+            %Option{opt | selected: true}
 
-        true ->
-          %Option{option | selected: false}
-      end
+          Element.attr_present?(select, :multiple) ->
+            opt
+
+          true ->
+            %Option{opt | selected: false}
+        end
+      end)
     end)
+    |> assert_single_option_selected
   end
 
-  def update_select_lists(form, fun) do
-    update_select_lists_with(form, [], fun)
+  defp assert_select_found(form, criteria) do
+    if Form.select_lists_with(form, criteria) == [],
+      do: raise(SelectError, "No select found with criteria #{inspect(criteria)}")
   end
 
-  def update_select_lists_with(form, criteria, fun) do
-    Form.update_fields(form, __MODULE__, fn select ->
-      options = Enum.map(select.options, &update_option(&1, select, criteria, fun))
-      %__MODULE__{select | options: options}
-    end)
+  defp assert_options_found(options, criteria) do
+    if Enum.filter(options, &Query.match?(&1, criteria)) == [],
+      do: raise(SelectError, "No option found with criteria #{inspect(criteria)} in select")
   end
 
-  defp update_option(option, select, criteria, fun) do
-    if Query.match?(select, criteria) do
-      fun.(select, option)
-    else
-      option
+  defp assert_single_option_selected(form) do
+    form
+    |> Form.select_lists_with(multiple: false)
+    |> Stream.map(fn select -> {select.name, length(selected_options(select))} end)
+    |> Stream.filter(fn {_, selected} -> selected > 1 end)
+    |> Enum.map(fn {name, _} -> name end)
+    |> case do
+      [] ->
+        form
+
+      names ->
+        raise SelectError, "Multiple selected options on single select list with name(s) #{names}"
     end
   end
 end

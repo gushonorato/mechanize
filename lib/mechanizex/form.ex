@@ -105,9 +105,6 @@ defmodule Mechanizex.Form do
     |> Enum.filter(&Query.match?(&1, criteria))
   end
 
-  defdelegate update_select_lists(form, fun), to: SelectList
-  defdelegate update_select_lists_with(form, criteria, fun), to: SelectList
-
   defdelegate check_checkboxes(form, criteria), to: __MODULE__, as: :check_checkbox
 
   def check_checkbox(form, criteria) do
@@ -153,7 +150,7 @@ defmodule Mechanizex.Form do
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
   defdelegate click_image(form, criteria), to: ImageInput, as: :click
 
-  defp assert_form_updated(new_form, old_form, message) do
+  def assert_form_updated(new_form, old_form, message) do
     if new_form.fields != old_form.fields do
       new_form
     else

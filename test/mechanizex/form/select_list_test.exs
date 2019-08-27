@@ -69,22 +69,24 @@ defmodule Mechanizex.Form.SelectTest do
 
   describe ".update_select_lists" do
     test "on success return form", %{form: form} do
-      assert match?(%Form{}, Form.update_select_lists(form, fn _select, option -> option end))
+      assert match?(%Form{}, Form.update_select_lists(form, fn select -> select end))
     end
 
     test "select by list name and option value", %{form: form} do
       assert form
-             |> Form.update_select_lists(fn select, option ->
-               cond do
-                 select.name == "select1" and option.value == "3" ->
-                   %Option{option | selected: true}
+             |> Form.update_select_lists(fn select ->
+               SelectList.update_options(select, fn opt ->
+                 cond do
+                   select.name == "select1" and opt.value == "3" ->
+                     %Option{opt | selected: true}
 
-                 select.name == "select1" ->
-                   %Option{option | selected: false}
+                   select.name == "select1" ->
+                     %Option{opt | selected: false}
 
-                 true ->
-                   option
-               end
+                   true ->
+                     opt
+                 end
+               end)
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -103,17 +105,19 @@ defmodule Mechanizex.Form.SelectTest do
 
     test "select first element of select1 by index", %{form: form} do
       assert form
-             |> Form.update_select_lists(fn select, option ->
-               cond do
-                 select.name == "select1" and option.index == 0 ->
-                   %Option{option | selected: true}
+             |> Form.update_select_lists(fn select ->
+               SelectList.update_options(select, fn opt ->
+                 cond do
+                   select.name == "select1" and opt.index == 0 ->
+                     %Option{opt | selected: true}
 
-                 select.name == "select1" ->
-                   %Option{option | selected: false}
+                   select.name == "select1" ->
+                     %Option{opt | selected: false}
 
-                 true ->
-                   option
-               end
+                   true ->
+                     opt
+                 end
+               end)
              end)
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
@@ -133,12 +137,14 @@ defmodule Mechanizex.Form.SelectTest do
 
     test "select third option of all selects", %{form: form} do
       assert form
-             |> Form.update_select_lists(fn _select, option ->
-               if option.index == 2 do
-                 %Option{option | selected: true}
-               else
-                 %Option{option | selected: false}
-               end
+             |> Form.update_select_lists(fn select ->
+               SelectList.update_options(select, fn opt ->
+                 if opt.index == 2 do
+                   %Option{opt | selected: true}
+                 else
+                   %Option{opt | selected: false}
+                 end
+               end)
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -159,12 +165,14 @@ defmodule Mechanizex.Form.SelectTest do
   describe ".update_select_lists_with" do
     test "select by list name and option value", %{form: form} do
       assert form
-             |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
-               if option.value == "3" do
-                 %Option{option | selected: true}
-               else
-                 %Option{option | selected: false}
-               end
+             |> Form.update_select_lists_with([name: "select1"], fn select ->
+               SelectList.update_options(select, fn opt ->
+                 if opt.value == "3" do
+                   %Option{opt | selected: true}
+                 else
+                   %Option{opt | selected: false}
+                 end
+               end)
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -183,12 +191,14 @@ defmodule Mechanizex.Form.SelectTest do
 
     test "select first element of select1 by index", %{form: form} do
       assert form
-             |> Form.update_select_lists_with([name: "select1"], fn _select, option ->
-               if option.index == 0 do
-                 %Option{option | selected: true}
-               else
-                 %Option{option | selected: false}
-               end
+             |> Form.update_select_lists_with([name: "select1"], fn select ->
+               SelectList.update_options(select, fn opt ->
+                 if opt.index == 0 do
+                   %Option{opt | selected: true}
+                 else
+                   %Option{opt | selected: false}
+                 end
+               end)
              end)
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
@@ -202,21 +212,34 @@ defmodule Mechanizex.Form.SelectTest do
   end
 
   describe ".select" do
-    test "raise when option not found"
-    test "raise when select list not found"
+    test "raise when option not found", %{form: form} do
+      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/No option found/, fn ->
+        SelectList.select(form, name: "select1", options: [label: ~r/Lero/])
+      end
+    end
 
-    test "raise when many options selected on single selection select list"
+    test "raise when select list not found", %{form: form} do
+      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/No select found/, fn ->
+        SelectList.select(form, name: "lero", options: [label: ~r/Option/])
+      end
+    end
+
+    test "raise when many options selected on single selection select list", %{form: form} do
+      assert_raise Mechanizex.Form.SelectList.SelectError, ~r/Multiple selected/, fn ->
+        SelectList.select(form, name: "select1", options: [label: ~r/Option/])
+      end
+    end
 
     test "select multi select list", %{form: form} do
       assert form
-             |> SelectList.select(name: "multiple1", options: [value: "1"])
+             |> SelectList.select(name: "multiple1", options: [label: ~r/Option/])
              |> Form.select_lists_with(name: "multiple1")
              |> SelectList.options()
              |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
                {"Option 1", "1", "Option 1", true},
                {"Option 2", "2", "Option 2", true},
                {"Label 3", "3", "Option 3", false},
-               {"Option 4", "Option 4", "Option 4", false}
+               {"Option 4", "Option 4", "Option 4", true}
              ]
     end
 

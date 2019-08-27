@@ -101,7 +101,7 @@ defmodule Mechanizex.Form.SelectTest do
                {"Option 5", "5", "Option 5", false},
                {"Option 1", "1", "Option 1", false},
                {"Option 2", "2", "Option 2", true},
-               {"Label 3", "3", "Option 3", false},
+               {"Label 3", "3", "Option 3", true},
                {"Option 4", "Option 4", "Option 4", false}
              ]
     end
@@ -141,7 +141,7 @@ defmodule Mechanizex.Form.SelectTest do
       |> Form.update_select_lists(fn -> raise "Should not be called." end)
     end
 
-    test "select third option of all selects", %{form: form} do
+    test "select first option of all selects", %{form: form} do
       assert form
              |> Form.update_select_lists(fn select ->
                options =
@@ -158,14 +158,14 @@ defmodule Mechanizex.Form.SelectTest do
              |> Form.select_lists()
              |> SelectList.options()
              |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
+               {"Option 1", "1", "Option 1", true},
                {"Option 2", "2", "Option 2", false},
-               {"Label 3", "3", "Option 3", true},
+               {"Label 3", "3", "Option 3", false},
                {"Option 4", "Option 4", "Option 4", false},
-               {"Option 5", "5", "Option 5", false},
-               {"Option 1", "1", "Option 1", false},
+               {"Option 5", "5", "Option 5", true},
+               {"Option 1", "1", "Option 1", true},
                {"Option 2", "2", "Option 2", false},
-               {"Label 3", "3", "Option 3", true},
+               {"Label 3", "3", "Option 3", false},
                {"Option 4", "Option 4", "Option 4", false}
              ]
     end
@@ -196,7 +196,7 @@ defmodule Mechanizex.Form.SelectTest do
                {"Option 5", "5", "Option 5", false},
                {"Option 1", "1", "Option 1", false},
                {"Option 2", "2", "Option 2", true},
-               {"Label 3", "3", "Option 3", false},
+               {"Label 3", "3", "Option 3", true},
                {"Option 4", "Option 4", "Option 4", false}
              ]
     end
@@ -253,7 +253,7 @@ defmodule Mechanizex.Form.SelectTest do
              |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
                {"Option 1", "1", "Option 1", true},
                {"Option 2", "2", "Option 2", true},
-               {"Label 3", "3", "Option 3", false},
+               {"Label 3", "3", "Option 3", true},
                {"Option 4", "Option 4", "Option 4", true}
              ]
     end
@@ -314,14 +314,101 @@ defmodule Mechanizex.Form.SelectTest do
                {"Option 4", "Option 4", "Option 4", false}
              ]
     end
+
+    test "empty criteria selects all options", %{form: form} do
+      assert form
+             |> SelectList.select(name: "multiple1")
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{Element.text(&1), &1.selected}) == [
+               {"Option 1", true},
+               {"Option 2", true},
+               {"Option 3", true},
+               {"Option 4", true}
+             ]
+    end
   end
 
   describe ".unselect" do
-    test "raise when option not found"
-    test "raise when select list not found"
-    test "on success return form"
-    test "select by option index"
-    test "nil"
-    test "empty"
+    test "on success return form", %{form: form} do
+      match?(%Form{}, SelectList.unselect(form, name: "multiple1", options: [index: 0]))
+    end
+
+    test "raise when select list not found", %{form: form} do
+      assert_raise(Mechanizex.Query.BadCriteriaError, ~r/No select found/, fn ->
+        SelectList.unselect(form, name: "lero", options: [name: ~r/Option/])
+      end)
+    end
+
+    test "raise when option not found", %{form: form} do
+      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No option found/, fn ->
+        SelectList.unselect(form, name: "multiple1", options: [name: ~r/Lero/])
+      end
+    end
+
+    test "empty option criteria selects all option", %{form: form} do
+      assert form
+             |> SelectList.unselect(name: "multiple1")
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{Element.text(&1), &1.selected}) == [
+               {"Option 1", false},
+               {"Option 2", false},
+               {"Option 3", false},
+               {"Option 4", false}
+             ]
+    end
+
+    test "select option by text", %{form: form} do
+      assert form
+             |> SelectList.unselect(name: "multiple1", options: [text: "Option 2"])
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{Element.text(&1), &1.selected}) == [
+               {"Option 1", false},
+               {"Option 2", false},
+               {"Option 3", true},
+               {"Option 4", false}
+             ]
+    end
+
+    test "select option by label", %{form: form} do
+      assert form
+             |> SelectList.unselect(name: "multiple1", options: [label: "Option 2"])
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.label, &1.selected}) == [
+               {"Option 1", false},
+               {"Option 2", false},
+               {"Label 3", true},
+               {"Option 4", false}
+             ]
+    end
+
+    test "select by criteria with attributes name and option value", %{form: form} do
+      assert form
+             |> SelectList.unselect(name: "multiple1", options: [value: "2"])
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.value, &1.selected}) == [
+               {"1", false},
+               {"2", false},
+               {"3", true},
+               {"Option 4", false}
+             ]
+    end
+
+    test "select option by 0-based index", %{form: form} do
+      assert form
+             |> SelectList.unselect(name: "multiple1", options: [index: 1])
+             |> Form.select_lists_with(name: "multiple1")
+             |> SelectList.options()
+             |> Enum.map(&{&1.index, &1.selected}) == [
+               {0, false},
+               {1, false},
+               {2, true},
+               {3, false}
+             ]
+    end
   end
 end

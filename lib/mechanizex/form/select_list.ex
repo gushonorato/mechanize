@@ -75,6 +75,19 @@ defmodule Mechanizex.Form.SelectList do
     |> assert_single_option_selected
   end
 
+  def unselect(form, criteria) do
+    {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
+    assert_select_found(form, criteria)
+
+    update_options_with(form, criteria, opts_criteria, fn _select, opt ->
+      if Query.match?(opt, opts_criteria) do
+        %Option{opt | selected: false}
+      else
+        opt
+      end
+    end)
+  end
+
   defp assert_select_found(form, criteria) do
     if Form.select_lists_with(form, criteria) == [],
       do: raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")

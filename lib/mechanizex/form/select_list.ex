@@ -113,3 +113,23 @@ defmodule Mechanizex.Form.SelectList do
     end
   end
 end
+
+defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.SelectList do
+  alias Mechanizex.Form.SelectList
+
+  def to_param(select) do
+    case SelectList.selected_options(select) do
+      [] ->
+        option =
+          select
+          |> SelectList.options()
+          |> List.first()
+
+        [{select.name, option.value}]
+
+      options ->
+        options
+        |> Enum.map(&{select.name, &1.value})
+    end
+  end
+end

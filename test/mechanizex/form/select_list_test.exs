@@ -75,18 +75,21 @@ defmodule Mechanizex.Form.SelectTest do
     test "select by list name and option value", %{form: form} do
       assert form
              |> Form.update_select_lists(fn select ->
-               SelectList.update_options(select, fn opt ->
-                 cond do
-                   select.name == "select1" and opt.value == "3" ->
-                     %Option{opt | selected: true}
+               options =
+                 Enum.map(select.options, fn opt ->
+                   cond do
+                     select.name == "select1" and opt.value == "3" ->
+                       %Option{opt | selected: true}
 
-                   select.name == "select1" ->
-                     %Option{opt | selected: false}
+                     select.name == "select1" ->
+                       %Option{opt | selected: false}
 
-                   true ->
-                     opt
-                 end
-               end)
+                     true ->
+                       opt
+                   end
+                 end)
+
+               %SelectList{select | options: options}
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -106,18 +109,21 @@ defmodule Mechanizex.Form.SelectTest do
     test "select first element of select1 by index", %{form: form} do
       assert form
              |> Form.update_select_lists(fn select ->
-               SelectList.update_options(select, fn opt ->
-                 cond do
-                   select.name == "select1" and opt.index == 0 ->
-                     %Option{opt | selected: true}
+               options =
+                 Enum.map(select.options, fn opt ->
+                   cond do
+                     select.name == "select1" and opt.index == 0 ->
+                       %Option{opt | selected: true}
 
-                   select.name == "select1" ->
-                     %Option{opt | selected: false}
+                     select.name == "select1" ->
+                       %Option{opt | selected: false}
 
-                   true ->
-                     opt
-                 end
-               end)
+                     true ->
+                       opt
+                   end
+                 end)
+
+               %SelectList{select | options: options}
              end)
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
@@ -138,13 +144,16 @@ defmodule Mechanizex.Form.SelectTest do
     test "select third option of all selects", %{form: form} do
       assert form
              |> Form.update_select_lists(fn select ->
-               SelectList.update_options(select, fn opt ->
-                 if opt.index == 2 do
-                   %Option{opt | selected: true}
-                 else
-                   %Option{opt | selected: false}
-                 end
-               end)
+               options =
+                 Enum.map(select.options, fn opt ->
+                   if opt.index == 0 do
+                     %Option{opt | selected: true}
+                   else
+                     %Option{opt | selected: false}
+                   end
+                 end)
+
+               %SelectList{select | options: options}
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -166,13 +175,16 @@ defmodule Mechanizex.Form.SelectTest do
     test "select by list name and option value", %{form: form} do
       assert form
              |> Form.update_select_lists_with([name: "select1"], fn select ->
-               SelectList.update_options(select, fn opt ->
-                 if opt.value == "3" do
-                   %Option{opt | selected: true}
-                 else
-                   %Option{opt | selected: false}
-                 end
-               end)
+               options =
+                 Enum.map(select.options, fn opt ->
+                   if opt.value == "3" do
+                     %Option{opt | selected: true}
+                   else
+                     %Option{opt | selected: false}
+                   end
+                 end)
+
+               %SelectList{select | options: options}
              end)
              |> Form.select_lists()
              |> SelectList.options()
@@ -192,13 +204,16 @@ defmodule Mechanizex.Form.SelectTest do
     test "select first element of select1 by index", %{form: form} do
       assert form
              |> Form.update_select_lists_with([name: "select1"], fn select ->
-               SelectList.update_options(select, fn opt ->
-                 if opt.index == 0 do
-                   %Option{opt | selected: true}
-                 else
-                   %Option{opt | selected: false}
-                 end
-               end)
+               options =
+                 Enum.map(select.options, fn opt ->
+                   if opt.index == 0 do
+                     %Option{opt | selected: true}
+                   else
+                     %Option{opt | selected: false}
+                   end
+                 end)
+
+               %SelectList{select | options: options}
              end)
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
@@ -230,7 +245,7 @@ defmodule Mechanizex.Form.SelectTest do
       end
     end
 
-    test "select multi select list", %{form: form} do
+    test "multi select list", %{form: form} do
       assert form
              |> SelectList.select(name: "multiple1", options: [label: ~r/Option/])
              |> Form.select_lists_with(name: "multiple1")

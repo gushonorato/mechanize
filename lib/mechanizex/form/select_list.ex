@@ -41,8 +41,11 @@ defmodule Mechanizex.Form.SelectList do
     |> Enum.map(&Option.new(&1))
   end
 
-  def update_options(select, fun) do
-    %__MODULE__{select | options: Enum.map(select.options, fun)}
+  def update_options_with(form, criteria, opts_criteria, fun) do
+    Form.update_select_lists_with(form, criteria, fn select ->
+      assert_options_found(select.options, opts_criteria)
+      %__MODULE__{select | options: Enum.map(select.options, &fun.(select, &1))}
+    end)
   end
 
   defmacro __using__(_opts) do
@@ -57,21 +60,17 @@ defmodule Mechanizex.Form.SelectList do
     {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
     assert_select_found(form, criteria)
 
-    Form.update_select_lists_with(form, criteria, fn select ->
-      assert_options_found(select.options, opts_criteria)
+    update_options_with(form, criteria, opts_criteria, fn select, opt ->
+      cond do
+        Query.match?(opt, opts_criteria) ->
+          %Option{opt | selected: true}
 
-      update_options(select, fn opt ->
-        cond do
-          Query.match?(opt, opts_criteria) ->
-            %Option{opt | selected: true}
+        Element.attr_present?(select, :multiple) ->
+          opt
 
-          Element.attr_present?(select, :multiple) ->
-            opt
-
-          true ->
-            %Option{opt | selected: false}
-        end
-      end)
+        true ->
+          %Option{opt | selected: false}
+      end
     end)
     |> assert_single_option_selected
   end

@@ -33,10 +33,6 @@ defmodule Mechanizex.Form do
     }
   end
 
-  defmodule FormNotUpdatedError do
-    defexception [:message]
-  end
-
   defmodule InconsistentFormError do
     defexception [:message]
   end
@@ -116,29 +112,6 @@ defmodule Mechanizex.Form do
     |> Enum.filter(&Query.match?(&1, criteria))
   end
 
-  defdelegate check_radio_buttons(form, criteria), to: __MODULE__, as: :check_radio_button
-
-  def check_radio_button(form, criteria) do
-    form
-    |> RadioButton.check(criteria)
-    |> assert_single_radio_in_group_checked()
-    |> assert_form_updated(
-      form,
-      "Can't check radio button with criteria #{inspect(criteria)}, it probably does not exist"
-    )
-  end
-
-  defdelegate uncheck_radio_buttons(form, criteria), to: __MODULE__, as: :uncheck_radio_button
-
-  def uncheck_radio_button(form, criteria) do
-    form
-    |> RadioButton.uncheck(criteria)
-    |> assert_form_updated(
-      form,
-      "Can't uncheck radio button with criteria #{inspect(criteria)}, it probably does not exist"
-    )
-  end
-
   defdelegate checkboxes(form), to: Checkbox
   defdelegate checkboxes_with(form, criteria), to: Checkbox
   defdelegate update_checkboxes(form, fun), to: Checkbox
@@ -156,6 +129,8 @@ defmodule Mechanizex.Form do
   defdelegate radio_buttons_with(form, criteria), to: RadioButton
   defdelegate update_radio_buttons(form, fun), to: RadioButton
   defdelegate update_radio_buttons_with(form, criteria, fun), to: RadioButton
+  defdelegate check_radio_button(form, criteria), to: RadioButton, as: :check
+  defdelegate uncheck_radio_button(form, criteria), to: RadioButton, as: :uncheck
 
   defdelegate select_lists(form), to: SelectList
   defdelegate select_lists_with(form, criteria), to: SelectList
@@ -167,30 +142,6 @@ defmodule Mechanizex.Form do
   defdelegate update_submit_buttons(form, fun), to: SubmitButton
   defdelegate update_submit_buttons_with(form, criteria, fun), to: SubmitButton
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
-
-  def assert_form_updated(new_form, old_form, message) do
-    if new_form.fields != old_form.fields do
-      new_form
-    else
-      raise FormNotUpdatedError, message: message
-    end
-  end
-
-  defp assert_single_radio_in_group_checked(form) do
-    form
-    |> radio_buttons_with(fn radio -> radio.checked end)
-    |> Enum.group_by(&Element.attr(&1, :name))
-    |> Stream.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
-    |> Enum.map(fn {group_name, _} -> group_name end)
-    |> case do
-      [] ->
-        form
-
-      group_names ->
-        raise InconsistentFormError,
-          message: "Multiple radio buttons with same name (#{Enum.join(group_names, ",")}) are checked"
-    end
-  end
 
   def submit(form, button \\ nil) do
     Mechanizex.Agent.request!(agent(form), %Request{

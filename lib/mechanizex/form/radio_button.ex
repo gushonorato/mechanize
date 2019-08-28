@@ -1,9 +1,10 @@
 defmodule Mechanizex.Form.RadioButton do
-  alias Mechanizex.{Form, Query, Queryable}
+  alias Mechanizex.{Query, Queryable}
   alias Mechanizex.Page.{Element, Elementable}
+  alias Mechanizex.Form.InconsistentFormError
+  alias Mechanizex.Query.BadCriteriaError
 
-  use Mechanizex.Form.FieldMatcher
-  use Mechanizex.Form.FieldUpdater
+  use Mechanizex.Form.{FieldMatcher, FieldUpdater}
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
@@ -27,14 +28,20 @@ defmodule Mechanizex.Form.RadioButton do
   end
 
   def check(form, criteria) do
+    assert_radio_found(
+      form,
+      criteria,
+      "Can't check radio with criteria #{inspect(criteria)} because it was not found"
+    )
+
     radio_groups =
       form
-      |> Form.radio_buttons_with(criteria)
+      |> radio_buttons_with(criteria)
       |> Stream.map(& &1.name)
       |> Enum.uniq()
 
     form
-    |> Form.update_radio_buttons(fn field ->
+    |> update_radio_buttons(fn field ->
       cond do
         Query.match?(field, criteria) ->
           %__MODULE__{field | checked: true}
@@ -46,10 +53,37 @@ defmodule Mechanizex.Form.RadioButton do
           field
       end
     end)
+    |> assert_single_radio_in_group_checked
   end
 
   def uncheck(form, criteria) do
-    Form.update_radio_buttons_with(form, criteria, &%__MODULE__{&1 | checked: false})
+    assert_radio_found(
+      form,
+      criteria,
+      "Can't uncheck radio with criteria #{inspect(criteria)} because it was not found"
+    )
+
+    update_radio_buttons_with(form, criteria, &%__MODULE__{&1 | checked: false})
+  end
+
+  defp assert_radio_found(form, criteria, error_msg) do
+    if radio_buttons_with(form, criteria) == [], do: raise(BadCriteriaError, message: error_msg)
+  end
+
+  defp assert_single_radio_in_group_checked(form) do
+    form
+    |> radio_buttons_with(fn radio -> radio.checked end)
+    |> Enum.group_by(&Element.attr(&1, :name))
+    |> Stream.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
+    |> Enum.map(fn {group_name, _} -> group_name end)
+    |> case do
+      [] ->
+        form
+
+      group_names ->
+        raise InconsistentFormError,
+          message: "Multiple radio buttons with same name (#{Enum.join(group_names, ", ")}) are checked"
+    end
   end
 end
 

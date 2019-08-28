@@ -4,7 +4,7 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.Page.Element
   alias Mechanizex.{Form, Page}
-  alias Mechanizex.Form.{TextInput, FormNotUpdatedError, InconsistentFormError}
+  alias Mechanizex.Form.TextInput
   import TestHelper
 
   setup do
@@ -157,34 +157,6 @@ defmodule Mechanizex.FormTest do
                {nil, "gustavo"},
                {nil, "123456"}
              ]
-    end
-  end
-
-  describe ".check_radio_button" do
-    test "check multiple radios with same name", %{page: page} do
-      assert_raise InconsistentFormError, ~r/same name \(color\)/, fn ->
-        page
-        |> Page.form_with(name: "form_with_radios")
-        |> Form.check_radio_button(name: "color")
-      end
-    end
-
-    test "check inexistent radio button", %{page: page} do
-      assert_raise FormNotUpdatedError, ~r/Can't check radio button with criteria \[name: "lero"\]/, fn ->
-        page
-        |> Page.form_with(name: "form_with_radios")
-        |> Form.check_radio_button(name: "lero")
-      end
-    end
-  end
-
-  describe ".uncheck_radio_button" do
-    test "uncheck inexistent radio button", %{page: page} do
-      assert_raise FormNotUpdatedError, ~r/Can't uncheck radio button with criteria \[name: "lero"\]/, fn ->
-        page
-        |> Page.form_with(name: "form_with_radios")
-        |> Form.uncheck_radio_button(name: "lero")
-      end
     end
   end
 

@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form.Checkbox do
   alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.{Form, Queryable}
+  alias Mechanizex.{Queryable}
   alias Mechanizex.Query.BadCriteriaError
 
   use Mechanizex.Form.FieldMatcher, suffix: "es"
@@ -31,7 +31,7 @@ defmodule Mechanizex.Form.Checkbox do
     assert_checkbox_found(
       form,
       criteria,
-      "Can't check checkbox with criteria #{inspect(criteria)} because it probably does not exist"
+      "Can't check checkbox with criteria #{inspect(criteria)} because it was not found"
     )
 
     update_checkboxes_with(form, criteria, fn checkbox ->
@@ -43,7 +43,7 @@ defmodule Mechanizex.Form.Checkbox do
     assert_checkbox_found(
       form,
       criteria,
-      "Can't uncheck checkbox with criteria #{inspect(criteria)} because it probably does not exist"
+      "Can't uncheck checkbox with criteria #{inspect(criteria)} because it was not found"
     )
 
     update_checkboxes_with(form, criteria, fn checkbox ->

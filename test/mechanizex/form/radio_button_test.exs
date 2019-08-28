@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.RadioButtonTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.RadioButton
+  alias Mechanizex.Form.{RadioButton, InconsistentFormError}
+  alias Mechanizex.Query.BadCriteriaError
   alias Mechanizex.Page.Element
   import TestHelper
 
@@ -47,6 +48,10 @@ defmodule Mechanizex.Form.RadioButtonTest do
   end
 
   describe ".check" do
+    test "returns form", %{form: form} do
+      assert match?(%Form{}, RadioButton.uncheck(form, name: "download", value: "no"))
+    end
+
     test "check by name and value", %{form: form} do
       form = RadioButton.check(form, name: "download", value: "yes")
 
@@ -65,9 +70,25 @@ defmodule Mechanizex.Form.RadioButtonTest do
 
       assert fields == [{"color", "orange", true}, {"download", "no", true}]
     end
+
+    test "check multiple radios with same name", %{form: form} do
+      assert_raise InconsistentFormError, ~r/same name \(color\)/, fn ->
+        RadioButton.check(form, name: "color")
+      end
+    end
+
+    test "check inexistent radio button", %{form: form} do
+      assert_raise BadCriteriaError, ~r/it was not found/, fn ->
+        Form.check_radio_button(form, name: "lero")
+      end
+    end
   end
 
   describe ".uncheck" do
+    test "returns form", %{form: form} do
+      assert match?(%Form{}, RadioButton.uncheck(form, name: "color"))
+    end
+
     test "uncheck radio by name and value", %{form: form} do
       fields =
         form
@@ -82,6 +103,12 @@ defmodule Mechanizex.Form.RadioButtonTest do
         |> Form.radio_buttons_with(fn f -> f.checked end)
 
       assert fields == []
+    end
+
+    test "raise when uncheck inexistent radio button", %{form: form} do
+      assert_raise BadCriteriaError, ~r/it was not found/, fn ->
+        RadioButton.uncheck(form, name: "lero")
+      end
     end
   end
 

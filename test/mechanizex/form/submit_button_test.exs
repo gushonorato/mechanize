@@ -44,13 +44,13 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
   describe ".click_button" do
     test "label not match", %{form: form} do
-      assert_raise ClickError, ~r/not found/i, fn ->
+      assert_raise ClickError, ~r/no button was found/i, fn ->
         SubmitButton.click(form, "Button 1")
       end
     end
 
     test "criteria not match", %{form: form} do
-      assert_raise ClickError, ~r/not found/i, fn ->
+      assert_raise ClickError, ~r/no button was found/i, fn ->
         SubmitButton.click(form, name: "lero")
       end
     end

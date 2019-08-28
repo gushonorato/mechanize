@@ -63,14 +63,15 @@ defmodule Mechanizex.Form.SubmitButton do
   defp maybe_click_on_button(buttons, form) do
     case buttons do
       [] ->
-        raise ClickError, message: "Can't click on submit button because it was not found."
+        raise ClickError, message: "Can't click on submit button because no button was found for given criteria"
 
       [button] ->
         click(form, button)
 
       buttons ->
         raise ClickError,
-          message: "Can't decide which submit button to click because #{length(buttons)} buttons were found."
+          message:
+            "Can't decide which submit button to click because #{length(buttons)} buttons were found for given criteria"
     end
   end
 end

@@ -136,6 +136,8 @@ defmodule Mechanizex.Form do
   defdelegate select_lists_with(form, criteria), to: SelectList
   defdelegate update_select_lists(form, fun), to: SelectList
   defdelegate update_select_lists_with(form, criteria, fun), to: SelectList
+  defdelegate select(form, criteria), to: SelectList
+  defdelegate unselect(form, criteria), to: SelectList
 
   defdelegate submit_buttons(form), to: SubmitButton
   defdelegate submit_buttons_with(form, criteria), to: SubmitButton

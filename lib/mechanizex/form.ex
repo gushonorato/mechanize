@@ -200,32 +200,32 @@ defmodule Mechanizex.Form do
   end
 
   defp create_field(el) do
-    name = Element.name(el)
+    tag = Element.name(el)
     type = Element.attr(el, :type, normalize: true)
 
     cond do
       type == "reset" ->
         nil
 
-      name == "button" and (type == "submit" or type == nil or type == "") ->
+      tag == "button" and (type == "submit" or type == nil or type == "") ->
         SubmitButton.new(el)
 
-      name == "input" and type == "radio" ->
+      tag == "input" and type == "radio" ->
         RadioButton.new(el)
 
-      name == "input" and type == "checkbox" ->
+      tag == "input" and type == "checkbox" ->
         Checkbox.new(el)
 
-      name == "input" and type == "submit" ->
+      tag == "input" and type == "submit" ->
         SubmitButton.new(el)
 
-      name == "input" and type == "image" ->
+      tag == "input" and type == "image" ->
         ImageInput.new(el)
 
-      name == "textarea" or name == "input" ->
+      tag == "textarea" or tag == "input" ->
         TextInput.new(el)
 
-      name == "select" ->
+      tag == "select" ->
         SelectList.new(el)
 
       true ->

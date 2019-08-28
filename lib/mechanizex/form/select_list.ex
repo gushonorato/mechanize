@@ -55,7 +55,8 @@ defmodule Mechanizex.Form.SelectList do
     {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
     assert_select_found(form, criteria)
 
-    update_options_with(form, criteria, opts_criteria, fn select, opt ->
+    form
+    |> update_options_with(criteria, opts_criteria, fn select, opt ->
       cond do
         Query.match?(opt, opts_criteria) ->
           %Option{opt | selected: true}

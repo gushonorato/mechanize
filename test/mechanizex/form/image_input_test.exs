@@ -1,8 +1,9 @@
 defmodule Mechanizex.Form.ImageInputTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{Page, Form}
+  alias Mechanizex.Page
+  alias Mechanizex.Form.ImageInput
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{ImageInput, ClickError}
+  alias Mechanizex.Query.BadCriteriaError
   import TestHelper
 
   setup do
@@ -12,7 +13,7 @@ defmodule Mechanizex.Form.ImageInputTest do
 
   describe ".image_inputs" do
     test "retreve all image buttons", %{form: form} do
-      inputs = Form.image_inputs(form)
+      inputs = ImageInput.image_inputs(form)
 
       assert Enum.map(inputs, &{&1.name, &1.x, &1.y}) == [
                {"map1", 0, 0},
@@ -21,7 +22,7 @@ defmodule Mechanizex.Form.ImageInputTest do
     end
 
     test "elements loaded", %{form: form} do
-      inputs = Form.image_inputs(form)
+      inputs = ImageInput.image_inputs(form)
 
       refute Enum.empty?(inputs)
       Enum.each(inputs, fn image -> assert %Element{} = image.element end)
@@ -30,7 +31,7 @@ defmodule Mechanizex.Form.ImageInputTest do
 
   describe ".image_inputs_with" do
     test "retrieve by criteria with name", %{form: form} do
-      inputs = Form.image_inputs_with(form, name: "map2")
+      inputs = ImageInput.image_inputs_with(form, name: "map2")
 
       assert length(inputs) == 1
       assert List.first(inputs).name == "map2"
@@ -79,13 +80,13 @@ defmodule Mechanizex.Form.ImageInputTest do
     end
 
     test "raise exception when image not found", %{form: form} do
-      assert_raise ClickError, ~r/not found/, fn ->
+      assert_raise BadCriteriaError, ~r/not found/, fn ->
         ImageInput.click(form, name: "lero", x: 10, y: 10)
       end
     end
 
     test "raise exception when many images found", %{form: form} do
-      assert_raise ClickError, ~r/2 images were found/, fn ->
+      assert_raise BadCriteriaError, ~r/2 were found/, fn ->
         ImageInput.click(form, name: ~r/map/, x: 10, y: 10)
       end
     end

@@ -1,8 +1,9 @@
 defmodule Mechanizex.Form.SubmitButtonTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{Page, Form}
+  alias Mechanizex.Page
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{ClickError, SubmitButton}
+  alias Mechanizex.Form.SubmitButton
+  alias Mechanizex.Query.BadCriteriaError
   import TestHelper
 
   setup do
@@ -33,7 +34,7 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
       result =
         form
-        |> Form.submit_buttons()
+        |> SubmitButton.submit_buttons()
         |> Enum.map(fn f = %{name: name, value: value, label: label} ->
           {name, value, label, Element.attr(f, :id), Element.attr_present?(f, :disabled)}
         end)
@@ -44,25 +45,25 @@ defmodule Mechanizex.Form.SubmitButtonTest do
 
   describe ".click_button" do
     test "label not match", %{form: form} do
-      assert_raise ClickError, ~r/no button was found/i, fn ->
+      assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
         SubmitButton.click(form, "Button 1")
       end
     end
 
     test "criteria not match", %{form: form} do
-      assert_raise ClickError, ~r/no button was found/i, fn ->
+      assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
         SubmitButton.click(form, name: "lero")
       end
     end
 
     test "multiple labels match", %{form: form} do
-      assert_raise ClickError, ~r/16 buttons were found./i, fn ->
+      assert_raise BadCriteriaError, ~r/16 buttons were found./i, fn ->
         SubmitButton.click(form, ~r/Button/i)
       end
     end
 
     test "multiple criteria match", %{form: form} do
-      assert_raise ClickError, ~r/12 buttons were found./i, fn ->
+      assert_raise BadCriteriaError, ~r/12 buttons were found./i, fn ->
         SubmitButton.click(form, name: ~r/button/)
       end
     end

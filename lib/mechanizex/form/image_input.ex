@@ -1,7 +1,7 @@
 defmodule Mechanizex.Form.ImageInput do
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.{Form, Queryable}
-  alias Mechanizex.Form.{ClickError}
+  alias Mechanizex.Query.BadCriteriaError
 
   use Mechanizex.Form.FieldMatcher
   use Mechanizex.Form.FieldUpdater
@@ -39,14 +39,14 @@ defmodule Mechanizex.Form.ImageInput do
   defp maybe_click_on_image(images, form, x, y) do
     case images do
       [] ->
-        raise ClickError, message: "Can't click on image because it was not found"
+        raise BadCriteriaError, message: "Can't click on image input because it was not found"
 
       [image] ->
         click(form, %__MODULE__{image | x: x, y: y})
 
       images ->
-        raise ClickError,
-          message: "Can't decide which image to click because #{length(images)} images were found"
+        raise BadCriteriaError,
+          message: "Can't decide which image input to click because #{length(images)} were found"
     end
   end
 end

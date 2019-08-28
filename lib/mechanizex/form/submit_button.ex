@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.{Form, Queryable}
-  alias(Mechanizex.Form.{ParameterizableField, ClickError})
+  alias Mechanizex.Form.ParameterizableField
+  alias Mechanizex.Query.BadCriteriaError
 
   use Mechanizex.Form.FieldMatcher
   use Mechanizex.Form.FieldUpdater
@@ -63,13 +64,13 @@ defmodule Mechanizex.Form.SubmitButton do
   defp maybe_click_on_button(buttons, form) do
     case buttons do
       [] ->
-        raise ClickError, message: "Can't click on submit button because no button was found for given criteria"
+        raise BadCriteriaError, message: "Can't click on submit button because no button was found for given criteria"
 
       [button] ->
         click(form, button)
 
       buttons ->
-        raise ClickError,
+        raise BadCriteriaError,
           message:
             "Can't decide which submit button to click because #{length(buttons)} buttons were found for given criteria"
     end

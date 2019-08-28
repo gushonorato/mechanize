@@ -2,6 +2,7 @@ defmodule Mechanizex.Form.CheckboxTest do
   use ExUnit.Case, async: true
   alias Mechanizex.{Page, Form}
   alias Mechanizex.Form.Checkbox
+  alias Mechanizex.Query.BadCriteriaError
   import TestHelper
 
   setup do
@@ -13,7 +14,7 @@ defmodule Mechanizex.Form.CheckboxTest do
     test "retrieve checkboxes and only checkboxes", %{form: form} do
       checkboxes =
         form
-        |> Form.checkboxes()
+        |> Checkbox.checkboxes()
         |> Enum.map(&{&1.label, &1.name, &1.value, &1.checked})
 
       assert checkboxes == [
@@ -33,11 +34,21 @@ defmodule Mechanizex.Form.CheckboxTest do
   end
 
   describe ".check" do
+    test "returns a form", %{form: form} do
+      assert match?(%Form{}, Checkbox.check(form, name: "female"))
+    end
+
+    test "error when checkbox doesnt exist", %{form: form} do
+      assert_raise BadCriteriaError, ~r/Can't check checkbox with criteria \[name: "lero"\]/, fn ->
+        Checkbox.check(form, name: "lero")
+      end
+    end
+
     test "check by criteria with name", %{form: form} do
       checked =
         form
         |> Checkbox.check(name: "female")
-        |> Form.checkboxes_with(& &1.checked)
+        |> Checkbox.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
       assert checked == ["male", "female", "red", "download"]
@@ -47,7 +58,7 @@ defmodule Mechanizex.Form.CheckboxTest do
       checked =
         form
         |> Checkbox.check(name: "download", value: "no")
-        |> Form.checkboxes_with(& &1.checked)
+        |> Checkbox.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
       assert checked == ["male", "red", "download", "download"]
@@ -55,11 +66,15 @@ defmodule Mechanizex.Form.CheckboxTest do
   end
 
   describe ".uncheck" do
+    test "correct uncheck", %{form: form} do
+      assert match?(%Form{}, Checkbox.uncheck(form, name: "download", value: "yes"))
+    end
+
     test "uncheck by criteria with name", %{form: form} do
       checked =
         form
         |> Checkbox.uncheck(name: "male")
-        |> Form.checkboxes_with(& &1.checked)
+        |> Checkbox.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
       assert checked == ["red", "download"]
@@ -69,10 +84,16 @@ defmodule Mechanizex.Form.CheckboxTest do
       checked =
         form
         |> Checkbox.uncheck(name: "download", value: "yes")
-        |> Form.checkboxes_with(& &1.checked)
+        |> Checkbox.checkboxes_with(& &1.checked)
         |> Enum.map(& &1.name)
 
       assert checked == ["male", "red"]
+    end
+
+    test "error when checkbox doesnt exist", %{form: form} do
+      assert_raise BadCriteriaError, ~r/Can't uncheck checkbox with criteria \[name: "lero"\]/, fn ->
+        Form.uncheck_checkbox(form, name: "lero")
+      end
     end
   end
 

@@ -160,46 +160,6 @@ defmodule Mechanizex.FormTest do
     end
   end
 
-  describe ".check_checkbox" do
-    test "correct check", %{page: page} do
-      assert(
-        page
-        |> Page.form_with(name: "form_with_checkboxes")
-        |> Form.check_checkbox(name: "blue")
-        |> Form.checkboxes_with(& &1.checked)
-        |> Enum.map(& &1.name) == ["red", "blue"]
-      )
-    end
-
-    test "error when checkbox doesnt exist", %{page: page} do
-      assert_raise FormNotUpdatedError, ~r/Can't check checkbox with criteria \[name: "lero"\]/, fn ->
-        page
-        |> Page.form_with(name: "form_with_checkboxes")
-        |> Form.check_checkbox(name: "lero")
-      end
-    end
-  end
-
-  describe ".uncheck_checkbox" do
-    test "correct uncheck", %{page: page} do
-      assert(
-        page
-        |> Page.form_with(name: "form_with_checkboxes")
-        |> Form.uncheck_checkbox(name: "red")
-        |> Form.checkboxes_with(& &1.checked)
-        |> Enum.map(& &1.name) == []
-      )
-    end
-
-    test "error when checkbox doesnt exist", %{page: page} do
-      assert_raise FormNotUpdatedError, ~r/Can't uncheck checkbox with criteria \[name: "lero"\]/, fn ->
-        page
-        |> Page.form_with(name: "form_with_checkboxes")
-        |> Form.uncheck_checkbox(name: "lero")
-      end
-    end
-  end
-
   describe ".check_radio_button" do
     test "check multiple radios with same name", %{page: page} do
       assert_raise InconsistentFormError, ~r/same name \(color\)/, fn ->

@@ -116,25 +116,6 @@ defmodule Mechanizex.Form do
     |> Enum.filter(&Query.match?(&1, criteria))
   end
 
-  defdelegate check_checkboxes(form, criteria), to: __MODULE__, as: :check_checkbox
-
-  def check_checkbox(form, criteria) do
-    form
-    |> Checkbox.check(criteria)
-    |> assert_form_updated(form, "Can't check checkbox with criteria #{inspect(criteria)}, it probably does not exist")
-  end
-
-  defdelegate uncheck_checkboxes(form, criteria), to: __MODULE__, as: :uncheck_checkbox
-
-  def uncheck_checkbox(form, criteria) do
-    form
-    |> Checkbox.uncheck(criteria)
-    |> assert_form_updated(
-      form,
-      "Can't uncheck checkbox with criteria #{inspect(criteria)}, it probably does not exist"
-    )
-  end
-
   defdelegate check_radio_buttons(form, criteria), to: __MODULE__, as: :check_radio_button
 
   def check_radio_button(form, criteria) do
@@ -162,6 +143,8 @@ defmodule Mechanizex.Form do
   defdelegate checkboxes_with(form, criteria), to: Checkbox
   defdelegate update_checkboxes(form, fun), to: Checkbox
   defdelegate update_checkboxes_with(form, criteria, fun), to: Checkbox
+  defdelegate check_checkbox(form, criteria), to: Checkbox, as: :check
+  defdelegate uncheck_checkbox(form, criteria), to: Checkbox, as: :uncheck
 
   defdelegate image_inputs(form), to: ImageInput
   defdelegate image_inputs_with(form, criteria), to: ImageInput

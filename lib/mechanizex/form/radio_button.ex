@@ -2,6 +2,9 @@ defmodule Mechanizex.Form.RadioButton do
   alias Mechanizex.{Form, Query, Queryable}
   alias Mechanizex.Page.{Element, Elementable}
 
+  use Mechanizex.Form.FieldMatcher
+  use Mechanizex.Form.FieldUpdater
+
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
@@ -21,14 +24,6 @@ defmodule Mechanizex.Form.RadioButton do
       value: Element.attr(el, :value),
       checked: Element.attr_present?(el, :checked)
     }
-  end
-
-  defmacro __using__(_opts) do
-    quote do
-      alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
-    end
   end
 
   def check(form, criteria) do

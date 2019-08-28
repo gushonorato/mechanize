@@ -3,6 +3,9 @@ defmodule Mechanizex.Form.SubmitButton do
   alias Mechanizex.{Form, Queryable}
   alias(Mechanizex.Form.{ParameterizableField, ClickError})
 
+  use Mechanizex.Form.FieldMatcher
+  use Mechanizex.Form.FieldUpdater
+
   @derive [ParameterizableField, Queryable, Elementable]
   defstruct element: nil, name: nil, value: nil, label: nil
 
@@ -29,14 +32,6 @@ defmodule Mechanizex.Form.SubmitButton do
       value: Element.attr(el, :value),
       label: Element.attr(el, :value)
     }
-  end
-
-  defmacro __using__(_opts) do
-    quote do
-      alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
-    end
   end
 
   def click(_form, nil) do

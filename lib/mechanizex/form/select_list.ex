@@ -5,6 +5,9 @@ defmodule Mechanizex.Form.SelectList do
   alias Mechanizex.Query.BadCriteriaError
   alias Mechanizex.{Form, Query, Queryable}
 
+  use Mechanizex.Form.FieldMatcher
+  use Mechanizex.Form.FieldUpdater
+
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, options: []
@@ -46,14 +49,6 @@ defmodule Mechanizex.Form.SelectList do
       assert_options_found(select.options, opts_criteria)
       %__MODULE__{select | options: Enum.map(select.options, &fun.(select, &1))}
     end)
-  end
-
-  defmacro __using__(_opts) do
-    quote do
-      alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
-    end
   end
 
   def select(form, criteria) do

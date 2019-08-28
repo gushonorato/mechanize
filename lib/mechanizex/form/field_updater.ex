@@ -1,6 +1,6 @@
 defmodule Mechanizex.Form.FieldUpdater do
   defmacro __using__(opts) do
-    {module, opts} = Keyword.pop(opts, :for)
+    module = __CALLER__.module
     {suffix, _} = Keyword.pop(opts, :suffix, "s")
 
     module_name =

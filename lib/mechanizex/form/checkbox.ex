@@ -2,6 +2,9 @@ defmodule Mechanizex.Form.Checkbox do
   alias Mechanizex.Page.{Element, Elementable}
   alias Mechanizex.{Form, Queryable}
 
+  use Mechanizex.Form.FieldMatcher, suffix: "es"
+  use Mechanizex.Form.FieldUpdater, suffix: "es"
+
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, label: nil, name: nil, value: nil, checked: false
@@ -21,14 +24,6 @@ defmodule Mechanizex.Form.Checkbox do
       value: Element.attr(el, :value),
       checked: Element.attr_present?(el, :checked)
     }
-  end
-
-  defmacro __using__(_opts) do
-    quote do
-      alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__), suffix: "es"
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__), suffix: "es"
-    end
   end
 
   def check(form, criteria) do

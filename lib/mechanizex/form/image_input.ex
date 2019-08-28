@@ -3,6 +3,9 @@ defmodule Mechanizex.Form.ImageInput do
   alias Mechanizex.{Form, Queryable}
   alias Mechanizex.Form.{ClickError}
 
+  use Mechanizex.Form.FieldMatcher
+  use Mechanizex.Form.FieldUpdater
+
   @derive [Elementable, Queryable]
   defstruct element: nil, name: nil, x: 0, y: 0
 
@@ -18,14 +21,6 @@ defmodule Mechanizex.Form.ImageInput do
       element: el,
       name: Element.attr(el, :name)
     }
-  end
-
-  defmacro __using__(_opts) do
-    quote do
-      alias unquote(__MODULE__)
-      use Mechanizex.Form.FieldMatcher, for: unquote(__MODULE__)
-      use Mechanizex.Form.FieldUpdater, for: unquote(__MODULE__)
-    end
   end
 
   def click(form, %__MODULE__{} = image) do

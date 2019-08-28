@@ -1,8 +1,19 @@
 defmodule Mechanizex.Form do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Form.{TextInput, DetachedField, Checkbox, ParameterizableField}
+
+  alias Mechanizex.Form.{
+    TextInput,
+    DetachedField,
+    Checkbox,
+    ParameterizableField,
+    RadioButton,
+    SubmitButton,
+    Checkbox,
+    ImageInput,
+    SelectList
+  }
+
   alias Mechanizex.{Query, Request}
-  use Mechanizex.Form.{RadioButton, SubmitButton, Checkbox, ImageInput, SelectList}
 
   @derive [Mechanizex.Page.Elementable]
   @enforce_keys [:element]
@@ -147,8 +158,32 @@ defmodule Mechanizex.Form do
     )
   end
 
-  defdelegate click_button(form, criteria), to: SubmitButton, as: :click
+  defdelegate checkboxes(form), to: Checkbox
+  defdelegate checkboxes_with(form, criteria), to: Checkbox
+  defdelegate update_checkboxes(form, fun), to: Checkbox
+  defdelegate update_checkboxes_with(form, criteria, fun), to: Checkbox
+
+  defdelegate image_inputs(form), to: ImageInput
+  defdelegate image_inputs_with(form, criteria), to: ImageInput
+  defdelegate update_image_inputs(form, fun), to: ImageInput
+  defdelegate update_image_inputs_with(form, criteria, fun), to: ImageInput
   defdelegate click_image(form, criteria), to: ImageInput, as: :click
+
+  defdelegate radio_buttons(form), to: RadioButton
+  defdelegate radio_buttons_with(form, criteria), to: RadioButton
+  defdelegate update_radio_buttons(form, fun), to: RadioButton
+  defdelegate update_radio_buttons_with(form, criteria, fun), to: RadioButton
+
+  defdelegate select_lists(form), to: SelectList
+  defdelegate select_lists_with(form, criteria), to: SelectList
+  defdelegate update_select_lists(form, fun), to: SelectList
+  defdelegate update_select_lists_with(form, criteria, fun), to: SelectList
+
+  defdelegate submit_buttons(form), to: SubmitButton
+  defdelegate submit_buttons_with(form, criteria), to: SubmitButton
+  defdelegate update_submit_buttons(form, fun), to: SubmitButton
+  defdelegate update_submit_buttons_with(form, criteria, fun), to: SubmitButton
+  defdelegate click_button(form, criteria), to: SubmitButton, as: :click
 
   def assert_form_updated(new_form, old_form, message) do
     if new_form.fields != old_form.fields do

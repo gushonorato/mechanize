@@ -32,7 +32,9 @@ defmodule Mechanizex.Form.RadioButtonTest do
         ]
       )
     end
+  end
 
+  describe ".radio_buttons_with" do
     test "retrieving radios which matches query", %{form: form} do
       assert(
         form

@@ -1,8 +1,6 @@
 defmodule Mechanizex.Page.Element do
   alias Mechanizex.Page.Elementable
-  alias Mechanizex.Queryable
 
-  @derive [Queryable]
   defstruct name: nil,
             attrs: nil,
             parser_data: nil,
@@ -69,4 +67,10 @@ defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do
   def parser(e), do: Parseable.parser(e.page)
   def parser_data(e), do: e.parser_data
   def page(e), do: e.page
+end
+
+defimpl Mechanizex.Queryable, for: Mechanizex.Page.Element do
+  defdelegate attrs(queryable), to: Mechanizex.Page.Element
+  defdelegate name(queryable), to: Mechanizex.Page.Element
+  defdelegate text(queryable), to: Mechanizex.Page.Element
 end

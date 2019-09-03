@@ -1,7 +1,8 @@
 defmodule Mechanizex.Form.Option do
   alias Mechanizex.Page.{Element, Elementable}
+  alias Mechanizex.Queryable
 
-  @derive [Elementable]
+  @derive [Elementable, Queryable]
   @enforce_keys [:element, :index]
   defstruct element: nil, label: nil, value: nil, selected: false, index: nil
 
@@ -21,21 +22,5 @@ defmodule Mechanizex.Form.Option do
       index: index,
       selected: Element.attr_present?(el, :selected)
     }
-  end
-end
-
-defimpl Mechanizex.Queryable, for: Mechanizex.Form.Option do
-  alias Mechanizex.Queryable.Defaults
-
-  defdelegate name(queryable), to: Defaults
-  defdelegate text(queryable), to: Defaults
-
-  def attrs(queryable) do
-    queryable
-    |> Defaults.attrs()
-    |> List.keystore("label", 0, {"label", queryable.label})
-    |> List.keystore("value", 0, {"value", queryable.value})
-    |> List.keystore("selected", 0, {"selected", queryable.selected})
-    |> List.keystore("index", 0, {"index", queryable.index})
   end
 end

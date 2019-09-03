@@ -6,7 +6,15 @@ end
 
 defmodule Mechanizex.Queryable.Defaults do
   alias Mechanizex.Page.Element
-  def attrs(queryable), do: Element.attrs(queryable)
+
+  def attrs(queryable) do
+    queryable
+    |> Map.to_list()
+    |> Enum.map(fn {key, value} -> {Atom.to_string(key), value} end)
+    |> List.keydelete("element", 0)
+    |> Kernel.++(Element.attrs(queryable))
+  end
+
   def name(queryable), do: Element.name(queryable)
   def text(queryable), do: Element.text(queryable)
 end

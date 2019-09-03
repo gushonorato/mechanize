@@ -1,7 +1,6 @@
 defmodule Mechanizex.FormTest do
   use ExUnit.Case, async: true
   alias Mechanizex
-  alias Mechanizex.Test.Support.LocalPageLoader
   alias Mechanizex.Page.Element
   alias Mechanizex.{Form, Page}
   alias Mechanizex.Form.TextInput
@@ -12,15 +11,11 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".parse_fields" do
-    test "parse disabled fields", %{agent: agent} do
-      fields =
-        agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_disabled_generic_inputs.html")
-        |> Page.form_with()
-        |> Form.fields()
-        |> Enum.map(fn f -> {f.name, Element.attr_present?(f, :disabled)} end)
-
-      assert fields == [
+    test "parse disabled fields", %{page: page} do
+      assert page
+             |> Page.form_with(name: "form_with_disabled_generic_inputs")
+             |> Form.fields()
+             |> Enum.map(fn f -> {f.name, Element.attr_present?(f, :disabled)} end) == [
                {"color1", false},
                {"date1", true},
                {"datetime1", true},
@@ -29,15 +24,11 @@ defmodule Mechanizex.FormTest do
              ]
     end
 
-    test "parse elements without name", %{agent: agent} do
-      fields =
-        agent
-        |> LocalPageLoader.get("https://htdocs.local/test/htdocs/form_with_inputs_without_name.html")
-        |> Page.form_with()
-        |> Form.fields()
-        |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end)
-
-      assert fields == [
+    test "parse elements without name", %{page: page} do
+      assert page
+             |> Page.form_with(name: "form_with_inputs_without_name")
+             |> Form.fields()
+             |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end) == [
                {nil, "gustavo"},
                {nil, "123456"}
              ]

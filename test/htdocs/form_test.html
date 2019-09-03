@@ -108,6 +108,19 @@
     <input type="radio" name="color" value="red" checked>
     <input type="radio" name="color" value="orange">
   </form>
+
+  <form action="" method="post" name="form_with_disabled_generic_inputs">
+    <input type="color" name="color1" id="color-id" value="color1 value">
+    <input type="date" name="date1" id="date-id" value="date1 value" disabled>
+    <input type="datetime-local" name="datetime1" id="datetime-id" value="datetime1 value" disabled="true">
+    <input type="email" name="email1" id="email-id" value="email1 value" disabled="disabled">
+    <textarea name="textarea1" id="" cols="30" rows="10" disabled>textarea1 value</textarea>
+  </form>
+
+  <form action="" method="post" name="form_with_inputs_without_name">
+    <input type="text" id="login" value="gustavo"">
+      <input type=" password" id="pass" value="123456">
+  </form>
 </body>
 
 </html>

@@ -42,7 +42,7 @@ defmodule Mechanizex.Form do
   end
 
   def put_field(form, field) do
-    Map.put(form, :fields, [field | form.fields])
+    %__MODULE__{form | fields: [field | form.fields]}
   end
 
   def update_fields(form, fun) do
@@ -77,7 +77,7 @@ defmodule Mechanizex.Form do
     %__MODULE__{form | fields: Enum.reject(form.fields, fun)}
   end
 
-  def delete_fields(form, criteria) do
+  def delete_fields_with(form, criteria) do
     delete_fields(form, &Query.match?(&1, criteria))
   end
 

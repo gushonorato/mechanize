@@ -3,11 +3,122 @@ defmodule Mechanizex.FormTest do
   alias Mechanizex
   alias Mechanizex.Page.Element
   alias Mechanizex.{Form, Page}
-  alias Mechanizex.Form.TextInput
+  alias Mechanizex.Form.DetachedField
   import TestHelper
 
   setup do
     stub_requests("/test/htdocs/form_test.html")
+  end
+
+  describe ".put_field" do
+    test "returns form", %{page: page} do
+      form = Page.form_with(page, name: "login_form")
+      assert match?(%Form{}, Form.put_field(form, %DetachedField{name: "remember", value: "remember"}))
+    end
+
+    test "put a new field on form", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.put_field(%DetachedField{name: "remember", value: "remember"})
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"remember", "remember"},
+               {"username", "gustavo"},
+               {"pass", "123456"},
+               {"send", "Send"}
+             ]
+    end
+
+    test "put a new field on form by name and value", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.put_field("remember", "remember")
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"remember", "remember"},
+               {"username", "gustavo"},
+               {"pass", "123456"},
+               {"send", "Send"}
+             ]
+    end
+
+    test "put a new field with same name", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.put_field("remember", "remember")
+             |> Form.put_field("remember", "remember")
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"remember", "remember"},
+               {"remember", "remember"},
+               {"username", "gustavo"},
+               {"pass", "123456"},
+               {"send", "Send"}
+             ]
+    end
+  end
+
+  describe ".delete_fields" do
+    test "returns a form", %{page: page} do
+      form = Page.form_with(page, name: "login_form")
+      assert match?(%Form{}, Form.delete_fields(form, fn field -> field.name == "username" end))
+    end
+
+    test "remove all fields that function return true", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.delete_fields(&(&1.name == "username"))
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"pass", "123456"},
+               {"send", "Send"}
+             ]
+    end
+
+    test "empty list if all fields deleted", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.delete_fields(fn _ -> true end)
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == []
+    end
+  end
+
+  describe ".delete_fields_with" do
+    test "returns a form", %{page: page} do
+      form = Page.form_with(page, name: "login_form")
+      assert match?(%Form{}, Form.delete_fields_with(form, name: "username"))
+    end
+
+    test "remove all field with matching name", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.delete_fields_with(name: "username")
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"pass", "123456"},
+               {"send", "Send"}
+             ]
+    end
+
+    test "remove all field with matching value", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.delete_fields_with(value: "123456")
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"username", "gustavo"},
+               {"send", "Send"}
+             ]
+    end
+
+    test "empty list if all fields deleted", %{page: page} do
+      assert page
+             |> Page.form_with(name: "login_form")
+             |> Form.delete_fields_with(name: ~r/./)
+             |> Form.fields()
+             |> Enum.map(&{&1.name, &1.value}) == []
+    end
   end
 
   describe ".parse_fields" do
@@ -27,8 +138,8 @@ defmodule Mechanizex.FormTest do
     test "parse elements without name", %{page: page} do
       assert page
              |> Page.form_with(name: "form_with_inputs_without_name")
-             |> Form.fields()
-             |> Enum.map(fn %TextInput{name: name, value: value} -> {name, value} end) == [
+             |> Form.text_inputs()
+             |> Enum.map(&{&1.name, &1.value}) == [
                {nil, "gustavo"},
                {nil, "123456"}
              ]

@@ -41,21 +41,7 @@ defmodule Mechanizex.Form do
     put_field(form, DetachedField.new(field, value))
   end
 
-  def update_field(form, field_name, value) do
-    update_fields(form, fn field ->
-      if field.name == field_name, do: %{field | value: value}, else: field
-    end)
-  end
-
-  def add_field(form, field, value) do
-    create_field(form, DetachedField.new(field, value))
-  end
-
-  def delete_field(form, field_name) do
-    remove_fields(form, fn field -> field.name == field_name end)
-  end
-
-  def create_field(form, field) do
+  def put_field(form, field) do
     Map.put(form, :fields, [field | form.fields])
   end
 
@@ -87,8 +73,12 @@ defmodule Mechanizex.Form do
     end)
   end
 
-  def remove_fields(form, fun) do
+  def delete_fields(form, fun) when is_function(fun) do
     %__MODULE__{form | fields: Enum.reject(form.fields, fun)}
+  end
+
+  def delete_fields(form, criteria) do
+    delete_fields(form, &Query.match?(&1, criteria))
   end
 
   def fields(form) do

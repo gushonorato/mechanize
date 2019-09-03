@@ -37,9 +37,8 @@ defmodule Mechanizex.Form do
     defexception [:message]
   end
 
-  def fill_field(form, field, with: value) do
-    updated_form = update_field(form, field, value)
-    if updated_form == form, do: add_field(form, field, value), else: updated_form
+  def put_field(form, field, value) do
+    put_field(form, DetachedField.new(field, value))
   end
 
   def update_field(form, field_name, value) do
@@ -107,6 +106,12 @@ defmodule Mechanizex.Form do
     |> Stream.filter(&(type == &1.__struct__))
     |> Enum.filter(&Query.match?(&1, criteria))
   end
+
+  defdelegate text_inputs(form), to: TextInput
+  defdelegate text_inputs_with(form, criteria), to: TextInput
+  defdelegate update_text_inputs(form, fun), to: TextInput
+  defdelegate update_text_inputs_with(form, criteria, fun), to: TextInput
+  defdelegate fill_text(form, criteria), to: TextInput
 
   defdelegate checkboxes(form), to: Checkbox
   defdelegate checkboxes_with(form, criteria), to: Checkbox

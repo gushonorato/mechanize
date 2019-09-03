@@ -10,11 +10,10 @@ defmodule Mechanizex.Form.SelectList do
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
-  defstruct element: nil, label: nil, name: nil, options: []
+  defstruct element: nil, name: nil, options: []
 
   @type t :: %__MODULE__{
           element: Element.t(),
-          label: String.t(),
           name: String.t(),
           options: list()
         }
@@ -23,7 +22,6 @@ defmodule Mechanizex.Form.SelectList do
     %__MODULE__{
       element: el,
       name: Element.attr(el, :name),
-      label: Element.attr(el, :label),
       options: fetch_options(el)
     }
   end

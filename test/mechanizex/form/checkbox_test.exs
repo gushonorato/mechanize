@@ -15,20 +15,20 @@ defmodule Mechanizex.Form.CheckboxTest do
       checkboxes =
         form
         |> Checkbox.checkboxes()
-        |> Enum.map(&{&1.label, &1.name, &1.value, &1.checked})
+        |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert checkboxes == [
-               {nil, "male", nil, true},
-               {nil, "female", nil, false},
-               {nil, "green", nil, false},
-               {nil, "green", nil, false},
-               {nil, "red", "", true},
-               {nil, "blue", nil, false},
-               {nil, "yellow", nil, false},
-               {nil, "brown", nil, false},
-               {nil, "purple", nil, false},
-               {nil, "download", "yes", true},
-               {nil, "download", "no", false}
+               {"male", nil, true},
+               {"female", nil, false},
+               {"green", nil, false},
+               {"green", nil, false},
+               {"red", "", true},
+               {"blue", nil, false},
+               {"yellow", nil, false},
+               {"brown", nil, false},
+               {"purple", nil, false},
+               {"download", "yes", true},
+               {"download", "no", false}
              ]
     end
   end

@@ -1,6 +1,6 @@
 defmodule Mechanizex.Page.Link do
   alias Mechanizex.Page.Element
-  alias Mechanizex.Page
+  alias Mechanizex.{Page, Browser}
 
   @derive [Mechanizex.Page.Elementable]
   defstruct element: nil
@@ -15,8 +15,8 @@ defmodule Mechanizex.Page.Link do
 
     link
     |> Element.page()
-    |> Page.agent()
-    |> Mechanizex.Agent.get!(URI.merge(base_url, url))
+    |> Page.browser()
+    |> Browser.get!(URI.merge(base_url, url))
   end
 
   def new(el) do

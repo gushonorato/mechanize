@@ -1,5 +1,5 @@
 defmodule Mechanizex.HTTPAdapter do
-  @callback request(pid(), Mechanizex.Request.t()) :: {atom(), Page.t() | Mechanizex.Agent.ConnectionError.t()}
+  @callback request(pid(), Mechanizex.Request.t()) :: {atom(), Page.t() | Mechanizex.Browser.ConnectionError.t()}
 
   defmodule NetworkError do
     defexception [:message, :cause]

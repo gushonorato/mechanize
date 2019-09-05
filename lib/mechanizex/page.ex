@@ -2,19 +2,19 @@ defmodule Mechanizex.Page do
   alias Mechanizex.{Request, Response, Query, Form}
   alias Mechanizex.Page.Link
 
-  @enforce_keys [:request, :response, :agent]
-  defstruct request: nil, response: nil, agent: nil, parser: nil
+  @enforce_keys [:request, :response, :browser]
+  defstruct request: nil, response: nil, browser: nil, parser: nil
 
   @type t :: %__MODULE__{
           request: Request.t(),
           response: Response.t(),
-          agent: pid(),
+          browser: pid(),
           parser: module()
         }
 
   def response_code(page), do: page.response.code
   def body(page), do: page.response.body
-  def agent(page), do: page.agent
+  def browser(page), do: page.browser
 
   def click_link(page, criterias) when is_list(criterias) do
     page

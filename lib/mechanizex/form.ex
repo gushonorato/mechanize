@@ -137,7 +137,7 @@ defmodule Mechanizex.Form do
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
 
   def submit(form, button \\ nil) do
-    Mechanizex.Agent.request!(agent(form), %Request{
+    Mechanizex.Browser.request!(browser(form), %Request{
       method: method(form),
       url: action_url(form),
       params: params(form.fields, button)
@@ -179,8 +179,8 @@ defmodule Mechanizex.Form do
   defp maybe_add_clicked_button(params, nil), do: params
   defp maybe_add_clicked_button(params, button), do: [button | params]
 
-  defp agent(form) do
-    form.element.page.agent
+  defp browser(form) do
+    form.element.page.browser
   end
 
   defp parse_fields(element) do

@@ -41,7 +41,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   """
 
   @page %Page{
-    agent: :fake_mechanize_pid,
+    browser: :fake_mechanize_pid,
     request: %Request{},
     response: %Response{
       body: @html
@@ -49,7 +49,7 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   }
 
   @page_without_text %Page{
-    agent: :fake_mechanize_pid,
+    browser: :fake_mechanize_pid,
     request: %Request{},
     response: %Response{
       body: @html_without_text

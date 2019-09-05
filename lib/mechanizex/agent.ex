@@ -1,37 +1,37 @@
-defmodule Mechanizex.Agent.HTTPShortcuts do
+defmodule Mechanizex.Browser.HTTPShortcuts do
   alias Mechanizex.Request
 
   defmacro __using__(_) do
     [:get, :delete, :options, :patch, :post, :put, :head]
     |> Enum.map(fn method ->
       quote do
-        def unquote(method)(agent, url, params \\ [], headers \\ [])
+        def unquote(method)(browser, url, params \\ [], headers \\ [])
 
-        def unquote(method)(agent, %URI{} = uri, params, headers) do
-          request(agent, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
+        def unquote(method)(browser, %URI{} = uri, params, headers) do
+          request(browser, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
         end
 
-        def unquote(method)(agent, url, params, headers) do
-          request(agent, %Request{method: unquote(method), url: url, headers: headers, params: params})
+        def unquote(method)(browser, url, params, headers) do
+          request(browser, %Request{method: unquote(method), url: url, headers: headers, params: params})
         end
 
-        def unquote(:"#{method}!")(agent, url, params \\ [], headers \\ [])
+        def unquote(:"#{method}!")(browser, url, params \\ [], headers \\ [])
 
-        def unquote(:"#{method}!")(agent, %URI{} = uri, params, headers) do
-          request!(agent, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
+        def unquote(:"#{method}!")(browser, %URI{} = uri, params, headers) do
+          request!(browser, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
         end
 
-        def unquote(:"#{method}!")(agent, url, params, headers) do
-          request!(agent, %Request{method: unquote(method), url: url, headers: headers, params: params})
+        def unquote(:"#{method}!")(browser, url, params, headers) do
+          request!(browser, %Request{method: unquote(method), url: url, headers: headers, params: params})
         end
       end
     end)
   end
 end
 
-defmodule Mechanizex.Agent do
+defmodule Mechanizex.Browser do
   use Agent
-  use Mechanizex.Agent.HTTPShortcuts
+  use Mechanizex.Browser.HTTPShortcuts
   alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page}
 
   @user_agent_alias [
@@ -98,19 +98,19 @@ defmodule Mechanizex.Agent do
 
   @spec new(list()) :: pid()
   def new(options \\ []) do
-    {:ok, agent} = Mechanizex.Agent.start_link(options)
-    agent
+    {:ok, browser} = __MODULE__.start_link(options)
+    browser
   end
 
   defp init(options) do
     @default_options
     |> Keyword.merge(Application.get_all_env(:mechanizex))
     |> Keyword.merge(options)
-    |> config_agent()
+    |> config_browser()
   end
 
-  defp config_agent(options) do
-    %Mechanizex.Agent{
+  defp config_browser(options) do
+    %__MODULE__{
       http_adapter: HTTPAdapter.adapter(options[:http_adapter]),
       html_parser: HTMLParser.parser(options[:html_parser]),
       http_headers: config_http_headers(options)
@@ -135,51 +135,51 @@ defmodule Mechanizex.Agent do
     {String.downcase(k), v}
   end
 
-  def http_adapter(agent) do
-    Agent.get(agent, fn state -> state.http_adapter end)
+  def http_adapter(browser) do
+    Agent.get(browser, fn state -> state.http_adapter end)
   end
 
-  def set_http_adapter(agent, adapter) do
-    Agent.update(agent, &Map.put(&1, :http_adapter, adapter))
-    agent
+  def set_http_adapter(browser, adapter) do
+    Agent.update(browser, &Map.put(&1, :http_adapter, adapter))
+    browser
   end
 
-  def html_parser(agent) do
-    Agent.get(agent, fn state -> state.html_parser end)
+  def html_parser(browser) do
+    Agent.get(browser, fn state -> state.html_parser end)
   end
 
-  def set_html_parser(agent, parser) do
-    Agent.update(agent, &Map.put(&1, :html_parser, parser))
-    agent
+  def set_html_parser(browser, parser) do
+    Agent.update(browser, &Map.put(&1, :html_parser, parser))
+    browser
   end
 
-  def http_headers(agent) do
-    Agent.get(agent, fn state -> state.http_headers end)
+  def http_headers(browser) do
+    Agent.get(browser, fn state -> state.http_headers end)
   end
 
-  def set_http_headers(agent, headers) do
-    Agent.update(agent, &Map.put(&1, :http_headers, normalize_headers(headers)))
-    agent
+  def set_http_headers(browser, headers) do
+    Agent.update(browser, &Map.put(&1, :http_headers, normalize_headers(headers)))
+    browser
   end
 
-  def put_http_header(agent, h, v) do
+  def put_http_header(browser, h, v) do
     {h, _} = header = normalize_header({h, v})
 
-    Agent.update(agent, fn state ->
+    Agent.update(browser, fn state ->
       %__MODULE__{state | http_headers: List.keystore(state.http_headers, h, 0, header)}
     end)
 
-    agent
+    browser
   end
 
-  def set_user_agent_alias(agent, user_agent_alias) do
-    put_http_header(agent, "user-agent", user_agent_string!(user_agent_alias))
+  def set_user_agent_alias(browser, user_agent_alias) do
+    put_http_header(browser, "user-agent", user_agent_string!(user_agent_alias))
   end
 
   def user_agent_string!(user_agent_alias) do
     case @user_agent_alias[user_agent_alias] do
       nil ->
-        raise Mechanizex.Agent.InvalidUserAgentAliasError,
+        raise Mechanizex.Browser.InvalidUserAgentAliasError,
           message: "Invalid user agent alias \"#{user_agent_alias}\""
 
       user_agent_string ->
@@ -187,20 +187,20 @@ defmodule Mechanizex.Agent do
     end
   end
 
-  def request!(agent, request) do
-    case request(agent, request) do
+  def request!(browser, request) do
+    case request(browser, request) do
       {:ok, page} -> page
       {:error, error} -> raise error
     end
   end
 
-  def request(agent, request) do
+  def request(browser, request) do
     req_headers =
       request.headers
       |> normalize_headers()
-      |> merge_http_headers(http_headers(agent))
+      |> merge_http_headers(http_headers(browser))
 
-    res = http_adapter(agent).request(agent, %Request{request | headers: req_headers})
+    res = http_adapter(browser).request(browser, %Request{request | headers: req_headers})
 
     case res do
       {:ok, page} ->
@@ -212,7 +212,7 @@ defmodule Mechanizex.Agent do
     end
   end
 
-  defp merge_http_headers(request_headers, agent_headers) do
-    Enum.uniq_by(request_headers ++ agent_headers, &elem(&1, 0))
+  defp merge_http_headers(request_headers, browser_headers) do
+    Enum.uniq_by(request_headers ++ browser_headers, &elem(&1, 0))
   end
 end

@@ -15,7 +15,7 @@ defmock(Mechanizex.HTTPAdapter.Mock, for: Mechanizex.HTTPAdapter)
 defmodule TestHelper do
   def stub_requests(local_path) do
     bypass = Bypass.open()
-    agent = Mechanizex.Agent.new()
+    browser = Mechanizex.Browser.new()
 
     Bypass.expect_once(bypass, "GET", local_path, fn conn ->
       "/" <> file_path = conn.request_path
@@ -23,12 +23,12 @@ defmodule TestHelper do
     end)
 
     page =
-      Mechanizex.Agent.get!(
-        agent,
+      Mechanizex.Browser.get!(
+        browser,
         endpoint_url(bypass, local_path)
       )
 
-    {:ok, %{bypass: bypass, agent: agent, page: page}}
+    {:ok, %{bypass: bypass, browser: browser, page: page}}
   end
 
   def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path)

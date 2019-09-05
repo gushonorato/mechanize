@@ -1,7 +1,7 @@
 defmodule Mechanizex.Test.Support.LocalPageLoader do
-  alias Mechanizex.{Request, Response, Page, Agent}
+  alias Mechanizex.{Request, Response, Page, Browser}
 
-  def get(agent, url) do
+  def get(browser, url) do
     %Page{
       response: %Response{
         body: read_html_file(url),
@@ -13,8 +13,8 @@ defmodule Mechanizex.Test.Support.LocalPageLoader do
         method: :get,
         url: url
       },
-      agent: agent,
-      parser: Agent.html_parser(agent)
+      browser: browser,
+      parser: Browser.html_parser(browser)
     }
   end
 

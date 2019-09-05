@@ -1,6 +1,6 @@
 defmodule Mechanizex.HTTPAdapter.Httpoison do
   @behaviour Mechanizex.HTTPAdapter
-  alias Mechanizex.{Request, Response, Page, Agent}
+  alias Mechanizex.{Request, Response, Page, Browser}
   alias Mechanizex.HTTPAdapter.NetworkError
 
   @posix_errors [
@@ -146,7 +146,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
 
   @impl Mechanizex.HTTPAdapter
   @spec request(pid(), Request.t()) :: {atom(), Page.t() | Error.t()}
-  def request(agent, req) do
+  def request(browser, req) do
     case HTTPoison.request(req.method, req.url, req.body, req.headers, params: req.params) do
       {:ok, res} ->
         {:ok,
@@ -158,8 +158,8 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
              url: req.url
            },
            request: req,
-           agent: agent,
-           parser: Agent.html_parser(agent)
+           browser: browser,
+           parser: Browser.html_parser(browser)
          }}
 
       {:error, error} ->

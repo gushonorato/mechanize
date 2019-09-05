@@ -5,7 +5,7 @@ defmodule Mechanizex.HTTPAdapterTest do
       import Mechanizex.HTTPAdapterTest
 
       setup do
-        {:ok, bypass: Bypass.open(), agent: Mechanizex.Agent.new()}
+        {:ok, bypass: Bypass.open(), browser: Mechanizex.Browser.new()}
       end
 
       @moduletag unquote(options)
@@ -32,14 +32,14 @@ defmodule Mechanizex.HTTPAdapterTest do
     alias Mechanizex.{Request, Page}
 
     quote do
-      test "simple #{unquote(method_name)}", %{bypass: bypass, agent: agent, adapter: adapter} do
+      test "simple #{unquote(method_name)}", %{bypass: bypass, browser: browser, adapter: adapter} do
         Bypass.expect(bypass, fn conn ->
           assert conn.method == unquote(method_name)
           assert conn.request_path == "/fake_path"
           Plug.Conn.resp(conn, 200, "Lero")
         end)
 
-        {:ok, page} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:ok, page} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert Page.response_code(page) == 200
 
@@ -51,12 +51,12 @@ defmodule Mechanizex.HTTPAdapterTest do
 
       test "simple #{unquote(method_name)} with error", %{
         bypass: bypass,
-        agent: agent,
+        browser: browser,
         adapter: adapter
       } do
         Bypass.down(bypass)
 
-        {:error, error} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:error, error} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert %Mechanizex.HTTPAdapter.NetworkError{} = error
         assert error.message =~ ~r/connection refused/i
@@ -64,20 +64,20 @@ defmodule Mechanizex.HTTPAdapterTest do
 
       test "retrieve request from page using #{unquote(method_name)}", %{
         bypass: bypass,
-        agent: agent,
+        browser: browser,
         adapter: adapter
       } do
         Bypass.expect(bypass, fn conn -> Plug.Conn.resp(conn, 200, "Lero") end)
         req = %Request{method: unquote(method), url: endpoint_url(bypass.port)}
 
-        {:ok, page} = adapter.request(agent, req)
+        {:ok, page} = adapter.request(browser, req)
 
         assert page.request == req
       end
 
       test "request params using #{unquote(method_name)}", %{
         bypass: bypass,
-        agent: agent,
+        browser: browser,
         adapter: adapter
       } do
         Bypass.expect(bypass, fn conn ->
@@ -86,7 +86,7 @@ defmodule Mechanizex.HTTPAdapterTest do
         end)
 
         {:ok, _} =
-          adapter.request(agent, %Request{
+          adapter.request(browser, %Request{
             method: unquote(method),
             url: endpoint_url(bypass.port),
             params: [{"query", "árvore pau brasil"}, {"page", "1"}]
@@ -95,7 +95,7 @@ defmodule Mechanizex.HTTPAdapterTest do
 
       test "request headers using #{unquote(method_name)}", %{
         bypass: bypass,
-        agent: agent,
+        browser: browser,
         adapter: adapter
       } do
         Bypass.expect(bypass, fn conn ->
@@ -107,7 +107,7 @@ defmodule Mechanizex.HTTPAdapterTest do
         end)
 
         {:ok, _} =
-          adapter.request(agent, %Request{
+          adapter.request(browser, %Request{
             method: unquote(method),
             url: endpoint_url(bypass.port),
             headers: [{"User-Agent", "Gustabot"}, {"content-type", "text/html"}]
@@ -116,7 +116,7 @@ defmodule Mechanizex.HTTPAdapterTest do
 
       test "handle received headers using #{unquote(method_name)}", %{
         bypass: bypass,
-        agent: agent,
+        browser: browser,
         adapter: adapter
       } do
         Bypass.expect(bypass, fn conn ->
@@ -125,7 +125,7 @@ defmodule Mechanizex.HTTPAdapterTest do
           |> Plug.Conn.put_resp_header("Location", "https://www.seomaster.com.br")
         end)
 
-        {:ok, page} = adapter.request(agent, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        {:ok, page} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
         assert [{_, "https://www.seomaster.com.br"}] =
                  Enum.filter(page.response.headers, fn {k, _} -> k =~ ~r/location/i end)

@@ -1,5 +1,5 @@
 defmodule Mechanizex.Browser.HTTPShortcutsTest do
-  alias Mechanizex.Browser
+  alias Mechanizex.{Browser, Page}
   import TestHelper
 
   defmacro __using__(_) do
@@ -15,12 +15,15 @@ defmodule Mechanizex.Browser.HTTPShortcutsTest do
             Plug.Conn.resp(conn, 200, "OK PAGE")
           end)
 
-          apply(Browser, unquote(:"#{method}!"), [
-            browser,
-            endpoint_url(bypass),
-            [{"lero", "lero"}],
-            [{"accept", "lero"}]
-          ])
+          assert match?(
+                   %Page{},
+                   apply(Browser, unquote(:"#{method}!"), [
+                     browser,
+                     endpoint_url(bypass),
+                     [{"lero", "lero"}],
+                     [{"accept", "lero"}]
+                   ])
+                 )
         end
 
         test "#{unquote(method)}! delegate to request", %{bypass: bypass, browser: browser} do

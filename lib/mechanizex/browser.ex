@@ -75,54 +75,48 @@ defmodule Mechanizex.Browser do
     html_parser: :floki,
     http_headers: [],
     user_agent_alias: :mechanizex,
-    follow_redirect: true
+    follow_redirect: true,
+    max_redirect: 5
   ]
 
-  defstruct http_adapter: nil,
-            html_parser: nil,
-            http_headers: nil,
-            follow_redirect: nil
+  defstruct [:http_adapter, :html_parser, :http_headers, :follow_redirect, :max_redirect]
 
   @type t :: %__MODULE__{
           http_adapter: any(),
           html_parser: any(),
           http_headers: keyword(),
-          follow_redirect: boolean()
+          follow_redirect: boolean(),
+          max_redirect: integer()
         }
 
   defmodule InvalidUserAgentAliasError do
     defexception [:message]
   end
 
-  @spec start_link(list()) :: {:error, any()} | {:ok, pid()}
-  def start_link(options \\ []) do
-    Agent.start_link(fn -> init(options) end)
+  @spec start_link() :: {:error, any()} | {:ok, pid()}
+  def start_link() do
+    Agent.start_link(fn -> %__MODULE__{} end)
   end
 
   @spec new(list()) :: pid()
   def new(options \\ []) do
-    {:ok, browser} = __MODULE__.start_link(options)
-    browser
+    {:ok, browser} = __MODULE__.start_link()
+    init(browser, options)
   end
 
-  defp init(options) do
+  defp init(browser, options) do
     options =
       @default_options
       |> Keyword.merge(Application.get_all_env(:mechanizex))
       |> Keyword.merge(options)
 
-    %__MODULE__{
-      http_adapter: HTTPAdapter.adapter(options[:http_adapter]),
-      html_parser: HTMLParser.parser(options[:html_parser]),
-      follow_redirect: options[:follow_redirect],
-      http_headers: config_http_headers(options)
-    }
-  end
-
-  defp config_http_headers(options) do
-    options[:http_headers]
-    |> List.keystore("user-agent", 0, {"user-agent", user_agent_string(options[:user_agent_alias])})
-    |> normalize_headers()
+    browser
+    |> put_http_adapter(HTTPAdapter.adapter(options[:http_adapter]))
+    |> put_html_parser(HTMLParser.parser(options[:html_parser]))
+    |> update_follow_redirect(options[:follow_redirect])
+    |> put_max_redirect(options[:max_redirect])
+    |> put_http_headers(options[:http_headers])
+    |> put_user_agent_alias(options[:user_agent_alias])
   end
 
   defp normalize_headers(headers) do
@@ -137,7 +131,7 @@ defmodule Mechanizex.Browser do
     Agent.get(browser, fn state -> state.http_adapter end)
   end
 
-  def set_http_adapter(browser, adapter) do
+  def put_http_adapter(browser, adapter) do
     Agent.update(browser, &Map.put(&1, :http_adapter, adapter))
     browser
   end
@@ -146,7 +140,7 @@ defmodule Mechanizex.Browser do
     Agent.get(browser, fn state -> state.html_parser end)
   end
 
-  def set_html_parser(browser, parser) do
+  def put_html_parser(browser, parser) do
     Agent.update(browser, &Map.put(&1, :html_parser, parser))
     browser
   end
@@ -155,7 +149,7 @@ defmodule Mechanizex.Browser do
     Agent.get(browser, fn state -> state.http_headers end)
   end
 
-  def set_http_headers(browser, headers) do
+  def put_http_headers(browser, headers) do
     Agent.update(browser, &Map.put(&1, :http_headers, normalize_headers(headers)))
     browser
   end
@@ -170,11 +164,11 @@ defmodule Mechanizex.Browser do
     browser
   end
 
-  def set_user_agent_alias(browser, user_agent_alias) do
+  def put_user_agent_alias(browser, user_agent_alias) do
     put_http_header(browser, "user-agent", user_agent_string(user_agent_alias))
   end
 
-  defp update_follow_redirect(browser, follow) do
+  def update_follow_redirect(browser, follow) do
     :ok = Agent.update(browser, fn state -> %__MODULE__{state | follow_redirect: follow} end)
     browser
   end
@@ -189,6 +183,15 @@ defmodule Mechanizex.Browser do
 
   def follow_redirect?(browser) do
     Agent.get(browser, fn state -> state.follow_redirect end)
+  end
+
+  def put_max_redirect(browser, max_redirect) do
+    :ok = Agent.update(browser, fn state -> %__MODULE__{state | max_redirect: max_redirect} end)
+    browser
+  end
+
+  def max_redirect(browser) do
+    Agent.get(browser, fn state -> state.max_redirect end)
   end
 
   def user_agent_string(user_agent_alias) do

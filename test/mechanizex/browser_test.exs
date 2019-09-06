@@ -62,23 +62,25 @@ defmodule Mechanizex.BrowserTest do
     test "start a process", %{browser: browser} do
       assert is_pid(browser)
     end
-  end
 
-  describe ".start_link" do
-    test "start a process" do
-      {:ok, browser} = Mechanizex.Browser.start_link()
-      assert is_pid(browser)
+    test "redirects are followed by default", %{browser: browser} do
+      assert Browser.follow_redirect?(browser) == true
     end
 
-    test "start a different browser on each call" do
-      {:ok, browser1} = Browser.start_link()
-      {:ok, browser2} = Browser.start_link()
-
-      refute browser1 == browser2
+    test "change defaul follow redirect option" do
+      browser = Browser.new(follow_redirect: false)
+      assert Browser.follow_redirect?(browser) == false
     end
-  end
 
-  describe "initial headers config" do
+    test "default max redirect loop is 5", %{browser: browser} do
+      assert Browser.max_redirect(browser) == 5
+    end
+
+    test "change max redirect loop option" do
+      browser = Browser.new(max_redirect: 10)
+      assert Browser.max_redirect(browser) == 10
+    end
+
     test "load headers from mix config", %{browser: browser, default_ua: ua} do
       assert Browser.http_headers(browser) == [
                # loaded by config env
@@ -104,16 +106,50 @@ defmodule Mechanizex.BrowserTest do
                {"user-agent", ua}
              ]
     end
+
+    test "configure user agent" do
+      browser = Browser.new(user_agent_alias: :windows_chrome)
+
+      assert Browser.http_headers(browser) == [
+               # loaded by config env
+               {"foo", "bar"},
+               {"user-agent", Browser.user_agent_string(:windows_chrome)}
+             ]
+    end
+
+    test "configure http adapter" do
+      browser = Browser.new(http_adapter: :custom)
+      assert Browser.http_adapter(browser) == Mechanizex.HTTPAdapter.Custom
+    end
+
+    test "default http adapter" do
+      browser = Browser.new()
+      assert Browser.http_adapter(browser) == HTTPAdapter.Httpoison
+    end
   end
 
-  describe ".set_http_headers" do
+  describe ".start_link" do
+    test "start a process" do
+      {:ok, browser} = Mechanizex.Browser.start_link()
+      assert is_pid(browser)
+    end
+
+    test "start a different browser on each call" do
+      {:ok, browser1} = Browser.start_link()
+      {:ok, browser2} = Browser.start_link()
+
+      refute browser1 == browser2
+    end
+  end
+
+  describe ".put_http_headers" do
     test "set all headers at once", %{browser: browser} do
-      Browser.set_http_headers(browser, [{"content-type", "text/html"}])
+      Browser.put_http_headers(browser, [{"content-type", "text/html"}])
       assert Browser.http_headers(browser) == [{"content-type", "text/html"}]
     end
 
     test "ensure all headers are in lowercase", %{browser: browser} do
-      Browser.set_http_headers(browser, [
+      Browser.put_http_headers(browser, [
         {"Content-Type", "text/html"},
         {"Custom-Header", "Lero"}
       ])
@@ -159,24 +195,9 @@ defmodule Mechanizex.BrowserTest do
     end
   end
 
-  describe ".http_header" do
-    test "default user agent" do
-    end
-  end
-
-  describe ".set_user_agent_alias" do
+  describe ".put_user_agent_alias" do
     test "set by alias", %{browser: browser} do
-      Browser.set_user_agent_alias(browser, :windows_chrome)
-
-      assert Browser.http_headers(browser) == [
-               # loaded by config env
-               {"foo", "bar"},
-               {"user-agent", Browser.user_agent_string(:windows_chrome)}
-             ]
-    end
-
-    test "set on init" do
-      browser = Browser.new(user_agent_alias: :windows_chrome)
+      Browser.put_user_agent_alias(browser, :windows_chrome)
 
       assert Browser.http_headers(browser) == [
                # loaded by config env
@@ -187,47 +208,67 @@ defmodule Mechanizex.BrowserTest do
 
     test "raise error when invalid alias passed", %{browser: browser} do
       assert_raise ArgumentError, ~r/Invalid user agent/, fn ->
-        Browser.set_user_agent_alias(browser, :lero)
+        Browser.put_user_agent_alias(browser, :lero)
       end
     end
   end
 
-  describe ".http_adapter" do
-    test "configure on init" do
-      {:ok, browser} = Browser.start_link(http_adapter: :custom)
-      assert Browser.http_adapter(browser) == Mechanizex.HTTPAdapter.Custom
-    end
-
-    test "default http adapter" do
-      browser = Browser.new()
-      assert Browser.http_adapter(browser) == HTTPAdapter.Httpoison
-    end
-  end
-
-  describe ".set_http_adapter" do
+  describe ".put_http_adapter" do
     test "returns browser", %{browser: browser} do
-      assert Browser.set_http_adapter(browser, Mechanizex.HTTPAdapter.Custom) == browser
+      assert Browser.put_http_adapter(browser, Mechanizex.HTTPAdapter.Custom) == browser
     end
 
     test "updates http adapter", %{browser: browser} do
-      Browser.set_http_adapter(browser, Mechanizex.HTTPAdapter.Custom)
+      Browser.put_http_adapter(browser, Mechanizex.HTTPAdapter.Custom)
       assert Browser.http_adapter(browser) == Mechanizex.HTTPAdapter.Custom
     end
   end
 
-  describe ".set_html_parser" do
+  describe ".put_html_parser" do
     test "returns mechanizex browser", %{browser: browser} do
-      assert Browser.set_html_parser(browser, Mechanizex.HTMLParser.Custom) == browser
+      assert Browser.put_html_parser(browser, Mechanizex.HTMLParser.Custom) == browser
     end
 
     test "updates html parser", %{browser: browser} do
-      Browser.set_html_parser(browser, Mechanizex.HTMLParser.Custom)
+      Browser.put_html_parser(browser, Mechanizex.HTMLParser.Custom)
       assert Browser.html_parser(browser) == Mechanizex.HTMLParser.Custom
     end
 
     test "html parser option" do
-      {:ok, browser} = Browser.start_link(html_parser: :custom)
+      browser = Browser.new(html_parser: :custom)
       assert Browser.html_parser(browser) == Mechanizex.HTMLParser.Custom
+    end
+  end
+
+  describe ".update_follow_redirect" do
+    test "update browser follow redirect to true and false", %{browser: browser} do
+      assert Browser.follow_redirect?(browser) == true
+
+      Browser.update_follow_redirect(browser, false)
+      assert Browser.follow_redirect?(browser) == false
+
+      Browser.update_follow_redirect(browser, true)
+      assert Browser.follow_redirect?(browser) == true
+    end
+  end
+
+  describe ".enable_follow_redirect" do
+    test "update browser options to follow redirects", %{browser: browser} do
+      browser
+      |> Browser.update_follow_redirect(false)
+      |> Browser.enable_follow_redirect()
+
+      assert Browser.follow_redirect?(browser) == true
+    end
+  end
+
+  describe ".disable_follow_redirect" do
+    test "update browser options to not follow redirects", %{browser: browser} do
+      browser
+      |> Browser.update_follow_redirect(true)
+      |> Browser.disable_follow_redirect()
+
+      assert Browser.follow_redirect?(browser) == false
     end
   end
 
@@ -372,8 +413,15 @@ defmodule Mechanizex.BrowserTest do
       end
     end
 
-    test "redirects are followed by default", %{browser: browser} do
-      assert Browser.follow_redirect?(browser) == true
-    end
+    test "change max redirect loop"
+    test "disable redirects"
+
+    test "follow simple redirect"
+    test "raise if max redirect loop exceeded"
+    test "follow 301, 302, 307 and 308 redirects chains"
+    test "301 redirect must preserve only HEAD and GET methods"
+    test "302 redirect must preserve only HEAD and GET methods"
+    test "307 redirect must preserve method"
+    test "308 redirect must preserve method"
   end
 end

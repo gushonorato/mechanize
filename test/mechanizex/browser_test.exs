@@ -1,50 +1,35 @@
 defmodule Mechanizex.Browser.HTTPShortcutsTest do
-  alias Mechanizex.{Request, Response, Page, Browser}
+  alias Mechanizex.Browser
+  import TestHelper
 
   defmacro __using__(_) do
     [:get, :delete, :options, :patch, :post, :put, :head]
     |> Enum.map(fn method ->
       quote do
-        test "#{unquote(method)} delegate to request", %{browser: browser} do
-          Mechanizex.HTTPAdapter.Mock
-          |> Mox.expect(:request, fn _,
-                                     req = %Request{
-                                       method: unquote(method),
-                                       url: "https://www.seomaster.com.br",
-                                       params: params,
-                                       headers: headers
-                                     } ->
-            assert List.keyfind(params, "lero", 0) == {"lero", "lero"}
-            assert List.keyfind(headers, "accept", 0) == {"accept", "lero"}
-            {:ok, %Page{browser: browser, request: req, response: %Response{}}}
+        test "#{unquote(method)} delegate to request", %{bypass: bypass, browser: browser} do
+          Bypass.expect_once(bypass, fn conn ->
+            assert conn.method == unquote(method |> Atom.to_string() |> String.upcase())
+            assert %{"lero" => "lero"} = Plug.Conn.fetch_query_params(conn).params
+            assert [{"accept", "lero"} | _] = conn.req_headers
+
+            Plug.Conn.resp(conn, 200, "OK PAGE")
           end)
 
-          apply(Browser, unquote(method), [
+          apply(Browser, unquote(:"#{method}!"), [
             browser,
-            "https://www.seomaster.com.br",
+            endpoint_url(bypass),
             [{"lero", "lero"}],
             [{"accept", "lero"}]
           ])
         end
 
-        test "#{unquote(method)}! delegate to request", %{browser: browser} do
-          Mechanizex.HTTPAdapter.Mock
-          |> Mox.expect(:request, fn _,
-                                     req = %Request{
-                                       method: unquote(method),
-                                       url: "https://www.seomaster.com.br",
-                                       params: params,
-                                       headers: headers
-                                     } ->
-            assert List.keyfind(params, "lero", 0) == {"lero", "lero"}
-            assert List.keyfind(headers, "accept", 0) == {"accept", "lero"}
-            {:error, %Mechanizex.HTTPAdapter.NetworkError{cause: nil, message: "Never mind"}}
-          end)
+        test "#{unquote(method)}! delegate to request", %{bypass: bypass, browser: browser} do
+          Bypass.down(bypass)
 
           assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
             apply(Browser, unquote(:"#{method}!"), [
               browser,
-              "https://www.seomaster.com.br",
+              endpoint_url(bypass),
               [{"lero", "lero"}],
               [{"accept", "lero"}]
             ])
@@ -58,16 +43,16 @@ end
 defmodule Mechanizex.BrowserTest do
   use ExUnit.Case, async: true
   use Mechanizex.Browser.HTTPShortcutsTest
-  alias Mechanizex.{HTTPAdapter, Request, Response, Page, Browser}
-  import Mox
+  alias Mechanizex.{HTTPAdapter, Request, Page, Browser}
+  import TestHelper
   doctest Mechanizex.Browser
 
   setup do
-    {:ok, browser: start_supervised!({Browser, http_adapter: :mock})}
+    {:ok, %{bypass: Bypass.open(), browser: Browser.new()}}
   end
 
   setup_all do
-    {:ok, default_ua: Browser.user_agent_string!(:mechanizex)}
+    {:ok, default_ua: Browser.user_agent_string(:mechanizex)}
   end
 
   describe ".new" do
@@ -183,7 +168,7 @@ defmodule Mechanizex.BrowserTest do
       assert Browser.http_headers(browser) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent", Browser.user_agent_string!(:windows_chrome)}
+               {"user-agent", Browser.user_agent_string(:windows_chrome)}
              ]
     end
 
@@ -193,13 +178,13 @@ defmodule Mechanizex.BrowserTest do
       assert Browser.http_headers(browser) == [
                # loaded by config env
                {"foo", "bar"},
-               {"user-agent", Browser.user_agent_string!(:windows_chrome)}
+               {"user-agent", Browser.user_agent_string(:windows_chrome)}
              ]
     end
 
     test "raise error when invalid alias passed", %{browser: browser} do
-      assert_raise Browser.InvalidUserAgentAliasError, fn ->
-        Browser.set_user_agent_alias(browser, :windows_chrom)
+      assert_raise ArgumentError, ~r/Invalid user agent/, fn ->
+        Browser.set_user_agent_alias(browser, :lero)
       end
     end
   end
@@ -244,141 +229,142 @@ defmodule Mechanizex.BrowserTest do
   end
 
   describe ".request!" do
-    test "add agent's default http headers on request", %{browser: browser, default_ua: ua} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :get,
-                               url: "https://www.seomaster.com.br",
-                               headers: [
-                                 {"custom-header", "lero"},
-                                 {"foo", "bar"},
-                                 {"user-agent", ^ua}
-                               ]
-                             } = req ->
-        {:ok, %Page{browser: browser, request: req, response: %Response{}}}
-      end)
-
-      Browser.request!(browser, %Request{
-        method: :get,
-        url: "https://www.seomaster.com.br",
-        headers: [{"custom-header", "lero"}]
-      })
-    end
-
-    test "ignore case on update default http header", %{browser: browser} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :get,
-                               url: "https://www.seomaster.com.br",
-                               headers: [
-                                 {"custom-header", "lero"},
-                                 {"user-agent", "Gustabot"},
-                                 {"foo", "bar"}
-                               ]
-                             } = req ->
-        {:ok, %Page{browser: browser, request: req, response: %Response{}}}
-      end)
-
-      Browser.request!(browser, %Request{
-        method: :get,
-        url: "https://www.seomaster.com.br",
-        headers: [{"custom-header", "lero"}, {"User-Agent", "Gustabot"}]
-      })
-    end
-
-    test "ensure downcase of request headers", %{browser: browser} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :get,
-                               url: "https://www.seomaster.com.br",
-                               headers: [
-                                 {"custom-header", "lero"},
-                                 {"user-agent", "Gustabot"},
-                                 {"foo", "bar"}
-                               ]
-                             } = req ->
-        {:ok, %Page{browser: browser, request: req, response: %Response{}}}
-      end)
-
-      Browser.request!(browser, %Request{
-        method: :get,
-        url: "https://www.seomaster.com.br",
-        headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
-      })
-    end
-
-    test "send request parameters", %{browser: browser, default_ua: ua} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _,
-                             %Request{
-                               method: :get,
-                               url: "https://www.seomaster.com.br",
-                               params: [
-                                 {"query", "lero"},
-                                 {"start", "100"}
-                               ],
-                               headers: [
-                                 {"foo", "bar"},
-                                 {"user-agent", ^ua}
-                               ]
-                             } = req ->
-        {:ok, %Page{browser: browser, request: req, response: %Response{}}}
-      end)
-
-      Browser.request!(browser, %Request{
-        method: :get,
-        url: "https://www.seomaster.com.br",
-        params: [{"query", "lero"}, {"start", "100"}]
-      })
-    end
-
-    test "ensure downcase of response headers", %{browser: browser} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, req ->
-        {:ok,
-         %Page{
-           browser: browser,
-           request: req,
-           response: %Response{
-             body: [],
-             headers: [
-               {"Custom-Header", "lero"},
-               {"User-Agent", "Gustabot"},
-               {"FOO", "BAR"}
-             ],
-             code: 200,
-             url: "https://www.seomaster.com.br"
-           }
-         }}
+    test "get request content", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, "GET", "/", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK PAGE")
       end)
 
       page =
         Browser.request!(browser, %Request{
           method: :get,
-          url: "https://www.seomaster.com.br",
-          headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
+          url: endpoint_url(bypass)
         })
 
-      assert page.response.headers == [
-               {"custom-header", "lero"},
-               {"user-agent", "Gustabot"},
-               {"foo", "BAR"}
-             ]
+      assert Page.body(page) == "OK PAGE"
     end
 
-    test "raise error when connection fail", %{browser: browser} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request, fn _, _ ->
-        {:error, %Mechanizex.HTTPAdapter.NetworkError{cause: nil, message: "Never mind"}}
+    test "send correct methods", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, "GET", "/", fn conn ->
+        assert conn.method == "GET"
+        Plug.Conn.resp(conn, 200, "OK")
       end)
+
+      Browser.request!(browser, %Request{
+        method: :get,
+        url: endpoint_url(bypass)
+      })
+
+      Bypass.expect_once(bypass, "POST", "/", fn conn ->
+        assert conn.method == "POST"
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      Browser.request!(browser, %Request{
+        method: :post,
+        url: endpoint_url(bypass)
+      })
+    end
+
+    test "merge header with browser's default headers", %{bypass: bypass, browser: browser, default_ua: ua} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.req_headers == [
+                 {"custom-header", "lero"},
+                 # the header "foo" comes from config/test.exs
+                 {"foo", "bar"},
+                 {"host", "localhost:#{bypass.port}"},
+                 {"user-agent", ua}
+               ]
+
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      Browser.request!(browser, %Request{
+        method: :get,
+        url: endpoint_url(bypass),
+        headers: [{"custom-header", "lero"}]
+      })
+    end
+
+    test "ignore case on update default http header", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.req_headers == [
+                 {"custom-header", "lero"},
+                 # the header "foo" comes from config/test.exs
+                 {"foo", "bar"},
+                 {"host", "localhost:#{bypass.port}"},
+                 {"user-agent", "Gustabot"}
+               ]
+
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      Browser.request!(browser, %Request{
+        method: :get,
+        url: endpoint_url(bypass),
+        headers: [{"custom-header", "lero"}, {"User-Agent", "Gustabot"}]
+      })
+    end
+
+    test "ensure downcase of request headers", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.req_headers == [
+                 {"custom-header", "lero"},
+                 # the header "foo" comes from config/test.exs
+                 {"foo", "bar"},
+                 {"host", "localhost:#{bypass.port}"},
+                 {"user-agent", "Gustabot"}
+               ]
+
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      Browser.request!(browser, %Request{
+        method: :get,
+        url: endpoint_url(bypass),
+        headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
+      })
+    end
+
+    test "send request parameters", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert Plug.Conn.fetch_query_params(conn).params == %{
+                 "query" => "lero",
+                 "start" => "100"
+               }
+
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      Browser.request!(browser, %Request{
+        method: :get,
+        url: endpoint_url(bypass),
+        params: [{"query", "lero"}, {"start", "100"}]
+      })
+    end
+
+    test "ensure downcase of response headers", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, fn conn ->
+        conn
+        |> Plug.Conn.merge_resp_headers([{"Custom-Header", "lero"}, {"FOO", "BAR"}])
+        |> Plug.Conn.resp(200, "OK")
+      end)
+
+      page =
+        Browser.request!(browser, %Request{
+          method: :get,
+          url: endpoint_url(bypass)
+        })
+
+      assert [{"custom-header", "lero"}, {"foo", "BAR"} | _] = page.response.headers
+    end
+
+    test "raise error when connection fail", %{bypass: bypass, browser: browser} do
+      Bypass.down(bypass)
 
       assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
         Browser.request!(browser, %Request{
           method: :get,
-          url: "https://www.seomaster.com.br"
+          url: endpoint_url(bypass)
         })
       end
     end

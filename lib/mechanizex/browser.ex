@@ -34,7 +34,7 @@ defmodule Mechanizex.Browser do
   use Mechanizex.Browser.HTTPShortcuts
   alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page}
 
-  @user_agent_alias [
+  @user_agent_aliases [
     mechanizex:
       "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
     linux_firefox: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0",
@@ -119,11 +119,7 @@ defmodule Mechanizex.Browser do
 
   defp config_http_headers(options) do
     options[:http_headers]
-    |> List.keystore(
-      "user-agent",
-      0,
-      {"user-agent", user_agent_string!(options[:user_agent_alias])}
-    )
+    |> List.keystore("user-agent", 0, {"user-agent", user_agent_string(options[:user_agent_alias])})
     |> normalize_headers()
   end
 
@@ -173,13 +169,13 @@ defmodule Mechanizex.Browser do
   end
 
   def set_user_agent_alias(browser, user_agent_alias) do
-    put_http_header(browser, "user-agent", user_agent_string!(user_agent_alias))
+    put_http_header(browser, "user-agent", user_agent_string(user_agent_alias))
   end
 
-  def user_agent_string!(user_agent_alias) do
-    case @user_agent_alias[user_agent_alias] do
+  def user_agent_string(user_agent_alias) do
+    case @user_agent_aliases[user_agent_alias] do
       nil ->
-        raise Mechanizex.Browser.InvalidUserAgentAliasError,
+        raise ArgumentError,
           message: "Invalid user agent alias \"#{user_agent_alias}\""
 
       user_agent_string ->

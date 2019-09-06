@@ -371,5 +371,9 @@ defmodule Mechanizex.BrowserTest do
         })
       end
     end
+
+    test "redirects are followed by default", %{browser: browser} do
+      assert Browser.follow_redirect?(browser) == true
+    end
   end
 end

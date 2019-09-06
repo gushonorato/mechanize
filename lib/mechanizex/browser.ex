@@ -74,17 +74,20 @@ defmodule Mechanizex.Browser do
     http_adapter: :httpoison,
     html_parser: :floki,
     http_headers: [],
-    user_agent_alias: :mechanizex
+    user_agent_alias: :mechanizex,
+    follow_redirect: true
   ]
 
   defstruct http_adapter: nil,
             html_parser: nil,
-            http_headers: nil
+            http_headers: nil,
+            follow_redirect: nil
 
   @type t :: %__MODULE__{
           http_adapter: any(),
           html_parser: any(),
-          http_headers: keyword()
+          http_headers: keyword(),
+          follow_redirect: boolean()
         }
 
   defmodule InvalidUserAgentAliasError do
@@ -103,16 +106,15 @@ defmodule Mechanizex.Browser do
   end
 
   defp init(options) do
-    @default_options
-    |> Keyword.merge(Application.get_all_env(:mechanizex))
-    |> Keyword.merge(options)
-    |> config_browser()
-  end
+    options =
+      @default_options
+      |> Keyword.merge(Application.get_all_env(:mechanizex))
+      |> Keyword.merge(options)
 
-  defp config_browser(options) do
     %__MODULE__{
       http_adapter: HTTPAdapter.adapter(options[:http_adapter]),
       html_parser: HTMLParser.parser(options[:html_parser]),
+      follow_redirect: options[:follow_redirect],
       http_headers: config_http_headers(options)
     }
   end
@@ -170,6 +172,23 @@ defmodule Mechanizex.Browser do
 
   def set_user_agent_alias(browser, user_agent_alias) do
     put_http_header(browser, "user-agent", user_agent_string(user_agent_alias))
+  end
+
+  defp update_follow_redirect(browser, follow) do
+    :ok = Agent.update(browser, fn state -> %__MODULE__{state | follow_redirect: follow} end)
+    browser
+  end
+
+  def enable_follow_redirect(browser) do
+    update_follow_redirect(browser, true)
+  end
+
+  def disable_follow_redirect(browser) do
+    update_follow_redirect(browser, false)
+  end
+
+  def follow_redirect?(browser) do
+    Agent.get(browser, fn state -> state.follow_redirect end)
   end
 
   def user_agent_string(user_agent_alias) do

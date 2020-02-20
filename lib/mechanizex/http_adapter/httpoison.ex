@@ -1,6 +1,6 @@
 defmodule Mechanizex.HTTPAdapter.Httpoison do
   @behaviour Mechanizex.HTTPAdapter
-  alias Mechanizex.{Request, Response, Page, Browser}
+  alias Mechanizex.{Request, Response}
   alias Mechanizex.HTTPAdapter.NetworkError
 
   @posix_errors [
@@ -145,25 +145,13 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
   ]
 
   @impl Mechanizex.HTTPAdapter
-  @spec request(pid(), Request.t()) :: {atom(), Page.t() | Error.t()}
-  def request(browser, req) do
+  def request!(%Request{} = req) do
     case HTTPoison.request(req.method, req.url, req.body, req.headers, params: req.params) do
       {:ok, res} ->
-        {:ok,
-         %Page{
-           response: %Response{
-             body: res.body,
-             headers: res.headers,
-             code: res.status_code,
-             url: req.url
-           },
-           request: req,
-           browser: browser,
-           parser: Browser.html_parser(browser)
-         }}
+        %Response{body: res.body, headers: res.headers, code: res.status_code, url: req.url}
 
       {:error, error} ->
-        {:error, %NetworkError{cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"}}
+        raise NetworkError, cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"
     end
   end
 end

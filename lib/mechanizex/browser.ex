@@ -5,16 +5,6 @@ defmodule Mechanizex.Browser.HTTPShortcuts do
     [:get, :delete, :options, :patch, :post, :put, :head]
     |> Enum.map(fn method ->
       quote do
-        def unquote(method)(browser, url, params \\ [], headers \\ [])
-
-        def unquote(method)(browser, %URI{} = uri, params, headers) do
-          request(browser, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
-        end
-
-        def unquote(method)(browser, url, params, headers) do
-          request(browser, %Request{method: unquote(method), url: url, headers: headers, params: params})
-        end
-
         def unquote(:"#{method}!")(browser, url, params \\ [], headers \\ [])
 
         def unquote(:"#{method}!")(browser, %URI{} = uri, params, headers) do
@@ -32,7 +22,7 @@ end
 defmodule Mechanizex.Browser do
   use Agent
   use Mechanizex.Browser.HTTPShortcuts
-  alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page}
+  alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page, Header}
 
   @user_agent_aliases [
     mechanizex:
@@ -119,14 +109,6 @@ defmodule Mechanizex.Browser do
     |> put_user_agent_alias(options[:user_agent_alias])
   end
 
-  defp normalize_headers(headers) do
-    Enum.map(headers, &normalize_header/1)
-  end
-
-  defp normalize_header({k, v}) do
-    {String.downcase(k), v}
-  end
-
   def http_adapter(browser) do
     Agent.get(browser, fn state -> state.http_adapter end)
   end
@@ -150,12 +132,12 @@ defmodule Mechanizex.Browser do
   end
 
   def put_http_headers(browser, headers) do
-    Agent.update(browser, &Map.put(&1, :http_headers, normalize_headers(headers)))
+    Agent.update(browser, &Map.put(&1, :http_headers, Header.normalize(headers)))
     browser
   end
 
   def put_http_header(browser, h, v) do
-    {h, _} = header = normalize_header({h, v})
+    {h, _} = header = Header.normalize({h, v})
 
     Agent.update(browser, fn state ->
       %__MODULE__{state | http_headers: List.keystore(state.http_headers, h, 0, header)}
@@ -205,32 +187,46 @@ defmodule Mechanizex.Browser do
     end
   end
 
-  def request!(browser, request) do
-    case request(browser, request) do
-      {:ok, page} -> page
-      {:error, error} -> raise error
-    end
+  def request!(browser, req) do
+    resp_chain = request!(browser, req, 0)
+
+    %Page{
+      request: req,
+      response: List.first(resp_chain),
+      browser: browser,
+      parser: html_parser(browser)
+    }
   end
 
-  def request(browser, request) do
-    req_headers =
-      request.headers
-      |> normalize_headers()
-      |> merge_http_headers(http_headers(browser))
-
-    res = http_adapter(browser).request(browser, %Request{request | headers: req_headers})
-
-    case res do
-      {:ok, page} ->
-        res_headers = normalize_headers(page.response.headers)
-        {:ok, %Page{page | response: %Response{page.response | headers: res_headers}}}
-
-      res ->
-        res
-    end
+  defp request!(browser, req, redirect_count) do
+    req
+    |> Request.normalize_headers()
+    |> merge_default_headers(browser)
+    |> perform_request(browser)
+    |> Response.normalize_headers()
+    |> maybe_follow_redirect(req, browser, redirect_count)
   end
 
-  defp merge_http_headers(request_headers, browser_headers) do
-    Enum.uniq_by(request_headers ++ browser_headers, &elem(&1, 0))
+  defp merge_default_headers(req, browser) do
+    %Request{req | headers: Header.merge(http_headers(browser), req.headers)}
+  end
+
+  defp perform_request(req, browser) do
+    http_adapter(browser).request!(req)
+  end
+
+  defp maybe_follow_redirect(res, req, browser, redirect_count) do
+    cond do
+      redirect_count > max_redirect(browser) ->
+        raise "Too many redirects (max #{max_redirect(browser)})"
+
+      follow_redirect?(browser) and res.code in 300..399 ->
+        location = Header.get(res.headers, "location")
+        new_req = %Request{req | method: :get, url: location, params: []}
+        request!(browser, new_req, redirect_count + 1) ++ [res]
+
+      true ->
+        [Response.normalize_headers(res)]
+    end
   end
 end

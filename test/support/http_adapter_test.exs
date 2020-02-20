@@ -5,7 +5,7 @@ defmodule Mechanizex.HTTPAdapterTest do
       import Mechanizex.HTTPAdapterTest
 
       setup do
-        {:ok, bypass: Bypass.open(), browser: Mechanizex.Browser.new()}
+        {:ok, bypass: Bypass.open()}
       end
 
       @moduletag unquote(options)
@@ -29,75 +29,48 @@ defmodule Mechanizex.HTTPAdapterTest do
   end
 
   defp gen_test(method_name, method) do
-    alias Mechanizex.{Request, Page}
+    alias Mechanizex.Request
 
     quote do
-      test "simple #{unquote(method_name)}", %{bypass: bypass, browser: browser, adapter: adapter} do
+      test "simple #{unquote(method_name)}", %{bypass: bypass, adapter: adapter} do
         Bypass.expect(bypass, fn conn ->
           assert conn.method == unquote(method_name)
           assert conn.request_path == "/fake_path"
           Plug.Conn.resp(conn, 200, "Lero")
         end)
 
-        {:ok, page} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        res = adapter.request!(%Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
-        assert Page.response_code(page) == 200
+        assert res.code == 200
 
         case unquote(:method) do
-          :head -> assert Page.body(page) == ""
-          _ -> assert Page.body(page) == "Lero"
+          :head -> assert res.body == ""
+          _ -> assert res.body == "Lero"
         end
       end
 
-      test "simple #{unquote(method_name)} with error", %{
-        bypass: bypass,
-        browser: browser,
-        adapter: adapter
-      } do
+      test "simple #{unquote(method_name)} with error", %{bypass: bypass, adapter: adapter} do
         Bypass.down(bypass)
 
-        {:error, error} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
-
-        assert %Mechanizex.HTTPAdapter.NetworkError{} = error
-        assert error.message =~ ~r/connection refused/i
+        assert_raise Mechanizex.HTTPAdapter.NetworkError, ~r/connection refused/i, fn ->
+          adapter.request!(%Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        end
       end
 
-      test "retrieve request from page using #{unquote(method_name)}", %{
-        bypass: bypass,
-        browser: browser,
-        adapter: adapter
-      } do
-        Bypass.expect(bypass, fn conn -> Plug.Conn.resp(conn, 200, "Lero") end)
-        req = %Request{method: unquote(method), url: endpoint_url(bypass.port)}
-
-        {:ok, page} = adapter.request(browser, req)
-
-        assert page.request == req
-      end
-
-      test "request params using #{unquote(method_name)}", %{
-        bypass: bypass,
-        browser: browser,
-        adapter: adapter
-      } do
+      test "request params using #{unquote(method_name)}", %{bypass: bypass, adapter: adapter} do
         Bypass.expect(bypass, fn conn ->
           assert conn.query_string == "query=%C3%A1rvore+pau+brasil&page=1"
           Plug.Conn.resp(conn, 200, "Lero")
         end)
 
-        {:ok, _} =
-          adapter.request(browser, %Request{
-            method: unquote(method),
-            url: endpoint_url(bypass.port),
-            params: [{"query", "árvore pau brasil"}, {"page", "1"}]
-          })
+        adapter.request!(%Request{
+          method: unquote(method),
+          url: endpoint_url(bypass.port),
+          params: [{"query", "árvore pau brasil"}, {"page", "1"}]
+        })
       end
 
-      test "request headers using #{unquote(method_name)}", %{
-        bypass: bypass,
-        browser: browser,
-        adapter: adapter
-      } do
+      test "request headers using #{unquote(method_name)}", %{bypass: bypass, adapter: adapter} do
         Bypass.expect(bypass, fn conn ->
           assert [{_, "text/html"}] = Enum.filter(conn.req_headers, fn {k, _} -> k =~ ~r/content-type/i end)
 
@@ -106,29 +79,23 @@ defmodule Mechanizex.HTTPAdapterTest do
           Plug.Conn.resp(conn, 200, "Lero")
         end)
 
-        {:ok, _} =
-          adapter.request(browser, %Request{
-            method: unquote(method),
-            url: endpoint_url(bypass.port),
-            headers: [{"User-Agent", "Gustabot"}, {"content-type", "text/html"}]
-          })
+        adapter.request!(%Request{
+          method: unquote(method),
+          url: endpoint_url(bypass.port),
+          headers: [{"User-Agent", "Gustabot"}, {"content-type", "text/html"}]
+        })
       end
 
-      test "handle received headers using #{unquote(method_name)}", %{
-        bypass: bypass,
-        browser: browser,
-        adapter: adapter
-      } do
+      test "handle received headers using #{unquote(method_name)}", %{bypass: bypass, adapter: adapter} do
         Bypass.expect(bypass, fn conn ->
           conn
           |> Plug.Conn.resp(301, "Lero")
           |> Plug.Conn.put_resp_header("Location", "https://www.seomaster.com.br")
         end)
 
-        {:ok, page} = adapter.request(browser, %Request{method: unquote(method), url: endpoint_url(bypass.port)})
+        res = adapter.request!(%Request{method: unquote(method), url: endpoint_url(bypass.port)})
 
-        assert [{_, "https://www.seomaster.com.br"}] =
-                 Enum.filter(page.response.headers, fn {k, _} -> k =~ ~r/location/i end)
+        assert [{_, "https://www.seomaster.com.br"}] = Enum.filter(res.headers, fn {k, _} -> k =~ ~r/location/i end)
       end
     end
   end

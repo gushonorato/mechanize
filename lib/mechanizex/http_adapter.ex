@@ -1,5 +1,7 @@
 defmodule Mechanizex.HTTPAdapter do
-  @callback request(pid(), Mechanizex.Request.t()) :: {atom(), Page.t() | Mechanizex.Browser.ConnectionError.t()}
+  alias Mechanizex.{Request, Response}
+
+  @callback request!(Request.t()) :: Response.t()
 
   defmodule NetworkError do
     defexception [:message, :cause]

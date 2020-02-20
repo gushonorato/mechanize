@@ -6,26 +6,6 @@ defmodule Mechanizex.Browser.HTTPShortcutsTest do
     [:get, :delete, :options, :patch, :post, :put, :head]
     |> Enum.map(fn method ->
       quote do
-        test "#{unquote(method)} delegate to request", %{bypass: bypass, browser: browser} do
-          Bypass.expect_once(bypass, fn conn ->
-            assert conn.method == unquote(method |> Atom.to_string() |> String.upcase())
-            assert %{"lero" => "lero"} = Plug.Conn.fetch_query_params(conn).params
-            assert [{"accept", "lero"} | _] = conn.req_headers
-
-            Plug.Conn.resp(conn, 200, "OK PAGE")
-          end)
-
-          assert match?(
-                   %Page{},
-                   apply(Browser, unquote(:"#{method}!"), [
-                     browser,
-                     endpoint_url(bypass),
-                     [{"lero", "lero"}],
-                     [{"accept", "lero"}]
-                   ])
-                 )
-        end
-
         test "#{unquote(method)}! delegate to request", %{bypass: bypass, browser: browser} do
           Bypass.down(bypass)
 
@@ -413,10 +393,35 @@ defmodule Mechanizex.BrowserTest do
       end
     end
 
-    test "change max redirect loop"
+    test "follow simple redirect", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+        redirect_location =
+          bypass
+          |> endpoint_url("/redirected")
+          |> URI.to_string()
+
+        conn
+        |> Plug.Conn.merge_resp_headers([{"Location", redirect_location}])
+        |> Plug.Conn.resp(301, "")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        Plug.Conn.resp(conn, 200, "REDIRECT OK")
+      end)
+
+      req = %Request{
+        method: :get,
+        url: endpoint_url(bypass, "/redirect_to")
+      }
+
+      page = Browser.request!(browser, req)
+
+      assert Page.response_code(page) == 200
+      assert Page.body(page) == "REDIRECT OK"
+    end
+
     test "disable redirects"
 
-    test "follow simple redirect"
     test "raise if max redirect loop exceeded"
     test "follow 301, 302, 307 and 308 redirects chains"
     test "301 redirect must preserve only HEAD and GET methods"

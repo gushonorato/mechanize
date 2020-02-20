@@ -66,20 +66,24 @@ defmodule Mechanizex.Browser do
     http_headers: [],
     user_agent_alias: :mechanizex,
     follow_redirect: true,
-    max_redirect: 5
+    redirect_limit: 5
   ]
 
-  defstruct [:http_adapter, :html_parser, :http_headers, :follow_redirect, :max_redirect]
+  defstruct [:http_adapter, :html_parser, :http_headers, :follow_redirect, :redirect_limit]
 
   @type t :: %__MODULE__{
           http_adapter: any(),
           html_parser: any(),
           http_headers: keyword(),
           follow_redirect: boolean(),
-          max_redirect: integer()
+          redirect_limit: integer()
         }
 
   defmodule InvalidUserAgentAliasError do
+    defexception [:message]
+  end
+
+  defmodule RedirectLimitReachedError do
     defexception [:message]
   end
 
@@ -104,7 +108,7 @@ defmodule Mechanizex.Browser do
     |> put_http_adapter(HTTPAdapter.adapter(options[:http_adapter]))
     |> put_html_parser(HTMLParser.parser(options[:html_parser]))
     |> update_follow_redirect(options[:follow_redirect])
-    |> put_max_redirect(options[:max_redirect])
+    |> put_redirect_limit(options[:redirect_limit])
     |> put_http_headers(options[:http_headers])
     |> put_user_agent_alias(options[:user_agent_alias])
   end
@@ -167,13 +171,13 @@ defmodule Mechanizex.Browser do
     Agent.get(browser, fn state -> state.follow_redirect end)
   end
 
-  def put_max_redirect(browser, max_redirect) do
-    :ok = Agent.update(browser, fn state -> %__MODULE__{state | max_redirect: max_redirect} end)
+  def put_redirect_limit(browser, redirect_limit) do
+    :ok = Agent.update(browser, fn state -> %__MODULE__{state | redirect_limit: redirect_limit} end)
     browser
   end
 
-  def max_redirect(browser) do
-    Agent.get(browser, fn state -> state.max_redirect end)
+  def redirect_limit(browser) do
+    Agent.get(browser, fn state -> state.redirect_limit end)
   end
 
   def user_agent_string(user_agent_alias) do
@@ -217,8 +221,8 @@ defmodule Mechanizex.Browser do
 
   defp maybe_follow_redirect(res, req, browser, redirect_count) do
     cond do
-      redirect_count > max_redirect(browser) ->
-        raise "Too many redirects (max #{max_redirect(browser)})"
+      redirect_count >= redirect_limit(browser) ->
+        raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
 
       follow_redirect?(browser) and res.code in 300..399 ->
         location = Header.get(res.headers, "location")

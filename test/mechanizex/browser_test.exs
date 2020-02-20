@@ -422,15 +422,57 @@ defmodule Mechanizex.BrowserTest do
 
     @tag :skip
     test "disable redirects"
+      end)
 
-    @tag :skip
-    test "raise if max redirect loop exceeded"
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        Plug.Conn.resp(conn, 200, "REDIRECT OK")
+      end)
 
-    @tag :skip
-    test "change max redirect loop"
+      Browser.disable_follow_redirect(browser)
+      page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
+      assert page.status_code == 301
+      assert Header.get(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
 
-    @tag :skip
-    test "follow 301, 302, 307 and 308 redirects chains"
+      Browser.enable_follow_redirect(browser)
+      page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
+      assert page.status_code == 200
+    end
+
+    test "raise if max redirect loop exceeded", %{browser: browser, bypass: bypass} do
+      1..6
+      |> Enum.each(fn n ->
+        Bypass.expect_once(bypass, "GET", "/#{n}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/#{n + 1}"))
+          |> Plug.Conn.resp(301, "")
+        end)
+      end)
+
+      assert_raise Mechanizex.Browser.RedirectLimitReachedError,
+                   "Redirect limit of #{Browser.redirect_limit(browser)} reached",
+                   fn ->
+                     Browser.get!(browser, endpoint_url(bypass, "/1"))
+                   end
+    end
+
+    test "change redirect limit to above", %{bypass: bypass} do
+      1..5
+      |> Enum.each(fn n ->
+        Bypass.expect_once(bypass, "GET", "/#{n}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/#{n + 1}"))
+          |> Plug.Conn.resp(301, "")
+        end)
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/6", fn conn ->
+        Plug.Conn.resp(conn, 200, "")
+      end)
+
+      browser = Browser.new(redirect_limit: 6)
+      page = Browser.get!(browser, endpoint_url(bypass, "/1"))
+      assert page.status_code == 200
+    end
 
     @tag :skip
     test "301 redirect must preserve only HEAD and GET methods"

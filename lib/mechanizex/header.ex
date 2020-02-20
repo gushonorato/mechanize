@@ -40,7 +40,7 @@ defmodule Mechanizex.Header do
   end
 
   def get_all(headers, key) do
-    Enun.filter(headers, fn {k, _v} -> normalize_key(k) == normalize_key(key) end)
+    Enum.filter(headers, fn {k, _v} -> normalize_key(k) == normalize_key(key) end)
   end
 
   def normalize_key(k) do

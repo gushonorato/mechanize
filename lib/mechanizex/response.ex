@@ -12,4 +12,8 @@ defmodule Mechanizex.Response do
   def normalize_headers(%__MODULE__{} = res) do
     %__MODULE__{res | headers: Header.normalize(res.headers)}
   end
+
+  def headers(%__MODULE__{} = res) do
+    res.headers
+  end
 end

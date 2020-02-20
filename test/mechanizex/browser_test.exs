@@ -26,7 +26,7 @@ end
 defmodule Mechanizex.BrowserTest do
   use ExUnit.Case, async: true
   use Mechanizex.Browser.HTTPShortcutsTest
-  alias Mechanizex.{HTTPAdapter, Request, Page, Browser}
+  alias Mechanizex.{HTTPAdapter, Request, Page, Browser, Header}
   import TestHelper
   doctest Mechanizex.Browser
 
@@ -47,18 +47,18 @@ defmodule Mechanizex.BrowserTest do
       assert Browser.follow_redirect?(browser) == true
     end
 
-    test "change defaul follow redirect option" do
+    test "change default follow redirect option" do
       browser = Browser.new(follow_redirect: false)
       assert Browser.follow_redirect?(browser) == false
     end
 
-    test "default max redirect loop is 5", %{browser: browser} do
-      assert Browser.max_redirect(browser) == 5
+    test "default redirect limit is 5", %{browser: browser} do
+      assert Browser.redirect_limit(browser) == 5
     end
 
-    test "change max redirect loop option" do
-      browser = Browser.new(max_redirect: 10)
-      assert Browser.max_redirect(browser) == 10
+    test "change redirect limit" do
+      browser = Browser.new(redirect_limit: 10)
+      assert Browser.redirect_limit(browser) == 10
     end
 
     test "load headers from mix config", %{browser: browser, default_ua: ua} do
@@ -379,7 +379,7 @@ defmodule Mechanizex.BrowserTest do
           url: endpoint_url(bypass)
         })
 
-      assert [{"custom-header", "lero"}, {"foo", "BAR"} | _] = page.response.headers
+      assert [{"custom-header", "lero"}, {"foo", "BAR"} | _] = Page.headers(page)
     end
 
     test "raise error when connection fail", %{bypass: bypass, browser: browser} do
@@ -395,13 +395,8 @@ defmodule Mechanizex.BrowserTest do
 
     test "follow simple redirect", %{bypass: bypass, browser: browser} do
       Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
-        redirect_location =
-          bypass
-          |> endpoint_url("/redirected")
-          |> URI.to_string()
-
         conn
-        |> Plug.Conn.merge_resp_headers([{"Location", redirect_location}])
+        |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected"))
         |> Plug.Conn.resp(301, "")
       end)
 
@@ -416,12 +411,16 @@ defmodule Mechanizex.BrowserTest do
 
       page = Browser.request!(browser, req)
 
-      assert Page.response_code(page) == 200
-      assert Page.body(page) == "REDIRECT OK"
+      assert page.status_code == 200
+      assert page.url == endpoint_url(bypass, "/redirected")
+      assert page.body == "REDIRECT OK"
     end
 
-    @tag :skip
-    test "disable redirects"
+    test "toggle follow redirects", %{bypass: bypass, browser: browser} do
+      Bypass.expect(bypass, "GET", "/redirect_to", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected"))
+        |> Plug.Conn.resp(301, "")
       end)
 
       Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
@@ -472,6 +471,30 @@ defmodule Mechanizex.BrowserTest do
       browser = Browser.new(redirect_limit: 6)
       page = Browser.get!(browser, endpoint_url(bypass, "/1"))
       assert page.status_code == 200
+    end
+
+    test "follow 301, 302, 307 and 308 redirects chains", %{bypass: bypass, browser: browser} do
+      step_codes = %{1 => 301, 2 => 302, 3 => 307, 4 => 308}
+
+      1..4
+      |> Enum.each(fn step ->
+        Bypass.expect_once(bypass, "GET", "/#{step}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/#{step + 1}"))
+          |> Plug.Conn.resp(step_codes[step], "")
+        end)
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/5", fn conn ->
+        Plug.Conn.resp(conn, 200, "Page 5")
+      end)
+
+      page = Browser.get!(browser, endpoint_url(bypass, "/1"))
+
+      expected_resp_chain = Enum.map(5..1, &endpoint_url(bypass, "/#{&1}"))
+      actual_resp_chain = Enum.map(page.response_chain, & &1.url)
+
+      assert expected_resp_chain == actual_resp_chain
     end
 
     @tag :skip

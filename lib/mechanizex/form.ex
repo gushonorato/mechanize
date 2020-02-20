@@ -160,7 +160,7 @@ defmodule Mechanizex.Form do
     |> Element.attr(:action)
     |> Kernel.||("")
     |> String.trim()
-    |> (&URI.merge(form.element.page.request.url, &1)).()
+    |> (&URI.merge(form.element.page.url, &1)).()
     |> URI.to_string()
   end
 

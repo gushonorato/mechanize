@@ -194,9 +194,13 @@ defmodule Mechanizex.Browser do
   def request!(browser, req) do
     resp_chain = request!(browser, req, 0)
 
+    last_response = List.first(resp_chain)
+
     %Page{
-      request: req,
-      response: List.first(resp_chain),
+      response_chain: resp_chain,
+      status_code: last_response.code,
+      body: last_response.body,
+      url: last_response.url,
       browser: browser,
       parser: html_parser(browser)
     }

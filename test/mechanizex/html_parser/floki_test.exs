@@ -1,7 +1,7 @@
 defmodule Mechanizex.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
   alias Mechanizex.HTMLParser
-  alias Mechanizex.{Response, Page, Request}
+  alias Mechanizex.Page
   alias Mechanizex.Page.Element
 
   doctest Mechanizex.HTMLParser.Floki
@@ -42,18 +42,12 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
 
   @page %Page{
     browser: :fake_mechanize_pid,
-    request: %Request{},
-    response: %Response{
-      body: @html
-    }
+    body: @html
   }
 
   @page_without_text %Page{
     browser: :fake_mechanize_pid,
-    request: %Request{},
-    response: %Response{
-      body: @html_without_text
-    }
+    body: @html_without_text
   }
 
   @google %Element{

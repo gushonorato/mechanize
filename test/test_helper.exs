@@ -31,5 +31,5 @@ defmodule TestHelper do
     {:ok, %{bypass: bypass, browser: browser, page: page}}
   end
 
-  def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path)
+  def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path) |> URI.to_string()
 end

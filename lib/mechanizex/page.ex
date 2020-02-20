@@ -1,20 +1,29 @@
 defmodule Mechanizex.Page do
-  alias Mechanizex.{Request, Response, Query, Form}
+  alias Mechanizex.{Response, Query, Form}
   alias Mechanizex.Page.Link
 
-  @enforce_keys [:request, :response, :browser]
-  defstruct request: nil, response: nil, browser: nil, parser: nil
+  defstruct response_chain: nil, status_code: nil, body: nil, url: nil, browser: nil, parser: nil
 
   @type t :: %__MODULE__{
-          request: Request.t(),
-          response: Response.t(),
+          response_chain: [Response.t()],
+          status_code: integer(),
+          body: String.t(),
+          url: String.t(),
           browser: pid(),
           parser: module()
         }
 
-  def response_code(page), do: page.response.code
-  def body(page), do: page.response.body
   def browser(page), do: page.browser
+  def url(page), do: page.url
+  def body(page), do: page.body
+
+  def headers(page) do
+    page
+    |> last_response()
+    |> Response.headers()
+  end
+
+  def last_response(page), do: List.first(page.response_chain)
 
   def click_link(page, criterias) when is_list(criterias) do
     page
@@ -62,14 +71,10 @@ defmodule Mechanizex.Page do
     |> Enum.filter(&Query.match?(&1, criteria))
     |> Enum.map(construct_fun)
   end
-
-  def url(page) do
-    page.response.url
-  end
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page do
   def parser(page), do: page.parser
-  def parser_data(page), do: page.response.body
+  def parser_data(page), do: page.body
   def page(page), do: page
 end

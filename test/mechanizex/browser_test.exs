@@ -420,13 +420,28 @@ defmodule Mechanizex.BrowserTest do
       assert Page.body(page) == "REDIRECT OK"
     end
 
+    @tag :skip
     test "disable redirects"
 
+    @tag :skip
     test "raise if max redirect loop exceeded"
+
+    @tag :skip
+    test "change max redirect loop"
+
+    @tag :skip
     test "follow 301, 302, 307 and 308 redirects chains"
+
+    @tag :skip
     test "301 redirect must preserve only HEAD and GET methods"
+
+    @tag :skip
     test "302 redirect must preserve only HEAD and GET methods"
+
+    @tag :skip
     test "307 redirect must preserve method"
+
+    @tag :skip
     test "308 redirect must preserve method"
   end
 end

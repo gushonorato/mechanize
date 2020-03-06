@@ -497,16 +497,109 @@ defmodule Mechanizex.BrowserTest do
       assert expected_resp_chain == actual_resp_chain
     end
 
-    @tag :skip
-    test "301 redirect must preserve only HEAD and GET methods"
+    test "301 and 302 redirects change to GET method on new request", %{bypass: bypass, browser: browser} do
+      fixtures =
+        for status <- [301, 302],
+            method <- [:get, :delete, :options, :patch, :post, :put],
+            do: {status, method}
 
-    @tag :skip
-    test "302 redirect must preserve only HEAD and GET methods"
+      Enum.each(fixtures, fn {status, method} ->
+        bypass_method =
+          method
+          |> Atom.to_string()
+          |> String.upcase()
 
-    @tag :skip
-    test "307 redirect must preserve method"
+        Bypass.expect_once(bypass, bypass_method, "/redirect_#{status}_#{method}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}_#{method}"))
+          |> Plug.Conn.resp(status, "")
+        end)
 
-    @tag :skip
-    test "308 redirect must preserve method"
+        Bypass.expect_once(bypass, "GET", "/redirected_#{status}_#{method}", fn conn ->
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        apply(Browser, :"#{method}!", [browser, endpoint_url(bypass, "/redirect_#{status}_#{method}")])
+      end)
+    end
+
+    test "301 and 302 redirects preserve HEAD methods on new request", %{bypass: bypass, browser: browser} do
+      [301, 302]
+      |> Enum.each(fn status ->
+        Bypass.expect_once(bypass, "HEAD", "/redirect_head_#{status}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_head_#{status}"))
+          |> Plug.Conn.resp(301, "")
+        end)
+
+        Bypass.expect_once(bypass, "HEAD", "/redirected_head_#{status}", fn conn ->
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        Browser.head!(browser, endpoint_url(bypass, "/redirect_head_#{status}"))
+      end)
+    end
+
+    test "307 and 308 redirects preserve methods", %{bypass: bypass, browser: browser} do
+      fixtures =
+        for status <- [307, 308],
+            method <- [:get, :head, :delete, :options, :patch, :post, :put],
+            do: {status, method}
+
+      Enum.each(fixtures, fn {status, method} ->
+        bypass_method =
+          method
+          |> Atom.to_string()
+          |> String.upcase()
+
+        Bypass.expect_once(bypass, bypass_method, "/redirect_#{status}_#{method}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}_#{method}"))
+          |> Plug.Conn.resp(status, "")
+        end)
+
+        Bypass.expect_once(bypass, bypass_method, "/redirected_#{status}_#{method}", fn conn ->
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        apply(Browser, :"#{method}!", [browser, endpoint_url(bypass, "/redirect_#{status}_#{method}")])
+      end)
+    end
+
+    test "307 and 308 redirects preserve request data", %{bypass: bypass, browser: browser} do
+      [307, 308]
+      |> Enum.each(fn status ->
+        Bypass.expect_once(bypass, "POST", "/redirect_to_#{status}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}"))
+          |> Plug.Conn.resp(status, "")
+        end)
+
+        Bypass.expect_once(bypass, "POST", "/redirected_#{status}", fn conn ->
+          assert conn.query_string == "user=gustavo"
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
+      end)
+    end
+
+    test "301 and 302 redirects does not preserve request data", %{bypass: bypass, browser: browser} do
+      [301, 302]
+      |> Enum.each(fn status ->
+        Bypass.expect_once(bypass, "POST", "/redirect_to_#{status}", fn conn ->
+          conn
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}"))
+          |> Plug.Conn.resp(status, "")
+        end)
+
+        Bypass.expect_once(bypass, "GET", "/redirected_#{status}", fn conn ->
+          assert conn.query_string == ""
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
+      end)
+    end
   end
 end

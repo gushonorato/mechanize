@@ -25,12 +25,9 @@ defmodule Mechanizex.Form do
           fields: list()
         }
 
-  @spec new(Element.t()) :: Form.t()
-  def new(element) do
-    %Mechanizex.Form{
-      element: element,
-      fields: parse_fields(element)
-    }
+  @spec new(Page.t(), Element.t()) :: Form.t()
+  def new(page, element) do
+    %Mechanizex.Form{element: element, fields: parse_fields(page, element)}
   end
 
   defmodule InconsistentFormError do
@@ -183,9 +180,11 @@ defmodule Mechanizex.Form do
     form.element.page.browser
   end
 
-  defp parse_fields(element) do
-    element
-    |> Query.search("input, textarea, button, select")
+  defp parse_fields(page, element) do
+    inner_fields = Query.search(element, "input, textarea, button, select")
+    outer_fields = Query.search(page, "[form=#{Element.attr(element, :id)}]")
+
+    (inner_fields ++ outer_fields)
     |> Enum.map(&create_field/1)
     |> Enum.reject(&is_nil/1)
   end

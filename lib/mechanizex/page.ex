@@ -45,7 +45,11 @@ defmodule Mechanizex.Page do
     |> List.first()
   end
 
-  def links_with(page, criteria \\ []), do: elements_with(page, "a, area", criteria, &Link.new/1)
+  def links_with(page, criteria \\ []) do
+    page
+    |> elements_with("a, area", criteria)
+    |> Enum.map(&Link.new/1)
+  end
 
   def form(page) do
     page
@@ -61,15 +65,16 @@ defmodule Mechanizex.Page do
     |> List.first()
   end
 
-  def forms_with(page, criteria \\ []), do: elements_with(page, "form", criteria, &Form.new/1)
+  def forms_with(page, criteria \\ []) do
+    page
+    |> elements_with("form", criteria)
+    |> Enum.map(&Form.new(page, &1))
+  end
 
-  def elements_with(page, selector, criteria \\ [], construct_fun \\ fn x -> x end)
-
-  def elements_with(page, selector, criteria, construct_fun) do
+  def elements_with(page, selector, criteria \\ []) do
     page
     |> Query.search(selector)
     |> Enum.filter(&Query.match?(&1, criteria))
-    |> Enum.map(construct_fun)
   end
 end
 

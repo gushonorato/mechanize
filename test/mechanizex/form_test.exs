@@ -144,6 +144,44 @@ defmodule Mechanizex.FormTest do
                {nil, "123456"}
              ]
     end
+
+    test "parse outer elements with form attribute", %{page: page} do
+      assert page
+             |> Page.form_with(name: "form_with_outer_inputs")
+             |> Form.text_inputs()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"firstname", "gustavo"},
+               {"lastname", "honorato"}
+             ]
+    end
+
+    test "parse inner element with form attribute without duplicating it", %{page: page} do
+      assert page
+             |> Page.form_with(id: "form_with_inner_element_with_form_attribute")
+             |> Form.text_inputs()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"firstname", "gustavo"}
+             ]
+    end
+
+    test "parse outer elements case sensitive", %{page: page} do
+      assert page
+             |> Page.form_with(id: "form_with_case_sensitive")
+             |> Form.text_inputs()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"lastname", "honorato"}
+             ]
+    end
+
+    test "parse outer element with spaces in id", %{page: page} do
+      assert page
+             |> Page.form_with(id: "form with spaces")
+             |> Form.text_inputs()
+             |> Enum.map(&{&1.name, &1.value}) == [
+               {"firstname", "gustavo"},
+               {"lastname", "honorato"}
+             ]
+    end
   end
 
   describe ".submit" do

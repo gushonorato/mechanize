@@ -121,6 +121,26 @@
     <input type="text" id="login" value="gustavo"">
       <input type=" password" id="pass" value="123456">
   </form>
+
+  <form action="" method="post" name="form_with_outer_inputs" id="form_with_outer_inputs">
+    <input type="text" name="lastname" value="honorato">
+  </form>
+  <input type="text" name="firstname" value="gustavo" form="form_with_outer_inputs">
+
+  <form action="" method="post" id="form_with_inner_element_with_form_attribute">
+    <input type="text" name="firstname" value="gustavo" form="form_with_inner_element_with_form_attribute">
+  </form>
+
+  <form action="" method="post" id="form_with_case_sensitive">
+    <input type="text" name="lastname" value="honorato">
+  </form>
+  <input type="text" name="firstname" value="gustavo" form="FORM_WITH_CASE_SENSITIVE">
+
+  <form action="" method="post" id="form with spaces">
+    <input type="text" name="lastname" value="honorato">
+  </form>
+  <input type="text" name="firstname" value="gustavo" form="form with spaces">
+
 </body>
 
 </html>

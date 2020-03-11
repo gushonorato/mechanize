@@ -78,18 +78,24 @@ defmodule Mechanizex.Form do
     delete_fields(form, &Query.match?(&1, criteria))
   end
 
+  def fields(nil) do
+    raise ArgumentError, "form is nil"
+  end
+
   def fields(form) do
     form.fields
   end
 
   def fields_with(form, type, fun) when is_function(fun) do
-    form.fields
+    form
+    |> fields()
     |> Stream.filter(&(type == &1.__struct__))
     |> Enum.filter(fun)
   end
 
   def fields_with(form, type, criteria) do
-    form.fields
+    form
+    |> fields()
     |> Stream.filter(&(type == &1.__struct__))
     |> Enum.filter(&Query.match?(&1, criteria))
   end
@@ -181,12 +187,28 @@ defmodule Mechanizex.Form do
   end
 
   defp parse_fields(page, element) do
-    inner_fields = Query.search(element, "input, textarea, button, select")
-    outer_fields = Query.search(page, "[form=#{Element.attr(element, :id)}]")
-
-    (inner_fields ++ outer_fields)
+    element
+    |> parse_inner_fields()
+    |> parse_outer_fields(page, element)
     |> Enum.map(&create_field/1)
     |> Enum.reject(&is_nil/1)
+  end
+
+  defp parse_inner_fields(element) do
+    Query.search(element, "input, textarea, button, select")
+  end
+
+  defp parse_outer_fields(fields, page, element) do
+    case Element.attr(element, :id) do
+      nil ->
+        fields
+
+      form_id ->
+        page
+        |> Query.filter(~s(form[id="#{form_id}"]))
+        |> Query.search(~s([form="#{form_id}"]))
+        |> Kernel.++(fields)
+    end
   end
 
   defp create_field(el) do

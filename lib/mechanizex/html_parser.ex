@@ -6,6 +6,7 @@ defmodule Mechanizex.HTMLParser do
   @type attribute :: atom()
 
   @callback search(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
+  @callback filter(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
 
   @spec parser(String.t()) :: module()
   def parser(parser_name) do

@@ -55,6 +55,8 @@ defmodule Mechanizex.Query do
 
   def search(elements, selector), do: parser(elements).search(elements, selector)
 
+  def filter(elements, selector), do: parser(elements).filter(elements, selector)
+
   def parser(elements) when is_list(elements),
     do: elements |> List.first() |> Parseable.parser()
 

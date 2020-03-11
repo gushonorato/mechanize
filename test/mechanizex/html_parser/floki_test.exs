@@ -1,6 +1,7 @@
 defmodule Mechanizex.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
   alias Mechanizex.HTMLParser
+  alias Mechanizex.HTMLParser.Parseable
   alias Mechanizex.Page
   alias Mechanizex.Page.Element
 
@@ -114,6 +115,70 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
           ".js-google"
         )
       end
+    end
+  end
+
+  describe ".filter" do
+    test "raise when parseable is nil" do
+      assert_raise ArgumentError, "parseable is nil", fn ->
+        HTMLParser.Floki.filter(nil, "a")
+      end
+    end
+
+    test "raise when selector is nil" do
+      assert_raise ArgumentError, "selector is nil", fn ->
+        HTMLParser.Floki.filter(@page, nil)
+      end
+    end
+
+    test "empty element list" do
+      assert HTMLParser.Floki.filter([], "form") == []
+    end
+
+    test "returns a list of elements" do
+      subject = HTMLParser.Floki.filter(@page, "a")
+
+      assert is_list(subject)
+      Enum.each(subject, fn e -> assert match?(%Element{}, e) end)
+    end
+
+    test "remove selected elements from a page" do
+      assert(
+        @page
+        |> HTMLParser.Floki.filter("a")
+        |> List.first()
+        |> Parseable.parser_data() ==
+          {"html", [],
+           [
+             {"head", [],
+              [
+                {"title", [], ["Test"]},
+                {"meta", [{"name", "description"}, {"content", "Test webpage"}], []}
+              ]},
+             {"body", [],
+              [
+                {"div",
+                 [
+                   {"id", "main"},
+                   {"class", "container"},
+                   {"data-method", "get"}
+                 ], []},
+                {"div", [{"class", "content"}], []}
+              ]}
+           ]}
+      )
+    end
+
+    test "remove selected elements from a list of elements" do
+      assert(
+        @page
+        |> HTMLParser.Floki.search("div")
+        |> HTMLParser.Floki.filter(".js-cool")
+        |> Enum.map(&Parseable.parser_data/1) == [
+          {"div", [{"id", "main"}, {"class", "container"}, {"data-method", "get"}], []},
+          {"div", [{"class", "content"}], [{"a", [{"href", "http://java.com"}, {"class", "js-java"}], ["Java"]}]}
+        ]
+      )
     end
   end
 end

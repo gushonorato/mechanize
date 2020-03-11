@@ -26,6 +26,38 @@ defmodule Mechanizex.HTMLParser.Floki do
     |> Enum.map(&create_element(&1, Parseable.page(parseable)))
   end
 
+  @impl HTMLParser
+  def filter(nil, _selector) do
+    raise ArgumentError, "parseable is nil"
+  end
+
+  @impl HTMLParser
+  def filter(_parseable, nil) do
+    raise ArgumentError, "selector is nil"
+  end
+
+  @impl HTMLParser
+  def filter([], _selector), do: []
+
+  @impl HTMLParser
+  def filter([h | _] = elements, selector) do
+    check_elements_from_same_page(elements)
+
+    elements
+    |> Enum.map(&Parseable.parser_data/1)
+    |> Floki.filter_out(selector)
+    |> Enum.map(&create_element(&1, Parseable.page(h)))
+  end
+
+  @impl HTMLParser
+  def filter(parseable, selector) do
+    parseable
+    |> Parseable.parser_data()
+    |> Floki.filter_out(selector)
+    |> List.wrap()
+    |> Enum.map(&create_element(&1, Parseable.page(parseable)))
+  end
+
   defp check_elements_from_same_page(elements) do
     num_pages =
       elements

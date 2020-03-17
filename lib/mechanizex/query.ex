@@ -50,7 +50,7 @@ defmodule Mechanizex.Query do
   end
 
   defp text_match?(element, text) do
-    Queryable.text(element) =~ text
+    Queryable.text(element) != nil and Queryable.text(element) =~ text
   end
 
   def search(elements, selector), do: parser(elements).search(elements, selector)

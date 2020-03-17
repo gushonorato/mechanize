@@ -2,8 +2,7 @@ defmodule Mechanizex.PageTest do
   use ExUnit.Case, async: true
   alias Mechanizex
   alias Mechanizex.Page.{Element, Link}
-  alias Mechanizex.{Page, Request, Response, Browser}
-  import Mox
+  alias Mechanizex.Page
   import TestHelper
 
   describe ".form_with" do
@@ -50,14 +49,14 @@ defmodule Mechanizex.PageTest do
     end
 
     test "returns list of %Link struct", %{page: page} do
-      [%Link{}] = Page.links_with(page, href: ~r/google.com/)
+      [%Link{}] = Page.links_with(page, href: ~r/google/)
     end
 
     test "with one attribute criteria", %{page: page} do
       assert(
         page
-        |> Page.links_with(href: ~r/google.com/)
-        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+        |> Page.links_with(href: ~r/google/)
+        |> Enum.map(&Element.attr(&1, :href)) == ["/about/google"]
       )
     end
 
@@ -65,7 +64,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.links_with(class: ~r/great-company/, rel: "search")
-        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+        |> Enum.map(&Element.attr(&1, :href)) == ["/about/google"]
       )
     end
 
@@ -73,7 +72,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.links_with(text: "Google")
-        |> Enum.map(&Element.attr(&1, :href)) == ["http://www.google.com"]
+        |> Enum.map(&Element.attr(&1, :href)) == ["/about/google"]
       )
     end
 
@@ -82,8 +81,8 @@ defmodule Mechanizex.PageTest do
         page
         |> Page.links_with(text: ~r/Google/)
         |> Enum.map(&Element.attr(&1, :href)) == [
-          "http://www.google.com",
-          "http://www.android.com"
+          "/about/google",
+          "/about/android"
         ]
       )
     end
@@ -123,16 +122,14 @@ defmodule Mechanizex.PageTest do
     end
 
     test "returns list of %Link struct", %{page: page} do
-      %Link{} =
-        page
-        |> Page.link_with(href: ~r/google.com/)
+      %Link{} = Page.link_with(page, href: ~r/google/)
     end
 
     test "with one attribute criteria", %{page: page} do
       assert(
         page
-        |> Page.link_with(href: ~r/google.com/)
-        |> Element.attr(:href) == "http://www.google.com"
+        |> Page.link_with(href: ~r/google/)
+        |> Element.attr(:href) == "/about/google"
       )
     end
 
@@ -140,7 +137,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.link_with(class: ~r/great-company/, rel: "search")
-        |> Element.attr(:href) == "http://www.google.com"
+        |> Element.attr(:href) == "/about/google"
       )
     end
 
@@ -148,7 +145,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.link_with(text: "Google")
-        |> Element.attr(:href) == "http://www.google.com"
+        |> Element.attr(:href) == "/about/google"
       )
     end
 
@@ -156,7 +153,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.link_with(text: ~r/Google/)
-        |> Element.attr(:href) == "http://www.google.com"
+        |> Element.attr(:href) == "/about/google"
       )
     end
 
@@ -164,7 +161,7 @@ defmodule Mechanizex.PageTest do
       assert(
         page
         |> Page.link_with(class: ~r/great-company/)
-        |> Element.attr(:href) == "http://www.google.com"
+        |> Element.attr(:href) == "/about/google"
       )
     end
 
@@ -180,68 +177,40 @@ defmodule Mechanizex.PageTest do
   end
 
   describe ".click_link" do
-    setup :verify_on_exit!
-
-    setup %{mock_request: path} do
-      expect(Mechanizex.HTTPAdapter.Mock, :request!, fn %Request{url: ^path} ->
-        %Response{
-          body: File.read(path) |> elem(1),
-          headers: [],
-          code: 200,
-          url: "http://example.com/#{path}"
-        }
-      end)
-
-      :ok
-    end
-
     setup do
-      {:ok, browser: Mechanizex.Browser.new(http_adapter: :mock)}
+      stub_requests("/test/htdocs/page_with_links.html")
     end
 
-    @tag mock_request: "test/htdocs/page_with_links.html"
-    test "click on first matched link", %{browser: browser} do
-      expect(Mechanizex.HTTPAdapter.Mock, :request!, fn %Request{url: "http://www.google.com"} ->
-        %Response{}
+    test "click on first matched link", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/about/google", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      browser
-      |> Browser.get!("test/htdocs/page_with_links.html")
-      |> Page.click_link(class: ~r/great-company/)
+      Page.click_link(page, class: ~r/great-company/)
     end
 
-    @tag mock_request: "test/htdocs/page_with_links.html"
-    test "click on first matched link by text", %{browser: browser} do
-      expect(Mechanizex.HTTPAdapter.Mock, :request!, fn %Request{url: "http://www.seomaster.com.br"} ->
-        %Response{}
+    test "click on first matched link by text", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/about/seomaster", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      browser
-      |> Browser.get!("test/htdocs/page_with_links.html")
-      |> Page.click_link("SEO Master")
+      Page.click_link(page, "SEO Master")
     end
 
-    @tag mock_request: "test/htdocs/page_with_links.html"
-    test "relative link", %{browser: browser} do
-      expect(Mechanizex.HTTPAdapter.Mock, :request!, fn %Request{url: "http://example.com/test"} ->
-        %Response{}
+    test "relative link", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/test", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      browser
-      |> Browser.get!("test/htdocs/page_with_links.html")
-      |> Page.click_link("Back")
+      Page.click_link(page, "Back")
     end
 
-    @tag mock_request: "test/htdocs/page_with_image_area_links.html"
-    test "image area links", %{browser: browser} do
-      Mechanizex.HTTPAdapter.Mock
-      |> expect(:request!, fn %Request{url: "http://example.com/test/htdocs/sun.html"} ->
-        %Response{}
+    test "image area links", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/test/htdocs/sun.html", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      browser
-      |> Browser.get!("test/htdocs/page_with_image_area_links.html")
-      |> Page.click_link(alt: "Sun")
+      Page.click_link(page, alt: "Sun")
     end
   end
 end

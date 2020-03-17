@@ -192,6 +192,7 @@ defmodule Mechanizex.Browser do
   end
 
   def request!(browser, req) do
+    check_request_url!(req)
     resp_chain = request!(browser, req, 0)
 
     last_response = List.first(resp_chain)
@@ -204,6 +205,12 @@ defmodule Mechanizex.Browser do
       browser: browser,
       parser: html_parser(browser)
     }
+  end
+
+  defp check_request_url!(%Request{} = req) do
+    if !String.match?(req.url, ~r/^http(s)?:\/\//) do
+      raise ArgumentError, "absolute URL needed (not #{req.url})"
+    end
   end
 
   defp request!(browser, req, redirect_count) do

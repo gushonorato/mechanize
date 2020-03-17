@@ -289,6 +289,15 @@ defmodule Mechanizex.BrowserTest do
       })
     end
 
+    test "raise if request URL is not absolute", %{browser: browser} do
+      assert_raise ArgumentError, "absolute URL needed (not www.google.com)", fn ->
+        Browser.request!(browser, %Request{
+          method: :get,
+          url: "www.google.com"
+        })
+      end
+    end
+
     test "merge header with browser's default headers", %{bypass: bypass, browser: browser, default_ua: ua} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.req_headers == [

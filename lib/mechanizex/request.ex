@@ -1,6 +1,7 @@
 defmodule Mechanizex.Request do
   alias Mechanizex.Header
 
+  @enforce_keys [:url]
   defstruct method: :get, url: nil, headers: [], body: [], params: []
 
   @type t :: %__MODULE__{

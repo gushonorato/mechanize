@@ -307,5 +307,16 @@ defmodule Mechanizex.FormTest do
         |> Page.body() == "OK"
       )
     end
+
+    test "submit empty value when field has absent value attribute", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert conn.query_string == "absent_value="
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.form_with(name: "form_with_field_with_absent_value")
+      |> Form.submit()
+    end
   end
 end

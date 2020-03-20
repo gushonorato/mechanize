@@ -101,11 +101,10 @@ defmodule Mechanizex.PageTest do
       )
     end
 
-    test "image area links" do
-      {:ok, %{page: page}} = stub_requests("/test/htdocs/page_with_image_area_links.html")
-
+    test "image area links", %{page: page} do
       assert(
         page
+        |> Page.elements_with("[name=planetmap]")
         |> Page.links_with()
         |> Enum.map(&Element.attr(&1, :alt)) == [
           "Sun",
@@ -165,11 +164,10 @@ defmodule Mechanizex.PageTest do
       )
     end
 
-    test "image area links" do
-      {:ok, %{page: page}} = stub_requests("/test/htdocs/page_with_image_area_links.html")
-
+    test "image area links", %{page: page} do
       assert(
         page
+        |> Page.elements_with("[name=planetmap]")
         |> Page.link_with()
         |> Element.attr(:alt) == "Sun"
       )

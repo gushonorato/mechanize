@@ -71,11 +71,9 @@ defmodule Mechanizex.Page do
     |> Enum.map(&Form.new(page, &1))
   end
 
-  def elements_with(page, selector, criteria \\ []) do
-    page
-    |> Query.search(selector)
-    |> Enum.filter(&Query.match?(&1, criteria))
-  end
+  defdelegate search(page, selector), to: Query, as: :search
+  defdelegate filter(page, selector), to: Query, as: :filter
+  defdelegate elements_with(page, selector, criteria \\ []), to: Query, as: :search_matches
 end
 
 defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page do

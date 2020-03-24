@@ -42,7 +42,7 @@ defmodule Mechanizex.Form.RadioButton do
     form
     |> update_radio_buttons(fn field ->
       cond do
-        Query.match?(field, criteria) ->
+        Query.match_criteria?(field, criteria) ->
           %__MODULE__{field | checked: true}
 
         field.name in radio_groups ->

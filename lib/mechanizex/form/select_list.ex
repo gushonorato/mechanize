@@ -56,7 +56,7 @@ defmodule Mechanizex.Form.SelectList do
     form
     |> update_options_with(criteria, opts_criteria, fn select, opt ->
       cond do
-        Query.match?(opt, opts_criteria) ->
+        Query.match_criteria?(opt, opts_criteria) ->
           %Option{opt | selected: true}
 
         Element.attr_present?(select, :multiple) ->
@@ -74,7 +74,7 @@ defmodule Mechanizex.Form.SelectList do
     assert_select_found(form, criteria)
 
     update_options_with(form, criteria, opts_criteria, fn _select, opt ->
-      if Query.match?(opt, opts_criteria) do
+      if Query.match_criteria?(opt, opts_criteria) do
         %Option{opt | selected: false}
       else
         opt
@@ -88,7 +88,7 @@ defmodule Mechanizex.Form.SelectList do
   end
 
   defp assert_options_found(options, criteria) do
-    if Enum.filter(options, &Query.match?(&1, criteria)) == [],
+    if Enum.filter(options, &Query.match_criteria?(&1, criteria)) == [],
       do: raise(BadCriteriaError, "No option found with criteria #{inspect(criteria)} in select")
   end
 

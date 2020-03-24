@@ -62,7 +62,7 @@ defmodule Mechanizex.Form do
 
   def update_fields(form, types, criteria, fun) do
     update_fields(form, types, fn field ->
-      if Query.match?(field, criteria) do
+      if Query.match_criteria?(field, criteria) do
         fun.(field)
       else
         field
@@ -75,7 +75,7 @@ defmodule Mechanizex.Form do
   end
 
   def delete_fields_with(form, criteria) do
-    delete_fields(form, &Query.match?(&1, criteria))
+    delete_fields(form, &Query.match_criteria?(&1, criteria))
   end
 
   def fields(nil) do
@@ -97,7 +97,7 @@ defmodule Mechanizex.Form do
     form
     |> fields()
     |> Stream.filter(&(type == &1.__struct__))
-    |> Enum.filter(&Query.match?(&1, criteria))
+    |> Enum.filter(&Query.match_criteria?(&1, criteria))
   end
 
   defdelegate text_inputs(form), to: TextInput

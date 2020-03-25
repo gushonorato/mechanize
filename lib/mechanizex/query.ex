@@ -6,16 +6,28 @@ defmodule Mechanizex.Query do
     defexception [:message]
   end
 
-  def search(elements, selector), do: parser(elements).search(elements, selector)
+  def search(nil, _selector), do: raise(ArgumentError, "parseable is nil")
 
-  def filter(elements, selector), do: parser(elements).filter(elements, selector)
+  def search(_parseable, nil), do: raise(ArgumentError, "selector is nil")
 
-  def matches(elements, criteria \\ []) do
-    Enum.filter(elements, &match_criteria?(&1, criteria))
+  def search(parseable, selector), do: parser(parseable).search(parseable, selector)
+
+  def filter(nil, _selector), do: raise(ArgumentError, "parseable is nil")
+
+  def filter(_parseable, nil), do: raise(ArgumentError, "selector is nil")
+
+  def filter(parseable, selector), do: parser(parseable).filter(parseable, selector)
+
+  def matches(nil, _criteria) do
+    raise ArgumentError, "queryable is nil"
   end
 
-  def search_matches(page, selector, criteria \\ []) do
-    page
+  def matches(queryable, criteria) do
+    Enum.filter(queryable, &match_criteria?(&1, criteria))
+  end
+
+  def search_matches(parseable, selector, criteria \\ []) do
+    parseable
     |> search(selector)
     |> matches(criteria)
   end

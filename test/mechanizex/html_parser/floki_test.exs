@@ -193,4 +193,21 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
       )
     end
   end
+
+  describe ".raw_html" do
+    test "parseable is nil" do
+      assert_raise ArgumentError, "parseable is nil", fn ->
+        HTMLParser.Floki.raw_html(nil)
+      end
+    end
+
+    test "parseable is a page" do
+      assert HTMLParser.Floki.raw_html(@page) == @html
+    end
+
+    test "parseable is an element" do
+      assert HTMLParser.Floki.raw_html(@google) ==
+               ~s(<a disabled="disabled" href="http://google.com" class="company js-google js-cool">Google</a>)
+    end
+  end
 end

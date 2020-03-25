@@ -64,6 +64,18 @@ defmodule Mechanizex.HTMLParser.FlokiTest do
   }
 
   describe ".search" do
+    test "raise if parseable is nil" do
+      assert_raise ArgumentError, "parseable is nil", fn ->
+        assert HTMLParser.Floki.search(nil, ".google")
+      end
+    end
+
+    test "raise if selector is nil" do
+      assert_raise ArgumentError, "selector is nil", fn ->
+        assert HTMLParser.Floki.search(@page, nil)
+      end
+    end
+
     test "element not found" do
       assert HTMLParser.Floki.search(@page, ".unknown") == []
     end

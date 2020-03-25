@@ -6,7 +6,13 @@ defmodule Mechanizex.HTMLParser.Floki do
   @behaviour Mechanizex.HTMLParser
 
   @impl HTMLParser
-  def search([], _), do: []
+  def search(nil, _selector), do: raise(ArgumentError, "parseable is nil")
+
+  @impl HTMLParser
+  def search(_parseable, nil), do: raise(ArgumentError, "selector is nil")
+
+  @impl HTMLParser
+  def search([], _selector), do: []
 
   @impl HTMLParser
   def search([h | _] = elements, selector) do

@@ -71,8 +71,8 @@ defmodule Mechanizex.Page do
     |> Enum.map(&Form.new(page, &1))
   end
 
-  defdelegate search(page, selector), to: Query, as: :search
-  defdelegate filter(page, selector), to: Query, as: :filter
+  defdelegate search(page, selector), to: Query
+  defdelegate filter(page, selector), to: Query
   defdelegate elements_with(page, selector, criteria \\ []), to: Query, as: :search_matches
 end
 

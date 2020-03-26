@@ -140,11 +140,24 @@ defmodule Mechanizex.Form do
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
 
   def submit(form, button \\ nil) do
-    Mechanizex.Browser.request!(browser(form), %Request{
-      method: method(form),
-      url: action_url(form),
-      params: params(form.fields, button)
-    })
+    request =
+      case method(form) do
+        :post ->
+          %Request{
+            method: method(form),
+            url: action_url(form),
+            body: URI.encode_query(params(form.fields, button))
+          }
+
+        :get ->
+          %Request{
+            method: method(form),
+            url: action_url(form),
+            params: params(form.fields, button)
+          }
+      end
+
+    Mechanizex.Browser.request!(browser(form), request)
   end
 
   defp method(form) do

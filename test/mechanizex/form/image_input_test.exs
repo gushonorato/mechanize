@@ -41,12 +41,7 @@ defmodule Mechanizex.Form.ImageInputTest do
   describe ".click" do
     test "send (0,0) click coords as default", %{form: form, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert Plug.Conn.fetch_query_params(conn).params == %{
-                 "username" => "gustavo",
-                 "passwd" => "123456",
-                 "map2.x" => "0",
-                 "map2.y" => "0"
-               }
+        assert {:ok, "map2.x=0&map2.y=0&username=gustavo&passwd=123456", conn} = Plug.Conn.read_body(conn)
 
         Plug.Conn.resp(conn, 200, "NEXT PAGE")
       end)
@@ -56,13 +51,7 @@ defmodule Mechanizex.Form.ImageInputTest do
 
     test "passing click coords as named params", %{form: form, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert Plug.Conn.fetch_query_params(conn).params == %{
-                 "username" => "gustavo",
-                 "passwd" => "123456",
-                 "map2.x" => "10",
-                 "map2.y" => "10"
-               }
-
+        assert {:ok, "map2.x=10&map2.y=10&username=gustavo&passwd=123456", conn} = Plug.Conn.read_body(conn)
         Plug.Conn.resp(conn, 200, "NEXT PAGE")
       end)
 

@@ -100,13 +100,7 @@ defmodule Mechanizex.Form.CheckboxTest do
   describe ".submit" do
     test "submit only checked checkboxes", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert(
-          Plug.Conn.fetch_query_params(conn).params == %{
-            "male" => "on",
-            "red" => "",
-            "download" => "yes"
-          }
-        )
+        assert {:ok, "male=on&red=&download=yes", conn} = Plug.Conn.read_body(conn)
 
         Plug.Conn.resp(conn, 200, "OK")
       end)

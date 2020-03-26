@@ -415,7 +415,7 @@ defmodule Mechanizex.Form.SelectTest do
   describe ".submit" do
     test "submit only selected options buttons", %{form: form, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.query_string == "select1=2&select2=5&multiple1=2&multiple1=3"
+        assert {:ok, "select1=2&select2=5&multiple1=2&multiple1=3", conn} = Plug.Conn.read_body(conn)
 
         Plug.Conn.resp(conn, 200, "OK")
       end)

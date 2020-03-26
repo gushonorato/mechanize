@@ -185,7 +185,7 @@ defmodule Mechanizex.FormTest do
   end
 
   describe ".submit" do
-    test "method is get when method attribute missing", %{page: page, bypass: bypass} do
+    test "method is GET when method attribute missing", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.method == "GET"
         Plug.Conn.resp(conn, 200, "OK")
@@ -196,7 +196,7 @@ defmodule Mechanizex.FormTest do
       |> Form.submit()
     end
 
-    test "method is get when method attribute is blank", %{page: page, bypass: bypass} do
+    test "method is GET when method attribute is blank", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.method == "GET"
         Plug.Conn.resp(conn, 200, "OK")
@@ -207,9 +207,22 @@ defmodule Mechanizex.FormTest do
       |> Form.submit()
     end
 
-    test "method post", %{page: page, bypass: bypass} do
+    test "send form fields in URL when GET", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.method == "POST"
+        assert conn.query_string == "product=gol&manufacturer=vw"
+        assert {:ok, "", conn} = Plug.Conn.read_body(conn)
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.form_with(name: "method_get")
+      |> Form.submit()
+    end
+
+    test "sends form fields in body when POST", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert {:ok, "username=gustavo&pass=123456", conn} = Plug.Conn.read_body(conn)
+        assert conn.query_string == ""
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -218,7 +231,7 @@ defmodule Mechanizex.FormTest do
       |> Form.submit()
     end
 
-    test "method post is case insensitive", %{page: page, bypass: bypass} do
+    test "POST method is case insensitive", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.method == "POST"
         Plug.Conn.resp(conn, 200, "OK")
@@ -264,7 +277,7 @@ defmodule Mechanizex.FormTest do
 
     test "does not submit buttons", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.query_string == "username=gustavo&pass=123456"
+        assert assert {:ok, "username=gustavo&pass=123456", conn} = Plug.Conn.read_body(conn)
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -275,7 +288,7 @@ defmodule Mechanizex.FormTest do
 
     test "does not submit disabled fields", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.query_string == "pass=123456"
+        assert {:ok, "pass=123456", conn} = Plug.Conn.read_body(conn)
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -286,7 +299,7 @@ defmodule Mechanizex.FormTest do
 
     test "does not submit input without name", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.query_string == "username=gustavo"
+        assert {:ok, "username=gustavo", conn} = Plug.Conn.read_body(conn)
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -295,7 +308,7 @@ defmodule Mechanizex.FormTest do
       |> Form.submit()
     end
 
-    test "returns a page", %{page: page, bypass: bypass} do
+    test "returns a page on success", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         Plug.Conn.resp(conn, 200, "OK")
       end)
@@ -310,7 +323,7 @@ defmodule Mechanizex.FormTest do
 
     test "submit empty value when field has absent value attribute", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert conn.query_string == "absent_value="
+        assert {:ok, "absent_value=", conn} = Plug.Conn.read_body(conn)
         Plug.Conn.resp(conn, 200, "OK")
       end)
 

@@ -117,14 +117,7 @@ defmodule Mechanizex.Form.RadioButtonTest do
   describe ".submit" do
     test "submit only checked radio buttons", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert(
-          Plug.Conn.fetch_query_params(conn).params == %{
-            "color" => "red",
-            "download" => "yes",
-            "passwd" => "123456",
-            "user" => "gustavo"
-          }
-        )
+        assert {:ok, "user=gustavo&passwd=123456&color=red&download=yes", _} = Plug.Conn.read_body(conn)
 
         Plug.Conn.resp(conn, 200, "OK")
       end)

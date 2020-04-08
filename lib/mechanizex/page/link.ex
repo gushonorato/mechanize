@@ -10,13 +10,17 @@ defmodule Mechanizex.Page.Link do
         }
 
   def click(%Mechanizex.Page.Link{} = link) do
-    url = Element.attr(link, :href)
-    base_url = link |> Element.page() |> Page.url()
+    url =
+      link
+      |> Element.page()
+      |> Page.url()
+      |> URI.merge(Element.attr(link, :href))
+      |> URI.to_string()
 
     link
     |> Element.page()
     |> Page.browser()
-    |> Browser.get!(URI.merge(base_url, url))
+    |> Browser.get!(url)
   end
 
   def new(el) do

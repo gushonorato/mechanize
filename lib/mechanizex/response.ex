@@ -9,7 +9,11 @@ defmodule Mechanizex.Response do
           url: binary()
         }
 
-  def normalize_headers(%__MODULE__{} = res) do
+  def normalize(%__MODULE__{} = res) do
+    normalize_headers(res)
+  end
+
+  defp normalize_headers(%__MODULE__{} = res) do
     %__MODULE__{res | headers: Header.normalize(res.headers)}
   end
 

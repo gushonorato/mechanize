@@ -146,7 +146,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
 
   @impl Mechanizex.HTTPAdapter
   def request!(%Request{} = req) do
-    case HTTPoison.request(req.method, req.url, req.body, req.headers, params: req.params) do
+    case HTTPoison.request(req.method, req.url, req.body, req.headers) do
       {:ok, res} ->
         %Response{body: res.body, headers: res.headers, code: res.status_code, url: req.url}
 

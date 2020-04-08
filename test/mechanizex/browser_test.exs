@@ -1,31 +1,6 @@
-defmodule Mechanizex.Browser.HTTPShortcutsTest do
-  alias Mechanizex.{Browser, Page}
-  import TestHelper
-
-  defmacro __using__(_) do
-    [:get, :delete, :options, :patch, :post, :put, :head]
-    |> Enum.map(fn method ->
-      quote do
-        test "#{unquote(method)}! delegate to request", %{bypass: bypass, browser: browser} do
-          Bypass.down(bypass)
-
-          assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
-            apply(Browser, unquote(:"#{method}!"), [
-              browser,
-              endpoint_url(bypass),
-              [{"lero", "lero"}],
-              [{"accept", "lero"}]
-            ])
-          end
-        end
-      end
-    end)
-  end
-end
-
 defmodule Mechanizex.BrowserTest do
   use ExUnit.Case, async: true
-  use Mechanizex.Browser.HTTPShortcutsTest
+
   alias Mechanizex.{HTTPAdapter, Request, Page, Browser, Header}
   import TestHelper
   doctest Mechanizex.Browser
@@ -360,11 +335,7 @@ defmodule Mechanizex.BrowserTest do
 
     test "send request parameters", %{bypass: bypass, browser: browser} do
       Bypass.expect_once(bypass, fn conn ->
-        assert Plug.Conn.fetch_query_params(conn).params == %{
-                 "query" => "lero",
-                 "start" => "100"
-               }
-
+        assert conn.query_string == "query=lero&start=100"
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -375,7 +346,7 @@ defmodule Mechanizex.BrowserTest do
       })
     end
 
-    test "ensure downcase of response headers", %{bypass: bypass, browser: browser} do
+    test "ensure downcase of response headers on redirect chain", %{bypass: bypass, browser: browser} do
       Bypass.expect_once(bypass, fn conn ->
         conn
         |> Plug.Conn.merge_resp_headers([{"Custom-Header", "lero"}, {"FOO", "BAR"}])
@@ -413,17 +384,17 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "REDIRECT OK")
       end)
 
-      req = %Request{
-        method: :get,
-        url: endpoint_url(bypass, "/redirect_to")
-      }
-
-      page = Browser.request!(browser, req)
+      page =
+        Browser.request!(browser, %Request{
+          method: :get,
+          url: endpoint_url(bypass, "/redirect_to")
+        })
 
       assert page.status_code == 200
       assert page.url == endpoint_url(bypass, "/redirected")
       assert page.body == "REDIRECT OK"
     end
+
 
     test "toggle follow redirects", %{bypass: bypass, browser: browser} do
       Bypass.expect(bypass, "GET", "/redirect_to", fn conn ->
@@ -528,7 +499,10 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        apply(Browser, :"#{method}!", [browser, endpoint_url(bypass, "/redirect_#{status}_#{method}")])
+        Browser.request!(browser, %Request{
+          method: method,
+          url: endpoint_url(bypass, "/redirect_#{status}_#{method}")
+        })
       end)
     end
 
@@ -545,7 +519,10 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.head!(browser, endpoint_url(bypass, "/redirect_head_#{status}"))
+        Browser.request!(browser, %Request{
+          method: :head,
+          url: endpoint_url(bypass, "/redirect_head_#{status}")
+        })
       end)
     end
 
@@ -571,25 +548,28 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        apply(Browser, :"#{method}!", [browser, endpoint_url(bypass, "/redirect_#{status}_#{method}")])
+        Browser.request!(browser, %Request{
+          method: method,
+          url: endpoint_url(bypass, "/redirect_#{status}_#{method}")
+        })
       end)
     end
 
     test "307 and 308 redirects preserve request data", %{bypass: bypass, browser: browser} do
       [307, 308]
       |> Enum.each(fn status ->
-        Bypass.expect_once(bypass, "POST", "/redirect_to_#{status}", fn conn ->
+        Bypass.expect_once(bypass, "GET", "/redirect_to_#{status}", fn conn ->
           conn
           |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}"))
           |> Plug.Conn.resp(status, "")
         end)
 
-        Bypass.expect_once(bypass, "POST", "/redirected_#{status}", fn conn ->
+        Bypass.expect_once(bypass, "GET", "/redirected_#{status}", fn conn ->
           assert conn.query_string == "user=gustavo"
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
+        Browser.get!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
       end)
     end
 
@@ -604,10 +584,11 @@ defmodule Mechanizex.BrowserTest do
 
         Bypass.expect_once(bypass, "GET", "/redirected_#{status}", fn conn ->
           assert conn.query_string == ""
+          assert {:ok, "", conn} = Plug.Conn.read_body(conn)
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
+        Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), "user=gustavo")
       end)
     end
   end

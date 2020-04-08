@@ -231,6 +231,17 @@ defmodule Mechanizex.FormTest do
       |> Form.submit()
     end
 
+    test "content-type header added when POST", %{page: page, bypass: bypass} do
+      Bypass.expect_once(bypass, fn conn ->
+        assert Plug.Conn.get_req_header(conn, "content-type") == ["application/x-www-form-urlencoded"]
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.form_with(name: "method_post")
+      |> Form.submit()
+    end
+
     test "POST method is case insensitive", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.method == "POST"

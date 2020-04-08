@@ -1,27 +1,6 @@
-defmodule Mechanizex.Browser.HTTPShortcuts do
-  alias Mechanizex.Request
-
-  defmacro __using__(_) do
-    [:get, :delete, :options, :patch, :post, :put, :head]
-    |> Enum.map(fn method ->
-      quote do
-        def unquote(:"#{method}!")(browser, url, params \\ [], headers \\ [])
-
-        def unquote(:"#{method}!")(browser, %URI{} = uri, params, headers) do
-          request!(browser, %Request{method: unquote(method), url: URI.to_string(uri), headers: headers, params: params})
-        end
-
-        def unquote(:"#{method}!")(browser, url, params, headers) do
-          request!(browser, %Request{method: unquote(method), url: url, headers: headers, params: params})
-        end
-      end
-    end)
-  end
-end
-
 defmodule Mechanizex.Browser do
   use Agent
-  use Mechanizex.Browser.HTTPShortcuts
+
   alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page, Header}
 
   @user_agent_aliases [
@@ -191,6 +170,25 @@ defmodule Mechanizex.Browser do
     end
   end
 
+  def get!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :get,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
+
+  def post!(browser, url, body, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :post,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
   def request!(browser, req) do
     check_request_url!(req)
     resp_chain = request!(browser, req, 0)
@@ -215,10 +213,9 @@ defmodule Mechanizex.Browser do
 
   defp request!(browser, req, redirect_count) do
     req
-    |> Request.normalize_headers()
+    |> Request.normalize()
     |> merge_default_headers(browser)
-    |> perform_request(browser)
-    |> Response.normalize_headers()
+    |> perform_request!(browser)
     |> maybe_follow_redirect(req, browser, redirect_count)
   end
 
@@ -226,11 +223,13 @@ defmodule Mechanizex.Browser do
     %Request{req | headers: Header.merge(http_headers(browser), req.headers)}
   end
 
-  defp perform_request(req, browser) do
+  defp perform_request!(req, browser) do
     http_adapter(browser).request!(req)
   end
 
   defp maybe_follow_redirect(res, req, browser, redirect_count) do
+    res = Response.normalize(res)
+
     cond do
       redirect_count >= redirect_limit(browser) ->
         raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
@@ -252,7 +251,7 @@ defmodule Mechanizex.Browser do
         request!(browser, new_req, redirect_count + 1) ++ [res]
 
       true ->
-        [Response.normalize_headers(res)]
+        [res]
     end
   end
 end

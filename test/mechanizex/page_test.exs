@@ -1,7 +1,7 @@
 defmodule Mechanizex.PageTest do
   use ExUnit.Case, async: true
   alias Mechanizex
-  alias Mechanizex.Page.{Element, Link}
+  alias Mechanizex.Page.{Element, Link, ClickError}
   alias Mechanizex.Page
   import TestHelper
 
@@ -109,7 +109,8 @@ defmodule Mechanizex.PageTest do
         |> Enum.map(&Element.attr(&1, :alt)) == [
           "Sun",
           "Mercury",
-          "Venus"
+          "Venus",
+          "Nibiru"
         ]
       )
     end
@@ -209,6 +210,18 @@ defmodule Mechanizex.PageTest do
       end)
 
       Page.click_link(page, alt: "Sun")
+    end
+
+    test "raise if link does't have href attribute", %{page: page} do
+      assert_raise ClickError, "href attribute is missing", fn ->
+        Page.click_link(page, "Stealth Company")
+      end
+    end
+
+    test "raise if image area link does't have href attribute", %{page: page} do
+      assert_raise ClickError, "href attribute is missing", fn ->
+        Page.click_link(page, alt: "Nibiru")
+      end
     end
   end
 end

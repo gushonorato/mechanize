@@ -13,6 +13,10 @@ defmodule Mechanizex.Page do
           parser: module()
         }
 
+  defmodule ClickError do
+    defexception [:message]
+  end
+
   def browser(page), do: page.browser
   def url(page), do: page.url
   def body(page), do: page.body

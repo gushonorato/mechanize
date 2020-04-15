@@ -280,18 +280,15 @@ defmodule Mechanizex.Browser do
     location = Header.get(res.headers, "location")
 
     cond do
-      location == nil ->
-        [res]
-
       redirect_count >= redirect_limit(browser) ->
         raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
 
-      follow_redirect?(browser) and res.code in 307..308 ->
+      follow_redirect?(browser) and res.code in 307..308 and location != nil ->
         new_req = Map.put(req, :url, location)
 
         request!(browser, new_req, redirect_count + 1) ++ [res]
 
-      follow_redirect?(browser) and res.code in 300..399 ->
+      follow_redirect?(browser) and res.code in 300..399 and location != nil ->
         method = if req.method == :head, do: :head, else: :get
 
         new_req =

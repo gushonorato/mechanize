@@ -277,13 +277,17 @@ defmodule Mechanizex.Browser do
 
   defp maybe_follow_redirect(res, req, browser, redirect_count) do
     res = Response.normalize(res)
+    location = Header.get(res.headers, "location")
 
     cond do
+      location == nil ->
+        [res]
+
       redirect_count >= redirect_limit(browser) ->
         raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
 
       follow_redirect?(browser) and res.code in 307..308 ->
-        new_req = Map.put(req, :url, Header.get(res.headers, "location"))
+        new_req = Map.put(req, :url, location)
 
         request!(browser, new_req, redirect_count + 1) ++ [res]
 
@@ -292,7 +296,7 @@ defmodule Mechanizex.Browser do
 
         new_req =
           req
-          |> Map.put(:url, Header.get(res.headers, "location"))
+          |> Map.put(:url, location)
           |> Map.put(:method, method)
           |> Map.put(:params, [])
 

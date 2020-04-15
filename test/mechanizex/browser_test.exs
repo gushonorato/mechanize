@@ -395,6 +395,20 @@ defmodule Mechanizex.BrowserTest do
       assert page.body == "REDIRECT OK"
     end
 
+    test "do not follow redirect when location header is missing", %{bypass: bypass, browser: browser} do
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+        Plug.Conn.resp(conn, 301, "")
+      end)
+
+      page =
+        Browser.request!(browser, %Request{
+          method: :get,
+          url: endpoint_url(bypass, "/redirect_to")
+        })
+
+      assert page.status_code == 301
+      assert page.url == endpoint_url(bypass, "/redirect_to")
+    end
 
     test "toggle follow redirects", %{bypass: bypass, browser: browser} do
       Bypass.expect(bypass, "GET", "/redirect_to", fn conn ->

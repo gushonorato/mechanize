@@ -179,9 +179,57 @@ defmodule Mechanizex.Browser do
     })
   end
 
-  def post!(browser, url, body, params \\ [], headers \\ []) do
+  def head!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :head,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
+
+  def options!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :options,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
+
+  def delete!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :delete,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def patch!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :patch,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def post!(browser, url, body \\ "", params \\ [], headers \\ []) do
     request!(browser, %Request{
       method: :post,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def put!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :put,
       url: url,
       params: params,
       body: body,

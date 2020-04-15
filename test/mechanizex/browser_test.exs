@@ -591,5 +591,47 @@ defmodule Mechanizex.BrowserTest do
         Browser.post!(browser, endpoint_url(bypass, "/redirect_to_#{status}"), "user=gustavo")
       end)
     end
+
+    test "request helper functions", %{bypass: bypass, browser: browser} do
+      [:get!, :head!, :options!, :delete!, :patch!, :post!, :put!]
+      |> Enum.each(fn function_name ->
+        method =
+          function_name
+          |> Atom.to_string()
+          |> String.upcase()
+          |> String.replace("!", "")
+
+        Bypass.expect_once(bypass, method, "/fake_path", fn conn ->
+          assert conn.method == method
+          assert Plug.Conn.get_req_header(conn, "lero") == ["LERO"]
+          assert conn.query_string == "q=10"
+
+          if function_name in [:delete!, :patch!, :post!, :put!] do
+            assert {:ok, "BODY", conn} = Plug.Conn.read_body(conn)
+          else
+            assert {:ok, "", conn} = Plug.Conn.read_body(conn)
+          end
+
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        if function_name in [:delete!, :patch!, :post!, :put!] do
+          apply(Browser, function_name, [
+            browser,
+            endpoint_url(bypass, "/fake_path"),
+            "BODY",
+            [{"q", "10"}],
+            [{"LERO", "LERO"}]
+          ])
+        else
+          apply(Browser, function_name, [
+            browser,
+            endpoint_url(bypass, "/fake_path"),
+            [{"q", "10"}],
+            [{"LERO", "LERO"}]
+          ])
+        end
+      end)
+    end
   end
 end

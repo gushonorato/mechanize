@@ -1,7 +1,7 @@
 defmodule Mechanizex.BrowserTest do
   use ExUnit.Case, async: true
 
-  alias Mechanizex.{HTTPAdapter, Request, Page, Browser, Header}
+  alias Mechanizex.{HTTPAdapter, Request, Response, Page, Browser, Header}
   import TestHelper
   doctest Mechanizex.Browser
 
@@ -273,62 +273,94 @@ defmodule Mechanizex.BrowserTest do
       end
     end
 
-    test "merge header with browser's default headers", %{bypass: bypass, browser: browser, default_ua: ua} do
-      Bypass.expect_once(bypass, fn conn ->
-        assert conn.req_headers == [
-                 {"custom-header", "lero"},
-                 # the header "foo" comes from config/test.exs
-                 {"foo", "bar"},
-                 {"host", "localhost:#{bypass.port}"},
-                 {"user-agent", ua}
-               ]
+    test "merge header with browser's default headers on all redirect chain", %{
+      bypass: bypass,
+      browser: browser,
+      default_ua: ua
+    } do
+      expected_headers = [
+        {"custom-header", "lero"},
+        # the header "foo" comes from config/test.exs
+        {"foo", "bar"},
+        {"host", "localhost:#{bypass.port}"},
+        {"user-agent", ua}
+      ]
 
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+        assert conn.req_headers == expected_headers
+
+        conn
+        |> Plug.Conn.put_resp_header("location", endpoint_url(bypass, "/redirected"))
+        |> Plug.Conn.resp(301, "OK")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        assert conn.req_headers == expected_headers
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
       Browser.request!(browser, %Request{
         method: :get,
-        url: endpoint_url(bypass),
+        url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"custom-header", "lero"}]
       })
     end
 
-    test "ignore case on update default http header", %{bypass: bypass, browser: browser} do
-      Bypass.expect_once(bypass, fn conn ->
-        assert conn.req_headers == [
-                 {"custom-header", "lero"},
-                 # the header "foo" comes from config/test.exs
-                 {"foo", "bar"},
-                 {"host", "localhost:#{bypass.port}"},
-                 {"user-agent", "Gustabot"}
-               ]
+    test "ignore case on update default http header on all redirect chain", %{bypass: bypass, browser: browser} do
+      expected_headers = [
+        {"custom-header", "lero"},
+        # the header "foo" comes from config/test.exs
+        {"foo", "bar"},
+        {"host", "localhost:#{bypass.port}"},
+        {"user-agent", "Gustabot"}
+      ]
+
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+        assert conn.req_headers == expected_headers
+
+        conn
+        |> Plug.Conn.put_resp_header("location", endpoint_url(bypass, "/redirected"))
+        |> Plug.Conn.resp(301, "")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        assert conn.req_headers == expected_headers
 
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
       Browser.request!(browser, %Request{
         method: :get,
-        url: endpoint_url(bypass),
+        url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"custom-header", "lero"}, {"User-Agent", "Gustabot"}]
       })
     end
 
-    test "ensure downcase of request headers", %{bypass: bypass, browser: browser} do
-      Bypass.expect_once(bypass, fn conn ->
-        assert conn.req_headers == [
-                 {"custom-header", "lero"},
-                 # the header "foo" comes from config/test.exs
-                 {"foo", "bar"},
-                 {"host", "localhost:#{bypass.port}"},
-                 {"user-agent", "Gustabot"}
-               ]
+    test "ensure downcase of request headers on all redirect chain", %{bypass: bypass, browser: browser} do
+      expected_headers = [
+        {"custom-header", "lero"},
+        # the header "foo" comes from config/test.exs
+        {"foo", "bar"},
+        {"host", "localhost:#{bypass.port}"},
+        {"user-agent", "Gustabot"}
+      ]
 
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+        assert conn.req_headers == expected_headers
+
+        conn
+        |> Plug.Conn.put_resp_header("location", endpoint_url(bypass, "/redirected"))
+        |> Plug.Conn.resp(301, "")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        assert conn.req_headers == expected_headers
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
       Browser.request!(browser, %Request{
         method: :get,
-        url: endpoint_url(bypass),
+        url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
       })
     end
@@ -347,19 +379,34 @@ defmodule Mechanizex.BrowserTest do
     end
 
     test "ensure downcase of response headers on redirect chain", %{bypass: bypass, browser: browser} do
-      Bypass.expect_once(bypass, fn conn ->
+      Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
         conn
-        |> Plug.Conn.merge_resp_headers([{"Custom-Header", "lero"}, {"FOO", "BAR"}])
-        |> Plug.Conn.resp(200, "OK")
+        |> Plug.Conn.put_resp_header("Custom-Header", "lero")
+        |> Plug.Conn.put_resp_header("FOO", "BAR")
+        |> Plug.Conn.put_resp_header("location", endpoint_url(bypass, "/redirected"))
+        |> Plug.Conn.resp(301, "")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/redirected", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_header("Custom-Header", "lero")
+        |> Plug.Conn.put_resp_header("FOO", "BAR")
+        |> Plug.Conn.resp(200, "")
       end)
 
       page =
         Browser.request!(browser, %Request{
           method: :get,
-          url: endpoint_url(bypass)
+          url: endpoint_url(bypass, "/redirect_to")
         })
 
-      assert [{"custom-header", "lero"}, {"foo", "BAR"} | _] = Page.headers(page)
+      [[r1h1, r1h2 | _], [r2h1, r2h2 | _]] = Enum.map(page.response_chain, &Response.headers/1)
+
+      assert r1h1 == {"custom-header", "lero"}
+      assert r1h2 == {"foo", "BAR"}
+
+      assert r2h1 == {"custom-header", "lero"}
+      assert r2h2 == {"foo", "BAR"}
     end
 
     test "raise error when connection fail", %{bypass: bypass, browser: browser} do

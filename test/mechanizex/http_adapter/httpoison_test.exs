@@ -56,4 +56,21 @@ defmodule Mechanizex.HTTPAdapter.HTTPoisonTest do
 
     assert [{_, "https://www.seomaster.com.br"}] = Enum.filter(res.headers, fn {k, _} -> k =~ ~r/location/i end)
   end
+
+  test "ensure downcase of response headers on redirect chain", %{bypass: bypass, adapter: adapter} do
+    Bypass.expect_once(bypass, "GET", "/redirect_to", fn conn ->
+      conn
+      |> Plug.Conn.put_resp_header("Custom-Header", "lero")
+      |> Plug.Conn.put_resp_header("FOO", "BAR")
+      |> Plug.Conn.resp(200, "")
+    end)
+
+    res =
+      adapter.request!(%Request{
+        method: :get,
+        url: endpoint_url(bypass, "/redirect_to")
+      })
+
+    [{"custom-header", "lero"}, {"foo", "BAR"} | _] = res.headers
+  end
 end

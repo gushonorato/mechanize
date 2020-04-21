@@ -148,7 +148,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
   def request!(%Request{} = req) do
     case HTTPoison.request(req.method, req.url, req.body, req.headers) do
       {:ok, res} ->
-        %Response{body: res.body, headers: res.headers, code: res.status_code, url: req.url}
+        Response.new(body: res.body, headers: res.headers, code: res.status_code, url: req.url)
 
       {:error, error} ->
         raise NetworkError, cause: error, message: "#{@posix_errors[error.reason]} (#{error.reason})"

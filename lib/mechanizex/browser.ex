@@ -1,7 +1,5 @@
 defmodule Mechanizex.Browser do
-  use Agent
-
-  alias Mechanizex.{HTTPAdapter, HTMLParser, Request, Response, Page, Header}
+  alias Mechanizex.{Request, Page, Header}
 
   @user_agent_aliases [
     mechanizex:
@@ -39,16 +37,11 @@ defmodule Mechanizex.Browser do
       "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
   ]
 
-  @default_options [
-    http_adapter: :httpoison,
-    html_parser: :floki,
-    http_headers: [],
-    user_agent_alias: :mechanizex,
-    follow_redirect: true,
-    redirect_limit: 5
-  ]
-
-  defstruct [:http_adapter, :html_parser, :http_headers, :follow_redirect, :redirect_limit]
+  defstruct http_adapter: Mechanizex.HTTPAdapter.Httpoison,
+            html_parser: Mechanizex.HTMLParser.Floki,
+            http_headers: [{"user-agent", @user_agent_aliases[:mechanizex]}],
+            follow_redirect: true,
+            redirect_limit: 5
 
   @type t :: %__MODULE__{
           http_adapter: any(),
@@ -66,67 +59,34 @@ defmodule Mechanizex.Browser do
     defexception [:message]
   end
 
-  @spec start_link() :: {:error, any()} | {:ok, pid()}
-  def start_link() do
-    Agent.start_link(fn -> %__MODULE__{} end)
-  end
-
-  @spec new(list()) :: pid()
-  def new(options \\ []) do
-    {:ok, browser} = __MODULE__.start_link()
-    init(browser, options)
-  end
-
-  defp init(browser, options) do
-    options =
-      @default_options
-      |> Keyword.merge(Application.get_all_env(:mechanizex))
-      |> Keyword.merge(options)
-
-    browser
-    |> put_http_adapter(HTTPAdapter.adapter(options[:http_adapter]))
-    |> put_html_parser(HTMLParser.parser(options[:html_parser]))
-    |> update_follow_redirect(options[:follow_redirect])
-    |> put_redirect_limit(options[:redirect_limit])
-    |> put_http_headers(options[:http_headers])
-    |> put_user_agent_alias(options[:user_agent_alias])
-  end
-
   def http_adapter(browser) do
-    Agent.get(browser, fn state -> state.http_adapter end)
+    browser.http_adapter
   end
 
   def put_http_adapter(browser, adapter) do
-    Agent.update(browser, &Map.put(&1, :http_adapter, adapter))
-    browser
+    Map.put(browser, :http_adapter, adapter)
   end
 
   def html_parser(browser) do
-    Agent.get(browser, fn state -> state.html_parser end)
+    browser.html_parser
   end
 
   def put_html_parser(browser, parser) do
-    Agent.update(browser, &Map.put(&1, :html_parser, parser))
-    browser
+    Map.put(browser, :html_parser, parser)
   end
 
   def http_headers(browser) do
-    Agent.get(browser, fn state -> state.http_headers end)
+    browser.http_headers
   end
 
   def put_http_headers(browser, headers) do
-    Agent.update(browser, &Map.put(&1, :http_headers, Header.normalize(headers)))
-    browser
+    Map.put(browser, :http_headers, Header.normalize(headers))
   end
 
   def put_http_header(browser, h, v) do
     {h, _} = header = Header.normalize({h, v})
 
-    Agent.update(browser, fn state ->
-      %__MODULE__{state | http_headers: List.keystore(state.http_headers, h, 0, header)}
-    end)
-
-    browser
+    %__MODULE__{browser | http_headers: List.keystore(browser.http_headers, h, 0, header)}
   end
 
   def put_user_agent_alias(browser, user_agent_alias) do
@@ -134,8 +94,7 @@ defmodule Mechanizex.Browser do
   end
 
   def update_follow_redirect(browser, follow) do
-    :ok = Agent.update(browser, fn state -> %__MODULE__{state | follow_redirect: follow} end)
-    browser
+    %__MODULE__{browser | follow_redirect: follow}
   end
 
   def enable_follow_redirect(browser) do
@@ -147,16 +106,15 @@ defmodule Mechanizex.Browser do
   end
 
   def follow_redirect?(browser) do
-    Agent.get(browser, fn state -> state.follow_redirect end)
+    browser.follow_redirect
   end
 
   def put_redirect_limit(browser, redirect_limit) do
-    :ok = Agent.update(browser, fn state -> %__MODULE__{state | redirect_limit: redirect_limit} end)
-    browser
+    %__MODULE__{browser | redirect_limit: redirect_limit}
   end
 
   def redirect_limit(browser) do
-    Agent.get(browser, fn state -> state.redirect_limit end)
+    browser.redirect_limit
   end
 
   def user_agent_string(user_agent_alias) do
@@ -275,32 +233,38 @@ defmodule Mechanizex.Browser do
     http_adapter(browser).request!(req)
   end
 
-  defp maybe_follow_redirect(res, req, browser, redirect_count) do
-    res = Response.normalize(res)
-    location = Header.get(res.headers, "location")
+  defp maybe_follow_redirect(res, _req, %__MODULE__{follow_redirect: false}, _count) do
+    [res]
+  end
 
+  defp maybe_follow_redirect(res, req, %__MODULE__{follow_redirect: true} = browser, count) do
+    if res.location do
+      follow_redirect(req, res, browser, count)
+    else
+      [res]
+    end
+  end
+
+  defp follow_redirect(req, res, browser, redirect_count) do
     cond do
       redirect_count >= redirect_limit(browser) ->
         raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
 
-      follow_redirect?(browser) and res.code in 307..308 and location != nil ->
-        new_req = Map.put(req, :url, location)
+      res.code in 307..308 ->
+        new_req = Map.put(req, :url, res.location)
 
         request!(browser, new_req, redirect_count + 1) ++ [res]
 
-      follow_redirect?(browser) and res.code in 300..399 and location != nil ->
+      res.code in 300..399 ->
         method = if req.method == :head, do: :head, else: :get
 
         new_req =
           req
-          |> Map.put(:url, location)
+          |> Map.put(:url, res.location)
           |> Map.put(:method, method)
           |> Map.put(:params, [])
 
         request!(browser, new_req, redirect_count + 1) ++ [res]
-
-      true ->
-        [res]
     end
   end
 end

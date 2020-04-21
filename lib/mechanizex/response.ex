@@ -1,6 +1,6 @@
 defmodule Mechanizex.Response do
   alias Mechanizex.Header
-  defstruct body: [], headers: [], code: nil, url: nil, location: nil
+  defstruct body: nil, headers: [], code: nil, url: nil, location: nil
 
   @type t :: %__MODULE__{
           body: term(),
@@ -23,17 +23,15 @@ defmodule Mechanizex.Response do
     |> fetch_location()
   end
 
-  defp normalize_headers(%__MODULE__{} = res) do
-    %__MODULE__{res | headers: Header.normalize(res.headers)}
-  end
-
   def headers(%__MODULE__{} = res) do
     res.headers
   end
 
-  # TODO: Add tests
   def location(%__MODULE__{} = res), do: Header.get(res.headers, "location")
 
-  # TODO: Add tests
-  def fetch_location(%__MODULE__{} = res), do: Map.put(res, :location, location(res))
+  defp normalize_headers(%__MODULE__{} = res) do
+    %__MODULE__{res | headers: Header.normalize(res.headers)}
+  end
+
+  defp fetch_location(%__MODULE__{} = res), do: Map.put(res, :location, location(res))
 end

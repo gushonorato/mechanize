@@ -30,7 +30,7 @@ defmodule Mechanizex.Header do
     List.keytake(headers, normalize_key(key), 0)
   end
 
-  def get(headers, key) do
+  def get_value(headers, key) do
     normalized_key = normalize_key(key)
 
     case List.keytake(headers, normalized_key, 0) do

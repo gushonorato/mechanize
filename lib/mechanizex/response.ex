@@ -26,7 +26,7 @@ defmodule Mechanizex.Response do
     res.headers
   end
 
-  def location(%__MODULE__{} = res), do: Header.get(res.headers, "location")
+  def location(%__MODULE__{} = res), do: Header.get_value(res.headers, "location")
 
   defp normalize_headers(%__MODULE__{} = res) do
     %__MODULE__{res | headers: Header.normalize(res.headers)}

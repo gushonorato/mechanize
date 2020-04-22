@@ -341,7 +341,7 @@ defmodule Mechanizex.BrowserTest do
       browser = Browser.disable_follow_redirect(%Browser{})
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 301
-      assert Header.get(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
+      assert Header.get_value(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
 
       browser = Browser.enable_follow_redirect(browser)
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))

@@ -99,7 +99,7 @@ defmodule Mechanizex.RequestTest do
             body: {:form, [{"q", "teste"}, {"p", "10"}]}
           })
 
-        assert Header.get(req.headers, "content-type") == "application/x-www-form-urlencoded"
+        assert Header.get_value(req.headers, "content-type") == "application/x-www-form-urlencoded"
       end)
     end
 
@@ -112,7 +112,7 @@ defmodule Mechanizex.RequestTest do
             url: "https://www.example.com"
           })
 
-        assert Header.get(req.headers, "content-type") == nil
+        assert Header.get_value(req.headers, "content-type") == nil
       end)
     end
 

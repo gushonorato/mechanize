@@ -10,7 +10,6 @@ defmodule Mechanizex.Response do
           location: String.t()
         }
 
-  # TODO: Add tests
   def new(attrs \\ []) do
     %__MODULE__{}
     |> struct(attrs)

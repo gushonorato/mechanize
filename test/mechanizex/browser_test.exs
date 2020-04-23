@@ -10,23 +10,23 @@ defmodule Mechanizex.BrowserTest do
   end
 
   setup_all do
-    {:ok, default_ua: Browser.user_agent_string(:mechanizex)}
+    {:ok, default_ua: Browser.get_user_agent_string(:mechanizex)}
   end
 
   describe ".put_http_headers" do
     test "set all headers at once" do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_headers([{"content-type", "text/html"}])
-             |> Browser.http_headers() == [{"content-type", "text/html"}]
+             |> Browser.get_http_headers() == [{"content-type", "text/html"}]
     end
 
     test "ensure all headers are in lowercase" do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_headers([
                {"Content-Type", "text/html"},
                {"Custom-Header", "Lero"}
              ])
-             |> Browser.http_headers() == [
+             |> Browser.get_http_headers() == [
                {"content-type", "text/html"},
                {"custom-header", "Lero"}
              ]
@@ -35,101 +35,89 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".put_http_header" do
     test "updates existent header" do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_header("user-agent", "Lero")
-             |> Browser.http_headers() == [
+             |> Browser.get_http_headers() == [
                {"user-agent", "Lero"}
              ]
     end
 
     test "add new header", %{default_ua: ua} do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_header("content-type", "text/html")
-             |> Browser.http_headers() == [
+             |> Browser.get_http_headers() == [
                {"user-agent", ua},
                {"content-type", "text/html"}
              ]
     end
 
     test "ensure inserted header is lowecase", %{default_ua: ua} do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_header("Content-Type", "text/html")
-             |> Browser.http_headers() == [
+             |> Browser.get_http_headers() == [
                {"user-agent", ua},
                {"content-type", "text/html"}
              ]
     end
   end
 
-  describe ".put_user_agent_alias" do
+  describe ".put_user_agent" do
     test "set by alias" do
-      assert %Browser{}
-             |> Browser.put_user_agent_alias(:windows_chrome)
-             |> Browser.http_headers() == [
-               {"user-agent", Browser.user_agent_string(:windows_chrome)}
+      assert Browser.new()
+             |> Browser.put_user_agent(:windows_chrome)
+             |> Browser.get_http_headers() == [
+               {"user-agent", Browser.get_user_agent_string(:windows_chrome)}
              ]
     end
 
     test "raise error when invalid alias passed" do
-      assert_raise ArgumentError, ~r/Invalid user agent/, fn ->
-        Browser.put_user_agent_alias(%Browser{}, :lero)
+      assert_raise ArgumentError, "invalid user agent alias lero", fn ->
+        Browser.put_user_agent(Browser.new(), :lero)
       end
+    end
+  end
+
+  describe ".get_user_agent_string" do
+    test "get default user agent string" do
+      assert Browser.get_user_agent_string(Browser.new()) == Browser.get_user_agent_string(:mechanizex)
     end
   end
 
   describe ".put_http_adapter" do
     test "returns browser" do
-      assert %Browser{} = Browser.put_http_adapter(%Browser{}, Mechanizex.HTTPAdapter.Custom)
+      assert %Browser{} = Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom)
     end
 
     test "updates http adapter" do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_http_adapter(Mechanizex.HTTPAdapter.Custom)
-             |> Browser.http_adapter() == Mechanizex.HTTPAdapter.Custom
+             |> Browser.get_http_adapter() == Mechanizex.HTTPAdapter.Custom
     end
   end
 
   describe ".put_html_parser" do
     test "returns mechanizex browser" do
-      assert %Browser{} = Browser.put_html_parser(%Browser{}, Mechanizex.HTMLParser.Custom)
+      assert %Browser{} = Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom)
     end
 
     test "updates html parser" do
-      assert %Browser{}
+      assert Browser.new()
              |> Browser.put_html_parser(Mechanizex.HTMLParser.Custom)
-             |> Browser.html_parser() == Mechanizex.HTMLParser.Custom
+             |> Browser.get_html_parser() == Mechanizex.HTMLParser.Custom
     end
   end
 
-  describe ".update_follow_redirect" do
+  describe ".put_follow_redirect" do
     test "update browser follow redirect to true and false" do
-      browser = %Browser{}
+      browser = Browser.new()
       assert Browser.follow_redirect?(browser) == true
 
-      browser = Browser.update_follow_redirect(browser, false)
+      browser = Browser.put_follow_redirect(browser, false)
       assert Browser.follow_redirect?(browser) == false
 
       assert browser
-             |> Browser.update_follow_redirect(true)
+             |> Browser.put_follow_redirect(true)
              |> Browser.follow_redirect?() == true
-    end
-  end
-
-  describe ".enable_follow_redirect" do
-    test "update browser options to follow redirects" do
-      assert %Browser{}
-             |> Browser.update_follow_redirect(false)
-             |> Browser.enable_follow_redirect()
-             |> Browser.follow_redirect?() == true
-    end
-  end
-
-  describe ".disable_follow_redirect" do
-    test "update browser options to not follow redirects" do
-      assert %Browser{}
-             |> Browser.update_follow_redirect(true)
-             |> Browser.disable_follow_redirect()
-             |> Browser.follow_redirect?() == false
     end
   end
 
@@ -140,7 +128,7 @@ defmodule Mechanizex.BrowserTest do
       end)
 
       page =
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :get,
           url: endpoint_url(bypass)
         })
@@ -149,7 +137,7 @@ defmodule Mechanizex.BrowserTest do
     end
 
     test "send correct methods", %{bypass: bypass} do
-      browser = %Browser{}
+      browser = Browser.new()
 
       Bypass.expect_once(bypass, "GET", "/", fn conn ->
         assert conn.method == "GET"
@@ -174,7 +162,7 @@ defmodule Mechanizex.BrowserTest do
 
     test "raise if request URL is not absolute" do
       assert_raise ArgumentError, "absolute URL needed (not www.google.com)", fn ->
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :get,
           url: "www.google.com"
         })
@@ -204,7 +192,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Browser.request!(%Browser{}, %Request{
+      Browser.request!(Browser.new(), %Request{
         method: :get,
         url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"custom-header", "lero"}]
@@ -232,7 +220,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Browser.request!(%Browser{}, %Request{
+      Browser.request!(Browser.new(), %Request{
         method: :get,
         url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"custom-header", "lero"}, {"User-Agent", "Gustabot"}]
@@ -259,7 +247,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Browser.request!(%Browser{}, %Request{
+      Browser.request!(Browser.new(), %Request{
         method: :get,
         url: endpoint_url(bypass, "/redirect_to"),
         headers: [{"Custom-Header", "lero"}, {"User-Agent", "Gustabot"}]
@@ -272,7 +260,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Browser.request!(%Browser{}, %Request{
+      Browser.request!(Browser.new(), %Request{
         method: :get,
         url: endpoint_url(bypass),
         params: [{"query", "lero"}, {"start", "100"}]
@@ -283,7 +271,7 @@ defmodule Mechanizex.BrowserTest do
       Bypass.down(bypass)
 
       assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :get,
           url: endpoint_url(bypass)
         })
@@ -302,7 +290,7 @@ defmodule Mechanizex.BrowserTest do
       end)
 
       page =
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :get,
           url: endpoint_url(bypass, "/redirect_to")
         })
@@ -318,7 +306,7 @@ defmodule Mechanizex.BrowserTest do
       end)
 
       page =
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :get,
           url: endpoint_url(bypass, "/redirect_to")
         })
@@ -338,18 +326,18 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "REDIRECT OK")
       end)
 
-      browser = Browser.disable_follow_redirect(%Browser{})
+      browser = Browser.put_follow_redirect(Browser.new(), false)
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 301
       assert Header.get_value(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
 
-      browser = Browser.enable_follow_redirect(browser)
+      browser = Browser.put_follow_redirect(browser, true)
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 200
     end
 
     test "raise if max redirect loop exceeded", %{bypass: bypass} do
-      browser = %Browser{}
+      browser = Browser.new()
 
       1..6
       |> Enum.each(fn n ->
@@ -361,7 +349,7 @@ defmodule Mechanizex.BrowserTest do
       end)
 
       assert_raise Mechanizex.Browser.RedirectLimitReachedError,
-                   "Redirect limit of #{Browser.redirect_limit(browser)} reached",
+                   "Redirect limit of #{Browser.get_redirect_limit(browser)} reached",
                    fn ->
                      Browser.get!(browser, endpoint_url(bypass, "/1"))
                    end
@@ -381,7 +369,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "")
       end)
 
-      browser = %Browser{redirect_limit: 6}
+      browser = Browser.new(redirect_limit: 6)
       page = Browser.get!(browser, endpoint_url(bypass, "/1"))
       assert page.status_code == 200
     end
@@ -402,7 +390,7 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "Page 5")
       end)
 
-      page = Browser.get!(%Browser{}, endpoint_url(bypass, "/1"))
+      page = Browser.get!(Browser.new(), endpoint_url(bypass, "/1"))
 
       expected_resp_chain = Enum.map(5..1, &endpoint_url(bypass, "/#{&1}"))
       actual_resp_chain = Enum.map(page.response_chain, & &1.url)
@@ -432,7 +420,7 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: method,
           url: endpoint_url(bypass, "/redirect_#{status}_#{method}")
         })
@@ -452,7 +440,7 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: :head,
           url: endpoint_url(bypass, "/redirect_head_#{status}")
         })
@@ -481,7 +469,7 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.request!(%Browser{}, %Request{
+        Browser.request!(Browser.new(), %Request{
           method: method,
           url: endpoint_url(bypass, "/redirect_#{status}_#{method}")
         })
@@ -502,7 +490,7 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.get!(%Browser{}, endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
+        Browser.get!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
       end)
     end
 
@@ -521,12 +509,12 @@ defmodule Mechanizex.BrowserTest do
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.post!(%Browser{}, endpoint_url(bypass, "/redirect_to_#{status}"), "user=gustavo")
+        Browser.post!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{status}"), "user=gustavo")
       end)
     end
 
     test "request helper functions", %{bypass: bypass} do
-      browser = %Browser{}
+      browser = Browser.new()
 
       [:get!, :head!, :options!, :delete!, :patch!, :post!, :put!]
       |> Enum.each(fn function_name ->

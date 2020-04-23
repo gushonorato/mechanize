@@ -1,7 +1,7 @@
 defmodule Mechanizex.Browser do
   alias Mechanizex.{Request, Page, Header}
 
-  @user_agent_aliases [
+  @user_agent_aliases %{
     mechanizex:
       "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
     linux_firefox: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0",
@@ -35,7 +35,7 @@ defmodule Mechanizex.Browser do
     googlebot: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
     googlebot_mobile:
       "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-  ]
+  }
 
   defstruct http_adapter: Mechanizex.HTTPAdapter.Httpoison,
             html_parser: Mechanizex.HTMLParser.Floki,
@@ -43,13 +43,13 @@ defmodule Mechanizex.Browser do
             follow_redirect: true,
             redirect_limit: 5
 
-  @type t :: %__MODULE__{
-          http_adapter: any(),
-          html_parser: any(),
-          http_headers: keyword(),
-          follow_redirect: boolean(),
-          redirect_limit: integer()
-        }
+  @opaque t :: %__MODULE__{
+            http_adapter: any(),
+            html_parser: any(),
+            http_headers: keyword(),
+            follow_redirect: boolean(),
+            redirect_limit: integer()
+          }
 
   defmodule InvalidUserAgentAliasError do
     defexception [:message]
@@ -59,73 +59,55 @@ defmodule Mechanizex.Browser do
     defexception [:message]
   end
 
-  def http_adapter(browser) do
-    browser.http_adapter
+  def new(fields \\ []) do
+    struct(%__MODULE__{}, fields)
   end
 
-  def put_http_adapter(browser, adapter) do
-    Map.put(browser, :http_adapter, adapter)
+  def put_http_adapter(browser, adapter), do: %__MODULE__{browser | http_adapter: adapter}
+  def get_http_adapter(browser), do: browser.http_adapter
+
+  def put_html_parser(browser, parser), do: %__MODULE__{browser | html_parser: parser}
+  def get_html_parser(browser), do: browser.html_parser
+
+  def put_http_headers(browser, headers), do: %__MODULE__{browser | http_headers: Header.normalize(headers)}
+  def get_http_headers(browser), do: browser.http_headers
+
+  def put_http_header(browser, {key, value}) do
+    put_http_header(browser, key, value)
   end
 
-  def html_parser(browser) do
-    browser.html_parser
+  def put_http_header(browser, key, value) do
+    %__MODULE__{browser | http_headers: Header.put(browser.http_headers, key, value)}
   end
 
-  def put_html_parser(browser, parser) do
-    Map.put(browser, :html_parser, parser)
-  end
+  def get_http_header_value(browser, key), do: Header.get_value(browser.http_headers, key)
 
-  def http_headers(browser) do
-    browser.http_headers
-  end
+  def put_follow_redirect(browser, value), do: %__MODULE__{browser | follow_redirect: value}
+  def follow_redirect?(browser), do: browser.follow_redirect
 
-  def put_http_headers(browser, headers) do
-    Map.put(browser, :http_headers, Header.normalize(headers))
-  end
+  def put_redirect_limit(browser, limit), do: %__MODULE__{browser | redirect_limit: limit}
+  def get_redirect_limit(browser), do: browser.redirect_limit
 
-  def put_http_header(browser, h, v) do
-    {h, _} = header = Header.normalize({h, v})
-
-    %__MODULE__{browser | http_headers: List.keystore(browser.http_headers, h, 0, header)}
-  end
-
-  def put_user_agent_alias(browser, user_agent_alias) do
-    put_http_header(browser, "user-agent", user_agent_string(user_agent_alias))
-  end
-
-  def update_follow_redirect(browser, follow) do
-    %__MODULE__{browser | follow_redirect: follow}
-  end
-
-  def enable_follow_redirect(browser) do
-    update_follow_redirect(browser, true)
-  end
-
-  def disable_follow_redirect(browser) do
-    update_follow_redirect(browser, false)
-  end
-
-  def follow_redirect?(browser) do
-    browser.follow_redirect
-  end
-
-  def put_redirect_limit(browser, redirect_limit) do
-    %__MODULE__{browser | redirect_limit: redirect_limit}
-  end
-
-  def redirect_limit(browser) do
-    browser.redirect_limit
-  end
-
-  def user_agent_string(user_agent_alias) do
-    case @user_agent_aliases[user_agent_alias] do
-      nil ->
-        raise ArgumentError,
-          message: "Invalid user agent alias \"#{user_agent_alias}\""
-
-      user_agent_string ->
-        user_agent_string
+  def put_user_agent(browser, ua_alias) do
+    case Map.fetch(@user_agent_aliases, ua_alias) do
+      {:ok, user_agent_string} -> put_user_agent_string(browser, user_agent_string)
+      :error -> raise ArgumentError, "invalid user agent alias #{ua_alias}"
     end
+  end
+
+  def put_user_agent_string(browser, agent_string) do
+    put_http_header(browser, "user-agent", agent_string)
+  end
+
+  def get_user_agent_string(ua_alias) when is_atom(ua_alias) do
+    case Map.fetch(@user_agent_aliases, ua_alias) do
+      {:ok, value} -> value
+      :error -> nil
+    end
+  end
+
+  def get_user_agent_string(browser) do
+    get_http_header_value(browser, "user-agent")
   end
 
   def get!(browser, url, params \\ [], headers \\ []) do
@@ -207,7 +189,7 @@ defmodule Mechanizex.Browser do
       body: last_response.body,
       url: last_response.url,
       browser: browser,
-      parser: html_parser(browser)
+      parser: get_html_parser(browser)
     }
   end
 
@@ -226,11 +208,11 @@ defmodule Mechanizex.Browser do
   end
 
   defp merge_default_headers(req, browser) do
-    %Request{req | headers: Header.merge(http_headers(browser), req.headers)}
+    %Request{req | headers: Header.merge(get_http_headers(browser), req.headers)}
   end
 
   defp perform_request!(req, browser) do
-    http_adapter(browser).request!(req)
+    get_http_adapter(browser).request!(req)
   end
 
   defp maybe_follow_redirect(res, _req, %__MODULE__{follow_redirect: false}, _count) do
@@ -247,8 +229,8 @@ defmodule Mechanizex.Browser do
 
   defp follow_redirect(req, res, browser, redirect_count) do
     cond do
-      redirect_count >= redirect_limit(browser) ->
-        raise RedirectLimitReachedError, "Redirect limit of #{redirect_limit(browser)} reached"
+      redirect_count >= get_redirect_limit(browser) ->
+        raise RedirectLimitReachedError, "Redirect limit of #{get_redirect_limit(browser)} reached"
 
       res.code in 307..308 ->
         new_req = Map.put(req, :url, res.location)

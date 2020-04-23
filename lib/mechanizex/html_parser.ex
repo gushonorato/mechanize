@@ -8,11 +8,6 @@ defmodule Mechanizex.HTMLParser do
   @callback search(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
   @callback filter(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
   @callback raw_html(Page.t() | Element.t()) :: String.t()
-
-  @spec parser(String.t()) :: module()
-  def parser(parser_name) do
-    Plugin.get(__MODULE__, parser_name)
-  end
 end
 
 defprotocol Mechanizex.HTMLParser.Parseable do

@@ -513,6 +513,40 @@ defmodule Mechanizex.BrowserTest do
       end)
     end
 
+    test "do not follow meta-refresh as default", %{bypass: bypass} do
+      resp_body = read_file!("test/htdocs/meta_refresh.html", url: endpoint_url(bypass, "/refreshed"))
+
+      Bypass.expect_once(bypass, "GET", "/do_not_refresh", fn conn ->
+        Plug.Conn.resp(conn, 200, resp_body)
+      end)
+
+      browser = Browser.new()
+      page = Browser.get!(browser, endpoint_url(bypass, "/do_not_refresh"))
+
+      assert page.status_code == 200
+      assert page.body == resp_body
+    end
+
+    [200, 300, 404]
+    |> Enum.each(fn status ->
+      test "follow meta-refresh on #{status}", %{bypass: bypass} do
+        Bypass.expect_once(bypass, "GET", "/refresh", fn conn ->
+          resp_body = read_file!("test/htdocs/meta_refresh.html", url: endpoint_url(bypass, "/refreshed"))
+          Plug.Conn.resp(conn, unquote(status), resp_body)
+        end)
+
+        Bypass.expect_once(bypass, "GET", "/refreshed", fn conn ->
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        browser = Browser.new(follow_meta_refresh: true)
+        page = Browser.get!(browser, endpoint_url(bypass, "/refresh"))
+
+        assert page.status_code == 200
+        assert page.body == "OK"
+      end
+    end)
+
     test "request helper functions", %{bypass: bypass} do
       browser = Browser.new()
 

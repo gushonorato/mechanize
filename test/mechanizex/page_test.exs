@@ -1,7 +1,7 @@
 defmodule Mechanizex.PageTest do
   use ExUnit.Case, async: true
   alias Mechanizex
-  alias Mechanizex.Page.{Element, Link, ClickError}
+  alias Mechanizex.Page.{Element, Link, ClickError, InvalidMetaRefreshError}
   alias Mechanizex.Page
   import TestHelper
 
@@ -223,5 +223,84 @@ defmodule Mechanizex.PageTest do
         Page.click_link(page, alt: "Nibiru")
       end
     end
+  end
+
+  describe ".meta_refresh" do
+    test "page with meta refresh" do
+      body = read_file!("test/htdocs/meta_refresh.html", url: "http://www.google.com.br")
+      page = %Page{body: body, parser: Mechanizex.HTMLParser.Floki}
+
+      assert Page.meta_refresh(page) == {0, "http://www.google.com.br"}
+    end
+
+    test "page without meta refresh" do
+      {:ok, %{page: page}} = stub_requests("/test/htdocs/without_meta_refresh.html")
+      assert Page.meta_refresh(page) == nil
+    end
+
+    test "meta refresh content parsing" do
+      [
+        {
+          "<meta http-equiv=\"refresh\" content=\"10\"/>",
+          {10, nil}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"   10    \"/>",
+          {10, nil}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"10; url=http://www.google.com.br\"/>",
+          {10, "http://www.google.com.br"}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"10 ;   url = http://www.google.com.br\"/>",
+          {10, "http://www.google.com.br"}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"10;url=http://www.google.com.br\"/>",
+          {10, "http://www.google.com.br"}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"10;url= http://www.google.com.br\"/>",
+          {10, "http://www.google.com.br"}
+        },
+        {
+          "<meta http-equiv=\"refresh\" content=\"10;url=     http://www.google.com.br  \"/>",
+          {10, "http://www.google.com.br"}
+        }
+      ]
+      |> Stream.with_index(1)
+      |> Enum.each(fn {{body, expected_result}, index} ->
+        page = %Page{body: body, parser: Mechanizex.HTMLParser.Floki, url: index}
+        result = Page.meta_refresh(page)
+
+        assert result == expected_result,
+               "(test #{index}) expected #{inspect(expected_result)}, " <>
+                 "but was #{inspect(result)} on subject #{inspect(body)}"
+      end)
+    end
+
+    [
+      "<meta http-equiv=\"refresh\" content=\"\"/>",
+      "<meta http-equiv=\"refresh\" content=\"      \"/>",
+      "<meta http-equiv=\"refresh\" content=\";\"/>",
+      "<meta http-equiv=\"refresh\" content=\"  ;  \"/>",
+      "<meta http-equiv=\"refresh\" content=\"10; lero=http://www.google.com.br\"/>",
+      "<meta http-equiv=\"refresh\" content=\"  ; lero=http://www.google.com.br\"/>",
+      "<meta http-equiv=\"refresh\" content=\"lero=http://www.google.com.br; 10\"/>",
+      "<meta http-equiv=\"refresh\" content=\"lero=http://www.google.com.br\"/>",
+      "<meta http-equiv=\"refresh\" content=\"a; lero=http://www.google.com.br\"/>",
+      "<meta http-equiv=\"refresh\" content=\"a; url=http://www.google.com.br\"/>"
+    ]
+    |> Stream.with_index(1)
+    |> Enum.each(fn {body, index} ->
+      test "#{body} raises exception" do
+        page = %Page{body: unquote(body), parser: Mechanizex.HTMLParser.Floki, url: unquote(index)}
+
+        assert_raise(InvalidMetaRefreshError, fn ->
+          Page.meta_refresh(page)
+        end)
+      end
+    end)
   end
 end

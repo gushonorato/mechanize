@@ -1,6 +1,6 @@
 defmodule Mechanizex.Page do
   alias Mechanizex.{Response, Query, Form}
-  alias Mechanizex.Page.Link
+  alias Mechanizex.Page.{Link, Element}
 
   defstruct response_chain: nil, status_code: nil, body: nil, url: nil, browser: nil, parser: nil
 
@@ -17,9 +17,42 @@ defmodule Mechanizex.Page do
     defexception [:message]
   end
 
+  defmodule InvalidMetaRefreshError do
+    defexception [:message]
+  end
+
   def browser(page), do: page.browser
   def url(page), do: page.url
   def body(page), do: page.body
+
+  def meta_refresh(page) do
+    page
+    |> search("meta[http-equiv=refresh]")
+    |> List.first()
+    |> case do
+      nil ->
+        nil
+
+      meta ->
+        meta
+        |> Element.attr(:content)
+        |> parse_meta_refresh_content(page)
+    end
+  end
+
+  defp parse_meta_refresh_content(content, page) do
+    content =
+      content
+      |> String.split(";")
+      |> Enum.map(&String.trim/1)
+      |> Enum.join(";")
+
+    case Regex.scan(~r/^(\d+)(?:;url\s*=\s*(.*))?$/, content) do
+      [[_, delay, url]] -> {String.to_integer(delay), url}
+      [[_, delay]] -> {String.to_integer(delay), nil}
+      _ -> raise InvalidMetaRefreshError, "can't parse meta-refresh content of #{page.url}"
+    end
+  end
 
   def headers(page) do
     page

@@ -41,14 +41,16 @@ defmodule Mechanizex.Browser do
             html_parser: Mechanizex.HTMLParser.Floki,
             http_headers: [{"user-agent", @user_agent_aliases[:mechanizex]}],
             follow_redirect: true,
-            redirect_limit: 5
+            redirect_limit: 5,
+            follow_meta_refresh: false
 
   @opaque t :: %__MODULE__{
             http_adapter: any(),
             html_parser: any(),
             http_headers: keyword(),
             follow_redirect: boolean(),
-            redirect_limit: integer()
+            redirect_limit: integer(),
+            follow_meta_refresh: boolean()
           }
 
   defmodule InvalidUserAgentAliasError do
@@ -183,7 +185,7 @@ defmodule Mechanizex.Browser do
 
     last_response = List.first(resp_chain)
 
-    %Page{
+    page = %Page{
       response_chain: resp_chain,
       status_code: last_response.code,
       body: last_response.body,
@@ -191,6 +193,24 @@ defmodule Mechanizex.Browser do
       browser: browser,
       parser: get_html_parser(browser)
     }
+
+    maybe_follow_meta_refresh(browser, page)
+  end
+
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: false}, page), do: page
+
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true} = browser, page) do
+    case Page.meta_refresh(page) do
+      nil ->
+        page
+
+      {_delay, nil} ->
+        page
+
+      {delay, url} ->
+        Process.sleep(delay * 1000)
+        get!(browser, url)
+    end
   end
 
   defp check_request_url!(%Request{} = req) do

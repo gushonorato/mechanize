@@ -32,4 +32,12 @@ defmodule TestHelper do
   end
 
   def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path) |> URI.to_string()
+
+  def read_file!(path, map \\ []) do
+    contents = File.read!(path)
+
+    Enum.reduce(map, contents, fn {k, v}, acc ->
+      String.replace(acc, "\#\{#{Atom.to_string(k)}\}", v)
+    end)
+  end
 end

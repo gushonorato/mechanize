@@ -6,6 +6,7 @@ Build web scrapers and automate interaction with websites in Elixir with ease! O
 - Scrape data easily using CSS selectors
 - Populate and submit forms (WIP)
 - Follow and tracks 3xx redirects
+- Follow meta-refresh
 - Automatically stores and sends cookies (TODO)
 - File upload (TODO)
 - Track of the sites that you have visited as a history (TODO)

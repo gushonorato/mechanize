@@ -529,7 +529,7 @@ defmodule Mechanizex.BrowserTest do
 
     [200, 300, 404]
     |> Enum.each(fn status ->
-      test "follow meta-refresh on #{status}", %{bypass: bypass} do
+      test "follow meta-refresh on status code #{status}", %{bypass: bypass} do
         Bypass.expect_once(bypass, "GET", "/refresh", fn conn ->
           resp_body = read_file!("test/htdocs/meta_refresh.html", url: endpoint_url(bypass, "/refreshed"))
           Plug.Conn.resp(conn, unquote(status), resp_body)

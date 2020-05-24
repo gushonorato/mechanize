@@ -1,5 +1,6 @@
 defmodule Mechanizex.Browser do
   alias Mechanizex.{Request, Page, Header}
+  alias Mechanizex.Page.Link
 
   @user_agent_aliases %{
     mechanizex:
@@ -199,7 +200,7 @@ defmodule Mechanizex.Browser do
 
   defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: false}, page), do: page
 
-  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true} = browser, page) do
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true}, page) do
     case Page.meta_refresh(page) do
       nil ->
         page
@@ -209,7 +210,7 @@ defmodule Mechanizex.Browser do
 
       {delay, url} ->
         Process.sleep(delay * 1000)
-        get!(browser, url)
+        Link.follow(page, url)
     end
   end
 

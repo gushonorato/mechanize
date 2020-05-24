@@ -9,22 +9,26 @@ defmodule Mechanizex.Page.Link do
           element: Element.t()
         }
 
+  def follow(%Page{} = page, url) do
+    url =
+      page
+      |> Page.url()
+      |> URI.merge(url)
+      |> URI.to_string()
+
+    page
+    |> Page.browser()
+    |> Browser.get!(url)
+  end
+
   def click(%Mechanizex.Page.Link{} = link) do
     href = Element.attr(link, :href)
 
     unless href, do: raise(ClickError, "href attribute is missing")
 
-    url =
-      link
-      |> Element.page()
-      |> Page.url()
-      |> URI.merge(href)
-      |> URI.to_string()
-
     link
     |> Element.page()
-    |> Page.browser()
-    |> Browser.get!(url)
+    |> follow(href)
   end
 
   def new(el) do

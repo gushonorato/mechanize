@@ -547,6 +547,23 @@ defmodule Mechanizex.BrowserTest do
       end
     end)
 
+    test "follow meta-refresh with relative url", %{bypass: bypass} do
+      Bypass.expect_once(bypass, "GET", "/refresh", fn conn ->
+        resp_body = read_file!("test/htdocs/meta_refresh.html", url: "/refreshed")
+        Plug.Conn.resp(conn, 200, resp_body)
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/refreshed", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      browser = Browser.new(follow_meta_refresh: true)
+      page = Browser.get!(browser, endpoint_url(bypass, "/refresh"))
+
+      assert page.status_code == 200
+      assert page.body == "OK"
+    end
+
     test "request helper functions", %{bypass: bypass} do
       browser = Browser.new()
 

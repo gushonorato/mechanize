@@ -15,7 +15,7 @@ defmock(Mechanizex.HTTPAdapter.Mock, for: Mechanizex.HTTPAdapter)
 defmodule TestHelper do
   def stub_requests(local_path) do
     bypass = Bypass.open()
-    browser = %Mechanizex.Browser{}
+    browser = Mechanizex.Browser.new()
 
     Bypass.expect_once(bypass, "GET", local_path, fn conn ->
       "/" <> file_path = conn.request_path

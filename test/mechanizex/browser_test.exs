@@ -85,7 +85,7 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".put_http_adapter" do
     test "returns browser" do
-      assert %Browser{} = Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom)
+      assert %Browser.Impl{} = Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom)
     end
 
     test "updates http adapter" do
@@ -97,7 +97,7 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".put_html_parser" do
     test "returns mechanizex browser" do
-      assert %Browser{} = Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom)
+      assert %Browser.Impl{} = Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom)
     end
 
     test "updates html parser" do

@@ -1,6 +1,5 @@
 defmodule Mechanizex.Browser.Impl do
-  alias Mechanizex.{Request, Page, Header}
-  alias Mechanizex.Page.Link
+  alias Mechanizex.{Page, Header, Request}
 
   @user_agent_aliases %{
     mechanizex:
@@ -105,73 +104,6 @@ defmodule Mechanizex.Browser.Impl do
     get_http_header_value(browser, "user-agent")
   end
 
-  def get!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :get,
-      url: url,
-      params: params,
-      headers: headers
-    })
-  end
-
-  def head!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :head,
-      url: url,
-      params: params,
-      headers: headers
-    })
-  end
-
-  def options!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :options,
-      url: url,
-      params: params,
-      headers: headers
-    })
-  end
-
-  def delete!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :delete,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
-  def patch!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :patch,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
-  def post!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :post,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
-  def put!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :put,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
   def request!(browser, req) do
     check_request_url!(req)
     resp_chain = request!(browser, req, 0)
@@ -183,7 +115,6 @@ defmodule Mechanizex.Browser.Impl do
       status_code: last_response.code,
       body: last_response.body,
       url: last_response.url,
-      browser: browser,
       parser: get_html_parser(browser)
     }
 
@@ -192,7 +123,7 @@ defmodule Mechanizex.Browser.Impl do
 
   defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: false}, page), do: page
 
-  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true}, page) do
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true} = browser, page) do
     case Page.meta_refresh(page) do
       nil ->
         page
@@ -202,8 +133,17 @@ defmodule Mechanizex.Browser.Impl do
 
       {delay, url} ->
         Process.sleep(delay * 1000)
-        Link.follow(page, url)
+        follow_url(browser, page.url, url)
     end
+  end
+
+  defp follow_url(browser, base_url, rel_url) do
+    abs_url =
+      base_url
+      |> URI.merge(rel_url)
+      |> URI.to_string()
+
+    request!(browser, %Request{method: :get, url: abs_url})
   end
 
   defp check_request_url!(%Request{} = req) do
@@ -243,7 +183,8 @@ defmodule Mechanizex.Browser.Impl do
   defp follow_redirect(req, res, browser, redirect_count) do
     cond do
       redirect_count >= get_redirect_limit(browser) ->
-        raise Mechanizex.Browser.RedirectLimitReachedError, "Redirect limit of #{get_redirect_limit(browser)} reached"
+        raise Mechanizex.Browser.RedirectLimitReachedError,
+              "Redirect limit of #{get_redirect_limit(browser)} reached"
 
       res.code in 307..308 ->
         new_req = Map.put(req, :url, res.location)

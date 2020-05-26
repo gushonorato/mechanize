@@ -1,52 +1,160 @@
 defmodule Mechanizex.Browser do
-  alias Mechanizex.Browser.Impl
+  alias Mechanizex.Request
 
   defmodule RedirectLimitReachedError do
     defexception [:message]
   end
 
-  defdelegate new(fields \\ []), to: Impl
+  def new(fields \\ []) do
+    {:ok, browser} = GenServer.start_link(__MODULE__.Server, __MODULE__.Impl.new(fields))
+    browser
+  end
 
-  defdelegate put_http_adapter(browser, adapter), to: Impl
-  defdelegate get_http_adapter(browser), to: Impl
+  def put_http_adapter(browser, adapter) do
+    :ok = GenServer.cast(browser, {:put_http_adapter, adapter})
+    browser
+  end
 
-  defdelegate put_html_parser(browser, parser), to: Impl
-  defdelegate get_html_parser(browser), to: Impl
+  def get_http_adapter(browser) do
+    GenServer.call(browser, {:get_http_adapter})
+  end
 
-  defdelegate put_http_headers(browser, headers), to: Impl
-  defdelegate get_http_headers(browser), to: Impl
+  def put_html_parser(browser, parser) do
+    :ok = GenServer.cast(browser, {:put_html_parser, parser})
+    browser
+  end
 
-  defdelegate put_http_header(browser, header), to: Impl
+  def get_html_parser(browser) do
+    GenServer.call(browser, {:get_html_parser})
+  end
 
-  defdelegate put_http_header(browser, key, value), to: Impl
+  def put_http_headers(browser, headers) do
+    :ok = GenServer.cast(browser, {:put_http_headers, headers})
+    browser
+  end
 
-  defdelegate get_http_header_value(browser, key), to: Impl
+  def get_http_headers(browser) do
+    GenServer.call(browser, {:get_http_headers})
+  end
 
-  defdelegate put_follow_redirect(browser, value), to: Impl
-  defdelegate follow_redirect?(browser), to: Impl
+  def put_http_header(browser, header) do
+    :ok = GenServer.cast(browser, {:put_http_header, header})
+    browser
+  end
 
-  defdelegate put_redirect_limit(browser, limit), to: Impl
-  defdelegate get_redirect_limit(browser), to: Impl
+  def put_http_header(browser, key, value) do
+    :ok = GenServer.cast(browser, {:put_http_header, key, value})
+    browser
+  end
 
-  defdelegate put_user_agent(browser, ua_alias), to: Impl
+  def get_http_header_value(browser, key) do
+    GenServer.call(browser, {:get_http_header_value, key})
+  end
 
-  defdelegate put_user_agent_string(browser, agent_string), to: Impl
+  def put_follow_redirect(browser, value) do
+    :ok = GenServer.cast(browser, {:put_follow_redirect, value})
+    browser
+  end
 
-  defdelegate get_user_agent_string(browser_or_alias), to: Impl
+  def follow_redirect?(browser) do
+    GenServer.call(browser, {:follow_redirect?})
+  end
 
-  defdelegate get!(browser, url, params \\ [], headers \\ []), to: Impl
+  def put_redirect_limit(browser, limit) do
+    :ok = GenServer.cast(browser, {:put_redirect_limit, limit})
+    browser
+  end
 
-  defdelegate head!(browser, url, params \\ [], headers \\ []), to: Impl
+  def get_redirect_limit(browser) do
+    GenServer.call(browser, {:get_redirect_limit})
+  end
 
-  defdelegate options!(browser, url, params \\ [], headers \\ []), to: Impl
+  def put_user_agent(browser, ua_alias) do
+    :ok = GenServer.cast(browser, {:put_user_agent, ua_alias})
+    browser
+  end
 
-  defdelegate delete!(browser, url, body \\ "", params \\ [], headers \\ []), to: Impl
+  def put_user_agent_string(browser, agent_string) do
+    :ok = GenServer.cast(browser, {:put_user_agent_string, agent_string})
+    browser
+  end
 
-  defdelegate patch!(browser, url, body \\ "", params \\ [], headers \\ []), to: Impl
+  def get_user_agent_string(ua_alias) when is_atom(ua_alias) do
+    __MODULE__.Impl.get_user_agent_string(ua_alias)
+  end
 
-  defdelegate post!(browser, url, body \\ "", params \\ [], headers \\ []), to: Impl
+  def get_user_agent_string(browser) do
+    GenServer.call(browser, {:get_user_agent_string})
+  end
 
-  defdelegate put!(browser, url, body \\ "", params \\ [], headers \\ []), to: Impl
+  def get!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :get,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
 
-  defdelegate request!(browser, req), to: Impl
+  def head!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :head,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
+
+  def options!(browser, url, params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :options,
+      url: url,
+      params: params,
+      headers: headers
+    })
+  end
+
+  def delete!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :delete,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def patch!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :patch,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def post!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :post,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def put!(browser, url, body \\ "", params \\ [], headers \\ []) do
+    request!(browser, %Request{
+      method: :put,
+      url: url,
+      params: params,
+      body: body,
+      headers: headers
+    })
+  end
+
+  def request!(browser, req) do
+    GenServer.call(browser, {:request!, req})
+  end
 end

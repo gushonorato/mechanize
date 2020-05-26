@@ -70,10 +70,18 @@ defmodule Mechanizex.BrowserTest do
              ]
     end
 
+    @tag :capture_log
     test "raise error when invalid alias passed" do
-      assert_raise ArgumentError, "invalid user agent alias lero", fn ->
-        Browser.put_user_agent(Browser.new(), :lero)
-      end
+      Process.flag(:trap_exit, true)
+
+      b = Browser.new()
+
+      b
+      |> Browser.put_user_agent(:lero)
+      |> :sys.get_state()
+      |> catch_exit()
+
+      assert_received {:EXIT, b, {%ArgumentError{message: "invalid user agent alias lero"}, _}}
     end
   end
 
@@ -85,7 +93,7 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".put_http_adapter" do
     test "returns browser" do
-      assert %Browser.Impl{} = Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom)
+      assert is_pid(Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom))
     end
 
     test "updates http adapter" do
@@ -97,7 +105,7 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".put_html_parser" do
     test "returns mechanizex browser" do
-      assert %Browser.Impl{} = Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom)
+      assert is_pid(Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom))
     end
 
     test "updates html parser" do
@@ -160,13 +168,16 @@ defmodule Mechanizex.BrowserTest do
       })
     end
 
+    @tag :capture_log
     test "raise if request URL is not absolute" do
-      assert_raise ArgumentError, "absolute URL needed (not www.google.com)", fn ->
-        Browser.request!(Browser.new(), %Request{
-          method: :get,
-          url: "www.google.com"
-        })
-      end
+      Process.flag(:trap_exit, true)
+      b = Browser.new()
+
+      b
+      |> Browser.get!("www.google.com")
+      |> catch_exit()
+
+      assert_received {:EXIT, b, {%ArgumentError{message: "absolute URL needed (not www.google.com)"}, _}}
     end
 
     test "merge header with browser's default headers on all redirect chain", %{
@@ -267,15 +278,17 @@ defmodule Mechanizex.BrowserTest do
       })
     end
 
+    @tag :capture_log
     test "raise error when connection fail", %{bypass: bypass} do
+      Process.flag(:trap_exit, true)
       Bypass.down(bypass)
+      b = Browser.new()
 
-      assert_raise Mechanizex.HTTPAdapter.NetworkError, fn ->
-        Browser.request!(Browser.new(), %Request{
-          method: :get,
-          url: endpoint_url(bypass)
-        })
-      end
+      b
+      |> Browser.get!(endpoint_url(bypass))
+      |> catch_exit()
+
+      assert_received {:EXIT, b, {%Mechanizex.HTTPAdapter.NetworkError{cause: %{reason: :econnrefused}}, _}}
     end
 
     test "follow simple redirect", %{bypass: bypass} do
@@ -326,18 +339,20 @@ defmodule Mechanizex.BrowserTest do
         Plug.Conn.resp(conn, 200, "REDIRECT OK")
       end)
 
-      browser = Browser.put_follow_redirect(Browser.new(), false)
+      browser = Browser.new()
+      Browser.put_follow_redirect(browser, false)
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 301
       assert Header.get_value(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
 
-      browser = Browser.put_follow_redirect(browser, true)
+      Browser.put_follow_redirect(browser, true)
       page = Browser.get!(browser, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 200
     end
 
+    @tag :capture_log
     test "raise if max redirect loop exceeded", %{bypass: bypass} do
-      browser = Browser.new()
+      b = Browser.new()
 
       1..6
       |> Enum.each(fn n ->
@@ -348,11 +363,13 @@ defmodule Mechanizex.BrowserTest do
         end)
       end)
 
-      assert_raise Mechanizex.Browser.RedirectLimitReachedError,
-                   "Redirect limit of #{Browser.get_redirect_limit(browser)} reached",
-                   fn ->
-                     Browser.get!(browser, endpoint_url(bypass, "/1"))
-                   end
+      Process.flag(:trap_exit, true)
+
+      b
+      |> Browser.get!(endpoint_url(bypass, "/1"))
+      |> catch_exit()
+
+      assert_received {:EXIT, b, {%Browser.RedirectLimitReachedError{message: "Redirect limit of 5 reached"}, _}}
     end
 
     test "change redirect limit to above", %{bypass: bypass} do

@@ -493,42 +493,44 @@ defmodule Mechanizex.BrowserTest do
       end)
     end
 
-    test "307 and 308 redirects preserve request data", %{bypass: bypass} do
-      [307, 308]
-      |> Enum.each(fn status ->
-        Bypass.expect_once(bypass, "GET", "/redirect_to_#{status}", fn conn ->
+    [307, 308]
+    |> Enum.each(fn status ->
+      test "#{status} redirects preserve request data", %{bypass: bypass} do
+        Bypass.expect_once(bypass, "GET", "/redirect_to_#{unquote(status)}", fn conn ->
           conn
-          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}"))
-          |> Plug.Conn.resp(status, "")
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{unquote(status)}"))
+          |> Plug.Conn.resp(unquote(status), "")
         end)
 
-        Bypass.expect_once(bypass, "GET", "/redirected_#{status}", fn conn ->
+        Bypass.expect_once(bypass, "GET", "/redirected_#{unquote(status)}", fn conn ->
           assert conn.query_string == "user=gustavo"
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.get!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{status}"), [{"user", "gustavo"}])
-      end)
-    end
+        Browser.get!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{unquote(status)}"),
+          params: [{"user", "gustavo"}]
+        )
+      end
+    end)
 
-    test "301 and 302 redirects does not preserve request data", %{bypass: bypass} do
-      [301, 302]
-      |> Enum.each(fn status ->
-        Bypass.expect_once(bypass, "POST", "/redirect_to_#{status}", fn conn ->
+    [301, 302]
+    |> Enum.each(fn status ->
+      test "#{status} redirects does not preserve request data", %{bypass: bypass} do
+        Bypass.expect_once(bypass, "POST", "/redirect_to_#{unquote(status)}", fn conn ->
           conn
-          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{status}"))
-          |> Plug.Conn.resp(status, "")
+          |> Plug.Conn.put_resp_header("Location", endpoint_url(bypass, "/redirected_#{unquote(status)}"))
+          |> Plug.Conn.resp(unquote(status), "")
         end)
 
-        Bypass.expect_once(bypass, "GET", "/redirected_#{status}", fn conn ->
+        Bypass.expect_once(bypass, "GET", "/redirected_#{unquote(status)}", fn conn ->
           assert conn.query_string == ""
           assert {:ok, "", conn} = Plug.Conn.read_body(conn)
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        Browser.post!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{status}"), "user=gustavo")
-      end)
-    end
+        Browser.post!(Browser.new(), endpoint_url(bypass, "/redirect_to_#{unquote(status)}"), "user=gustavo")
+      end
+    end)
 
     test "do not follow meta-refresh as default", %{bypass: bypass} do
       resp_body = read_file!("test/htdocs/meta_refresh.html", url: endpoint_url(bypass, "/refreshed"))
@@ -581,48 +583,47 @@ defmodule Mechanizex.BrowserTest do
       assert page.body == "OK"
     end
 
-    test "request helper functions", %{bypass: bypass} do
-      browser = Browser.new()
+    test_http_delegates([:get!, :head!, :options!], fn {function_name, http_method} ->
+      test ".#{function_name} with headers and params", %{bypass: bypass} do
+        browser = Browser.new()
 
-      [:get!, :head!, :options!, :delete!, :patch!, :post!, :put!]
-      |> Enum.each(fn function_name ->
-        method =
-          function_name
-          |> Atom.to_string()
-          |> String.upcase()
-          |> String.replace("!", "")
-
-        Bypass.expect_once(bypass, method, "/fake_path", fn conn ->
-          assert conn.method == method
+        Bypass.expect_once(bypass, unquote(http_method), "/fake_path", fn conn ->
+          assert conn.method == unquote(http_method)
           assert Plug.Conn.get_req_header(conn, "lero") == ["LERO"]
           assert conn.query_string == "q=10"
-
-          if function_name in [:delete!, :patch!, :post!, :put!] do
-            assert {:ok, "BODY", conn} = Plug.Conn.read_body(conn)
-          else
-            assert {:ok, "", conn} = Plug.Conn.read_body(conn)
-          end
+          assert {:ok, "", conn} = Plug.Conn.read_body(conn)
 
           Plug.Conn.resp(conn, 200, "OK")
         end)
 
-        if function_name in [:delete!, :patch!, :post!, :put!] do
-          apply(Browser, function_name, [
-            browser,
-            endpoint_url(bypass, "/fake_path"),
-            "BODY",
-            [{"q", "10"}],
-            [{"LERO", "LERO"}]
-          ])
-        else
-          apply(Browser, function_name, [
-            browser,
-            endpoint_url(bypass, "/fake_path"),
-            [{"q", "10"}],
-            [{"LERO", "LERO"}]
-          ])
-        end
-      end)
-    end
+        apply(Browser, unquote(function_name), [
+          browser,
+          endpoint_url(bypass, "/fake_path"),
+          [params: [{"q", "10"}], headers: [{"LERO", "LERO"}]]
+        ])
+      end
+    end)
+
+    test_http_delegates([:delete!, :patch!, :post!, :put!], fn {function_name, http_method} ->
+      test ".#{function_name} with headers and params", %{bypass: bypass} do
+        browser = Browser.new()
+
+        Bypass.expect_once(bypass, unquote(http_method), "/fake_path", fn conn ->
+          assert conn.method == unquote(http_method)
+          assert Plug.Conn.get_req_header(conn, "lero") == ["LERO"]
+          assert conn.query_string == "q=10"
+          assert {:ok, "BODY", conn} = Plug.Conn.read_body(conn)
+
+          Plug.Conn.resp(conn, 200, "OK")
+        end)
+
+        apply(Browser, unquote(function_name), [
+          browser,
+          endpoint_url(bypass, "/fake_path"),
+          "BODY",
+          [params: [{"q", "10"}], headers: [{"LERO", "LERO"}]]
+        ])
+      end
+    end)
   end
 end

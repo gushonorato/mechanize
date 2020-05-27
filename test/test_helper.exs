@@ -31,6 +31,20 @@ defmodule TestHelper do
     {:ok, %{bypass: bypass, browser: browser, page: page}}
   end
 
+  def test_http_delegates(function_names, func) do
+    function_names
+    |> Enum.map(fn function_name ->
+      http_method =
+        function_name
+        |> Atom.to_string()
+        |> String.replace("!", "")
+        |> String.upcase()
+
+      {function_name, http_method}
+    end)
+    |> Enum.each(func)
+  end
+
   def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path) |> URI.to_string()
 
   def read_file!(path, map \\ []) do

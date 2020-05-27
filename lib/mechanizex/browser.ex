@@ -1,5 +1,5 @@
 defmodule Mechanizex.Browser do
-  alias Mechanizex.Request
+  alias Mechanizex.{Page, Request}
 
   defmodule RedirectLimitReachedError do
     defexception [:message]
@@ -87,70 +87,44 @@ defmodule Mechanizex.Browser do
     GenServer.call(browser, {:get_user_agent_string})
   end
 
-  def get!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :get,
-      url: url,
-      params: params,
-      headers: headers
-    })
+  def get!(browser, url, opts \\ []) do
+    request!(browser, :get, url, "", opts)
   end
 
-  def head!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :head,
-      url: url,
-      params: params,
-      headers: headers
-    })
+  def head!(browser, url, opts \\ []) do
+    request!(browser, :head, url, "", opts)
   end
 
-  def options!(browser, url, params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :options,
-      url: url,
-      params: params,
-      headers: headers
-    })
+  def options!(browser, url, opts \\ []) do
+    request!(browser, :options, url, "", opts)
   end
 
-  def delete!(browser, url, body \\ "", params \\ [], headers \\ []) do
+  def delete!(browser, url, body \\ "", opts \\ []) do
+    request!(browser, :delete, url, body, opts)
+  end
+
+  def patch!(browser, url, body \\ "", opts \\ []) do
+    request!(browser, :patch, url, body, opts)
+  end
+
+  def post!(browser, url, body \\ "", opts \\ []) do
+    request!(browser, :post, url, body, opts)
+  end
+
+  def put!(browser, url, body \\ "", opts \\ []) do
+    request!(browser, :put, url, body, opts)
+  end
+
+  def request!(browser, method, url, body, opts) do
+    {headers, opts} = Keyword.pop(opts, :headers, [])
+    {params, _opts} = Keyword.pop(opts, :params, [])
+
     request!(browser, %Request{
-      method: :delete,
+      method: method,
       url: url,
-      params: params,
       body: body,
-      headers: headers
-    })
-  end
-
-  def patch!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :patch,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
-  def post!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :post,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
-    })
-  end
-
-  def put!(browser, url, body \\ "", params \\ [], headers \\ []) do
-    request!(browser, %Request{
-      method: :put,
-      url: url,
-      params: params,
-      body: body,
-      headers: headers
+      headers: headers,
+      params: params
     })
   end
 

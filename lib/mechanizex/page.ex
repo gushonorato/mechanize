@@ -25,6 +25,8 @@ defmodule Mechanizex.Page do
   def url(page), do: page.url
   def body(page), do: page.body
 
+  def meta_refresh(nil), do: raise(ArgumentError, "page is nil")
+
   def meta_refresh(page) do
     page
     |> search("meta[http-equiv=refresh]")

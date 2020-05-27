@@ -226,11 +226,22 @@ defmodule Mechanizex.PageTest do
   end
 
   describe ".meta_refresh" do
+    test "page is nil" do
+      assert_raise ArgumentError, "page is nil", fn ->
+        Page.meta_refresh(nil)
+      end
+    end
+
     test "page with meta refresh" do
       body = read_file!("test/htdocs/meta_refresh.html", url: "http://www.google.com.br")
       page = %Page{body: body, parser: Mechanizex.HTMLParser.Floki}
 
       assert Page.meta_refresh(page) == {0, "http://www.google.com.br"}
+    end
+
+    test "return the first matched meta refresh if multiple found" do
+      {:ok, %{page: page}} = stub_requests("/test/htdocs/multiple_meta_refresh.html")
+      assert Page.meta_refresh(page) == {0, "https://seomaster.com.br"}
     end
 
     test "page without meta refresh" do

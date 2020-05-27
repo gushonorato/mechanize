@@ -157,4 +157,12 @@ defmodule Mechanizex.Browser do
   def request!(browser, req) do
     GenServer.call(browser, {:request!, req})
   end
+
+  def follow_url(browser, %Page{} = page, url) do
+    follow_url(browser, page.url, url)
+  end
+
+  def follow_url(browser, base_url, url) do
+    GenServer.call(browser, {:follow_url, base_url, url})
+  end
 end

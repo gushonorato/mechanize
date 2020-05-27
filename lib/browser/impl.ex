@@ -137,7 +137,7 @@ defmodule Mechanizex.Browser.Impl do
     end
   end
 
-  defp follow_url(browser, base_url, rel_url) do
+  def follow_url(browser, base_url, rel_url) do
     abs_url =
       base_url
       |> URI.merge(rel_url)

@@ -282,13 +282,19 @@ defmodule Mechanizex.BrowserTest do
     test "raise error when connection fail", %{bypass: bypass} do
       Process.flag(:trap_exit, true)
       Bypass.down(bypass)
+
+      url = endpoint_url(bypass)
       b = Browser.new()
 
       b
-      |> Browser.get!(endpoint_url(bypass))
+      |> Browser.get!(url)
       |> catch_exit()
 
-      assert_received {:EXIT, b, {%Mechanizex.HTTPAdapter.NetworkError{cause: %{reason: :econnrefused}}, _}}
+      assert_received {:EXIT, b,
+                       {%Mechanizex.HTTPAdapter.NetworkError{
+                          cause: %{reason: :econnrefused},
+                          url: url
+                        }, _}}
     end
 
     test "follow simple redirect", %{bypass: bypass} do

@@ -4,6 +4,6 @@ defmodule Mechanizex.HTTPAdapter do
   @callback request!(Request.t()) :: Response.t()
 
   defmodule NetworkError do
-    defexception [:message, :cause]
+    defexception [:message, :cause, :url]
   end
 end

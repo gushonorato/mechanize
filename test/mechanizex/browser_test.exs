@@ -13,6 +13,18 @@ defmodule Mechanize.BrowserTest do
     {:ok, default_ua: Browser.get_user_agent_string(:mechanize)}
   end
 
+  describe ".start" do
+    test "start unlinked browser" do
+      {:ok, browser} = Browser.start()
+      assert is_pid(browser)
+    end
+
+    test "start unlinked browser with options" do
+      {:ok, browser} = Browser.start(redirect_limit: 999)
+      assert Browser.get_redirect_limit(browser) == 999
+    end
+  end
+
   describe ".put_http_headers" do
     test "set all headers at once" do
       assert Browser.new()

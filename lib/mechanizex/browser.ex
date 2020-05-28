@@ -6,8 +6,16 @@ defmodule Mechanize.Browser do
   end
 
   def new(fields \\ []) do
-    {:ok, browser} = GenServer.start_link(__MODULE__.Server, __MODULE__.Impl.new(fields))
+    {:ok, browser} = start_link(fields)
     browser
+  end
+
+  def start_link(fields \\ []) do
+    GenServer.start_link(__MODULE__.Server, __MODULE__.Impl.new(fields))
+  end
+
+  def start(fields \\ []) do
+    GenServer.start(__MODULE__.Server, __MODULE__.Impl.new(fields))
   end
 
   def put_http_adapter(browser, adapter) do

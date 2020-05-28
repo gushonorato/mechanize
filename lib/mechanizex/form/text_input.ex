@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.TextInput do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.ParameterizableField
   alias Mechanize.Queryable

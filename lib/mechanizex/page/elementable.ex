@@ -1,4 +1,6 @@
 defprotocol Mechanize.Page.Elementable do
+  @moduledoc false
+
   def element(e)
 end
 

@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.DetachedField do
+  @moduledoc false
+
   alias Mechanize.Form.ParameterizableField
 
   @derive [ParameterizableField]

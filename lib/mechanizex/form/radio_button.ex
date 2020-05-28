@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.RadioButton do
+  @moduledoc false
+
   alias Mechanize.{Query, Queryable}
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.InconsistentFormError

@@ -1,4 +1,6 @@
 defmodule Mechanize.Browser.Server do
+  @moduledoc false
+
   use GenServer
   alias Mechanize.Browser.Impl
 

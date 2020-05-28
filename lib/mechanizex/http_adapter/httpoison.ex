@@ -1,4 +1,6 @@
 defmodule Mechanize.HTTPAdapter.Httpoison do
+  @moduledoc false
+
   @behaviour Mechanize.HTTPAdapter
   alias Mechanize.{Request, Response}
   alias Mechanize.HTTPAdapter.NetworkError

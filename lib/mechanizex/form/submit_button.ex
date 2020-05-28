@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.SubmitButton do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.{Form, Queryable}
   alias Mechanize.Form.ParameterizableField

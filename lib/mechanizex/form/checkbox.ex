@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.Checkbox do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.{Queryable}
   alias Mechanize.Query.BadCriteriaError

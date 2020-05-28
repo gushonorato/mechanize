@@ -1,4 +1,6 @@
 defmodule Mechanize.Browser.Impl do
+  @moduledoc false
+
   alias Mechanize.{Page, Header, Request}
 
   @user_agent_aliases %{

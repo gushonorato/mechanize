@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.ImageInput do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.{Form, Queryable}
   alias Mechanize.Query.BadCriteriaError

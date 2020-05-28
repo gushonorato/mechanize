@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.FieldUpdater do
+  @moduledoc false
+
   defmacro __using__(opts) do
     module = __CALLER__.module
     {suffix, _} = Keyword.pop(opts, :suffix, "s")

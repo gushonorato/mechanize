@@ -1,4 +1,6 @@
 defmodule Mechanize.HTMLParser.Floki do
+  @moduledoc false
+
   alias Mechanize.HTMLParser
   alias Mechanize.Page.Element
   alias Mechanize.HTMLParser.Parseable

@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.Option do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Queryable
 

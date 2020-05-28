@@ -1,4 +1,6 @@
 defmodule Mechanize.Form.SelectList do
+  @moduledoc false
+
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.{Option, InconsistentFormError}
   alias Mechanize.Query

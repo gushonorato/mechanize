@@ -1,4 +1,6 @@
 defprotocol Mechanize.Form.ParameterizableField do
+  @moduledoc false
+
   def to_param(field)
 end
 

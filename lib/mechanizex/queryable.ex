@@ -1,10 +1,13 @@
 defprotocol Mechanize.Queryable do
+  @moduledoc false
   def attrs(queryable)
   def name(queryable)
   def text(queryable)
 end
 
 defmodule Mechanize.Queryable.Defaults do
+  @moduledoc false
+
   alias Mechanize.Page.Element
 
   def attrs(queryable) do

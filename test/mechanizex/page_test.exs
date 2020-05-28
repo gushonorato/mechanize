@@ -1,8 +1,8 @@
-defmodule Mechanizex.PageTest do
+defmodule Mechanize.PageTest do
   use ExUnit.Case, async: true
-  alias Mechanizex
-  alias Mechanizex.Page.{Element, Link, ClickError, InvalidMetaRefreshError}
-  alias Mechanizex.Page
+  alias Mechanize
+  alias Mechanize.Page.{Element, Link, ClickError, InvalidMetaRefreshError}
+  alias Mechanize.Page
   import TestHelper
 
   describe ".form_with" do
@@ -234,7 +234,7 @@ defmodule Mechanizex.PageTest do
 
     test "page with meta refresh" do
       body = read_file!("test/htdocs/meta_refresh.html", url: "http://www.google.com.br")
-      page = %Page{body: body, parser: Mechanizex.HTMLParser.Floki}
+      page = %Page{body: body, parser: Mechanize.HTMLParser.Floki}
 
       assert Page.meta_refresh(page) == {0, "http://www.google.com.br"}
     end
@@ -282,7 +282,7 @@ defmodule Mechanizex.PageTest do
       ]
       |> Stream.with_index(1)
       |> Enum.each(fn {{body, expected_result}, index} ->
-        page = %Page{body: body, parser: Mechanizex.HTMLParser.Floki, url: index}
+        page = %Page{body: body, parser: Mechanize.HTMLParser.Floki, url: index}
         result = Page.meta_refresh(page)
 
         assert result == expected_result,
@@ -306,7 +306,7 @@ defmodule Mechanizex.PageTest do
     |> Stream.with_index(1)
     |> Enum.each(fn {body, index} ->
       test "#{body} raises exception" do
-        page = %Page{body: unquote(body), parser: Mechanizex.HTMLParser.Floki, url: unquote(index)}
+        page = %Page{body: unquote(body), parser: Mechanize.HTMLParser.Floki, url: unquote(index)}
 
         assert_raise(InvalidMetaRefreshError, fn ->
           Page.meta_refresh(page)

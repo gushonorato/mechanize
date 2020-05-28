@@ -1,12 +1,12 @@
-defmodule Mechanizex.Form.SelectList do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form.{Option, InconsistentFormError}
-  alias Mechanizex.Query
-  alias Mechanizex.Query.BadCriteriaError
-  alias Mechanizex.{Form, Query, Queryable}
+defmodule Mechanize.Form.SelectList do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.Form.{Option, InconsistentFormError}
+  alias Mechanize.Query
+  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.{Form, Query, Queryable}
 
-  use Mechanizex.Form.FieldMatcher
-  use Mechanizex.Form.FieldUpdater
+  use Mechanize.Form.FieldMatcher
+  use Mechanize.Form.FieldUpdater
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
@@ -108,8 +108,8 @@ defmodule Mechanizex.Form.SelectList do
   end
 end
 
-defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.SelectList do
-  alias Mechanizex.Form.SelectList
+defimpl Mechanize.Form.ParameterizableField, for: Mechanize.Form.SelectList do
+  alias Mechanize.Form.SelectList
 
   def to_param(select) do
     case SelectList.selected_options(select) do

@@ -1,7 +1,7 @@
-defmodule Mechanizex.Form do
-  alias Mechanizex.Page.Element
+defmodule Mechanize.Form do
+  alias Mechanize.Page.Element
 
-  alias Mechanizex.Form.{
+  alias Mechanize.Form.{
     TextInput,
     DetachedField,
     Checkbox,
@@ -13,9 +13,9 @@ defmodule Mechanizex.Form do
     SelectList
   }
 
-  alias Mechanizex.{Query, Request}
+  alias Mechanize.{Query, Request}
 
-  @derive [Mechanizex.Page.Elementable]
+  @derive [Mechanize.Page.Elementable]
   @enforce_keys [:element]
   defstruct element: nil,
             fields: []
@@ -27,7 +27,7 @@ defmodule Mechanizex.Form do
 
   @spec new(Page.t(), Element.t()) :: Form.t()
   def new(page, element) do
-    %Mechanizex.Form{element: element, fields: parse_fields(page, element)}
+    %Mechanize.Form{element: element, fields: parse_fields(page, element)}
   end
 
   defmodule InconsistentFormError do
@@ -157,7 +157,7 @@ defmodule Mechanizex.Form do
           }
       end
 
-    Mechanizex.Browser.request!(browser(form), req)
+    Mechanize.Browser.request!(browser(form), req)
   end
 
   defp method(form) do

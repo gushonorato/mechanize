@@ -1,4 +1,4 @@
-defmodule Mechanizex.Header do
+defmodule Mechanize.Header do
   @type t :: {String.t(), String.t()}
   @type headers :: list(Header.t())
 

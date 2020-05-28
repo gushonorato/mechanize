@@ -1,9 +1,9 @@
-defmodule Mechanizex.Form.RadioButtonTest do
+defmodule Mechanize.Form.RadioButtonTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.{RadioButton, InconsistentFormError}
-  alias Mechanizex.Query.BadCriteriaError
-  alias Mechanizex.Page.Element
+  alias Mechanize.{Page, Form}
+  alias Mechanize.Form.{RadioButton, InconsistentFormError}
+  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Page.Element
   import TestHelper
 
   setup do

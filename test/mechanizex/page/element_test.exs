@@ -1,6 +1,6 @@
-defmodule Mechanizex.Page.ElementTest do
+defmodule Mechanize.Page.ElementTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Page.Element
+  alias Mechanize.Page.Element
 
   @subject %Element{
     name: "input",

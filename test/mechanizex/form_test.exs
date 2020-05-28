@@ -1,9 +1,9 @@
-defmodule Mechanizex.FormTest do
+defmodule Mechanize.FormTest do
   use ExUnit.Case, async: true
-  alias Mechanizex
-  alias Mechanizex.Page.Element
-  alias Mechanizex.{Form, Page}
-  alias Mechanizex.Form.DetachedField
+  alias Mechanize
+  alias Mechanize.Page.Element
+  alias Mechanize.{Form, Page}
+  alias Mechanize.Form.DetachedField
   import TestHelper
 
   setup do

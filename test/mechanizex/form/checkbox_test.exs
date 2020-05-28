@@ -1,8 +1,8 @@
-defmodule Mechanizex.Form.CheckboxTest do
+defmodule Mechanize.Form.CheckboxTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.Checkbox
-  alias Mechanizex.Query.BadCriteriaError
+  alias Mechanize.{Page, Form}
+  alias Mechanize.Form.Checkbox
+  alias Mechanize.Query.BadCriteriaError
   import TestHelper
 
   setup do

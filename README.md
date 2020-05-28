@@ -1,6 +1,6 @@
-# Mechanizex [![Build Status](https://travis-ci.org/gushonorato/mechanizex.svg?branch=master)](https://travis-ci.org/gushonorato/mechanizex) [![Coverage Status](https://coveralls.io/repos/github/gushonorato/mechanizex/badge.svg?branch=master)](https://coveralls.io/github/gushonorato/mechanizex?branch=master)
+# Mechanize [![Build Status](https://travis-ci.org/gushonorato/mechanize.svg?branch=master)](https://travis-ci.org/gushonorato/mechanize) [![Coverage Status](https://coveralls.io/repos/github/gushonorato/mechanize/badge.svg?branch=master)](https://coveralls.io/github/gushonorato/mechanize?branch=master)
 
-Build web scrapers and automate interaction with websites in Elixir with ease! One of Mechanizex's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture. Mechanizex is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features:
+Build web scrapers and automate interaction with websites in Elixir with ease! One of Mechanize's main design goals is to enable developers to easily create concurrent web scrapers without imposing any process architecture. Mechanize is heavily inspired on [Ruby](https://github.com/sparklemotion/mechanize) version of [Mechanize](https://metacpan.org/release/WWW-Mechanize). It features:
 
 - Follow hyperlinks
 - Scrape data easily using CSS selectors
@@ -17,12 +17,12 @@ Build web scrapers and automate interaction with websites in Elixir with ease! O
 
 > **Warning:** This library is in active development and probably will have changes in the public API. It is not currently recommended to use it on production systems.
 
-The package can be installed by adding `mechanizex` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `mechanize` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:mechanizex, github: "gushonorato/mechanizex"}
+    {:mechanize, github: "gushonorato/mechanize"}
   ]
 end
 ```

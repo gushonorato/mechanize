@@ -1,5 +1,5 @@
-defmodule Mechanizex.Request do
-  alias Mechanizex.Header
+defmodule Mechanize.Request do
+  alias Mechanize.Header
 
   @default_params []
   @default_body ""

@@ -1,4 +1,4 @@
-defmodule Mechanizex.Form.FieldMatcher do
+defmodule Mechanize.Form.FieldMatcher do
   defmacro __using__(opts) do
     module = __CALLER__.module
     {suffix, _} = Keyword.pop(opts, :suffix, "s")
@@ -13,7 +13,7 @@ defmodule Mechanizex.Form.FieldMatcher do
       def unquote(:"#{module_name}#{suffix}")(form), do: unquote(:"#{module_name}#{suffix}_with")(form, [])
 
       def unquote(:"#{module_name}#{suffix}_with")(form, criteria) do
-        Mechanizex.Form.fields_with(form, unquote(module), criteria)
+        Mechanize.Form.fields_with(form, unquote(module), criteria)
       end
     end
   end

@@ -1,10 +1,10 @@
-defmodule Mechanizex.Form.TextInput do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form.ParameterizableField
-  alias Mechanizex.Queryable
-  alias Mechanizex.Query.BadCriteriaError
+defmodule Mechanize.Form.TextInput do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.Form.ParameterizableField
+  alias Mechanize.Queryable
+  alias Mechanize.Query.BadCriteriaError
 
-  use Mechanizex.Form.{FieldMatcher, FieldUpdater}
+  use Mechanize.Form.{FieldMatcher, FieldUpdater}
 
   @derive [ParameterizableField, Queryable, Elementable]
   @enforce_keys [:element]

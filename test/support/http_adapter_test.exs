@@ -1,2 +1,2 @@
-defmodule Mechanizex.HTTPAdapterTest do
+defmodule Mechanize.HTTPAdapterTest do
 end

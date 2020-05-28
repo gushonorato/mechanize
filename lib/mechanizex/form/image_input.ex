@@ -1,10 +1,10 @@
-defmodule Mechanizex.Form.ImageInput do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.{Form, Queryable}
-  alias Mechanizex.Query.BadCriteriaError
+defmodule Mechanize.Form.ImageInput do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.{Form, Queryable}
+  alias Mechanize.Query.BadCriteriaError
 
-  use Mechanizex.Form.FieldMatcher
-  use Mechanizex.Form.FieldUpdater
+  use Mechanize.Form.FieldMatcher
+  use Mechanize.Form.FieldUpdater
 
   @derive [Elementable, Queryable]
   defstruct element: nil, name: nil, x: 0, y: 0
@@ -17,7 +17,7 @@ defmodule Mechanizex.Form.ImageInput do
         }
 
   def new(%Element{name: "input"} = el) do
-    %Mechanizex.Form.ImageInput{
+    %Mechanize.Form.ImageInput{
       element: el,
       name: Element.attr(el, :name)
     }
@@ -51,7 +51,7 @@ defmodule Mechanizex.Form.ImageInput do
   end
 end
 
-defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.ImageInput do
+defimpl Mechanize.Form.ParameterizableField, for: Mechanize.Form.ImageInput do
   def to_param(image) do
     [{"#{image.name}.x", image.x}, {"#{image.name}.y", image.y}]
   end

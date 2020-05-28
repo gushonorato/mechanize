@@ -1,5 +1,5 @@
-defmodule Mechanizex.HTTPAdapter do
-  alias Mechanizex.{Request, Response}
+defmodule Mechanize.HTTPAdapter do
+  alias Mechanize.{Request, Response}
 
   @callback request!(Request.t()) :: Response.t()
 

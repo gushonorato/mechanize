@@ -1,9 +1,9 @@
-defmodule Mechanizex.RequestTest do
+defmodule Mechanize.RequestTest do
   use ExUnit.Case, async: true
 
-  alias Mechanizex.{Request, Header}
+  alias Mechanize.{Request, Header}
 
-  doctest Mechanizex.Request
+  doctest Mechanize.Request
 
   @subject %Request{url: "https://example.com/search?q=teste"}
 

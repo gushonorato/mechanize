@@ -1,9 +1,9 @@
-defmodule Mechanizex.Form.SubmitButtonTest do
+defmodule Mechanize.Form.SubmitButtonTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Page
-  alias Mechanizex.Page.Element
-  alias Mechanizex.Form.SubmitButton
-  alias Mechanizex.Query.BadCriteriaError
+  alias Mechanize.Page
+  alias Mechanize.Page.Element
+  alias Mechanize.Form.SubmitButton
+  alias Mechanize.Query.BadCriteriaError
   import TestHelper
 
   setup do

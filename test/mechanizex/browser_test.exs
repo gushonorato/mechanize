@@ -1,16 +1,16 @@
-defmodule Mechanizex.BrowserTest do
+defmodule Mechanize.BrowserTest do
   use ExUnit.Case, async: true
 
-  alias Mechanizex.{Request, Page, Browser, Header}
+  alias Mechanize.{Request, Page, Browser, Header}
   import TestHelper
-  doctest Mechanizex.Browser
+  doctest Mechanize.Browser
 
   setup do
     {:ok, %{bypass: Bypass.open()}}
   end
 
   setup_all do
-    {:ok, default_ua: Browser.get_user_agent_string(:mechanizex)}
+    {:ok, default_ua: Browser.get_user_agent_string(:mechanize)}
   end
 
   describe ".put_http_headers" do
@@ -87,31 +87,31 @@ defmodule Mechanizex.BrowserTest do
 
   describe ".get_user_agent_string" do
     test "get default user agent string" do
-      assert Browser.get_user_agent_string(Browser.new()) == Browser.get_user_agent_string(:mechanizex)
+      assert Browser.get_user_agent_string(Browser.new()) == Browser.get_user_agent_string(:mechanize)
     end
   end
 
   describe ".put_http_adapter" do
     test "returns browser" do
-      assert is_pid(Browser.put_http_adapter(Browser.new(), Mechanizex.HTTPAdapter.Custom))
+      assert is_pid(Browser.put_http_adapter(Browser.new(), Mechanize.HTTPAdapter.Custom))
     end
 
     test "updates http adapter" do
       assert Browser.new()
-             |> Browser.put_http_adapter(Mechanizex.HTTPAdapter.Custom)
-             |> Browser.get_http_adapter() == Mechanizex.HTTPAdapter.Custom
+             |> Browser.put_http_adapter(Mechanize.HTTPAdapter.Custom)
+             |> Browser.get_http_adapter() == Mechanize.HTTPAdapter.Custom
     end
   end
 
   describe ".put_html_parser" do
-    test "returns mechanizex browser" do
-      assert is_pid(Browser.put_html_parser(Browser.new(), Mechanizex.HTMLParser.Custom))
+    test "returns mechanize browser" do
+      assert is_pid(Browser.put_html_parser(Browser.new(), Mechanize.HTMLParser.Custom))
     end
 
     test "updates html parser" do
       assert Browser.new()
-             |> Browser.put_html_parser(Mechanizex.HTMLParser.Custom)
-             |> Browser.get_html_parser() == Mechanizex.HTMLParser.Custom
+             |> Browser.put_html_parser(Mechanize.HTMLParser.Custom)
+             |> Browser.get_html_parser() == Mechanize.HTMLParser.Custom
     end
   end
 
@@ -291,7 +291,7 @@ defmodule Mechanizex.BrowserTest do
       |> catch_exit()
 
       assert_received {:EXIT, b,
-                       {%Mechanizex.HTTPAdapter.NetworkError{
+                       {%Mechanize.HTTPAdapter.NetworkError{
                           cause: %{reason: :econnrefused},
                           url: url
                         }, _}}

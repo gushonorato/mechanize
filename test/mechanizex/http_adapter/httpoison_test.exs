@@ -1,11 +1,11 @@
-defmodule Mechanizex.HTTPAdapter.HTTPoisonTest do
+defmodule Mechanize.HTTPAdapter.HTTPoisonTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Request
+  alias Mechanize.Request
   import TestHelper
 
   setup do
     bypass = Bypass.open()
-    {:ok, bypass: bypass, adapter: Mechanizex.HTTPAdapter.Httpoison}
+    {:ok, bypass: bypass, adapter: Mechanize.HTTPAdapter.Httpoison}
   end
 
   test "simple methods", %{bypass: bypass, adapter: adapter} do
@@ -24,7 +24,7 @@ defmodule Mechanizex.HTTPAdapter.HTTPoisonTest do
   test "simple GET with error", %{bypass: bypass, adapter: adapter} do
     Bypass.down(bypass)
 
-    assert_raise Mechanizex.HTTPAdapter.NetworkError, ~r/connection refused/i, fn ->
+    assert_raise Mechanize.HTTPAdapter.NetworkError, ~r/connection refused/i, fn ->
       adapter.request!(%Request{method: :get, url: endpoint_url(bypass)})
     end
   end

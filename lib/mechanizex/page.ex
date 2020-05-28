@@ -1,6 +1,6 @@
-defmodule Mechanizex.Page do
-  alias Mechanizex.{Response, Query, Form}
-  alias Mechanizex.Page.{Link, Element}
+defmodule Mechanize.Page do
+  alias Mechanize.{Response, Query, Form}
+  alias Mechanize.Page.{Link, Element}
 
   defstruct response_chain: nil, status_code: nil, body: nil, url: nil, browser: nil, parser: nil
 
@@ -115,7 +115,7 @@ defmodule Mechanizex.Page do
   defdelegate elements_with(page, selector, criteria \\ []), to: Query, as: :search_matches
 end
 
-defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page do
+defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page do
   def parser(page), do: page.parser
   def parser_data(page), do: page.body
   def page(page), do: page

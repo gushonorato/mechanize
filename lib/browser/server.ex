@@ -1,6 +1,6 @@
-defmodule Mechanizex.Browser.Server do
+defmodule Mechanize.Browser.Server do
   use GenServer
-  alias Mechanizex.Browser.Impl
+  alias Mechanize.Browser.Impl
 
   def init(state) do
     {:ok, state}

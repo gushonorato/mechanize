@@ -1,10 +1,10 @@
-defmodule Mechanizex.Form.Checkbox do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.{Queryable}
-  alias Mechanizex.Query.BadCriteriaError
+defmodule Mechanize.Form.Checkbox do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.{Queryable}
+  alias Mechanize.Query.BadCriteriaError
 
-  use Mechanizex.Form.FieldMatcher, suffix: "es"
-  use Mechanizex.Form.FieldUpdater, suffix: "es"
+  use Mechanize.Form.FieldMatcher, suffix: "es"
+  use Mechanize.Form.FieldUpdater, suffix: "es"
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
@@ -55,7 +55,7 @@ defmodule Mechanizex.Form.Checkbox do
   end
 end
 
-defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.Checkbox do
+defimpl Mechanize.Form.ParameterizableField, for: Mechanize.Form.Checkbox do
   def to_param(field) do
     if field.checked, do: [{field.name, field.value || "on"}], else: []
   end

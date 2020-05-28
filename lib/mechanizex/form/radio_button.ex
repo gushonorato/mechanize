@@ -1,10 +1,10 @@
-defmodule Mechanizex.Form.RadioButton do
-  alias Mechanizex.{Query, Queryable}
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Form.InconsistentFormError
-  alias Mechanizex.Query.BadCriteriaError
+defmodule Mechanize.Form.RadioButton do
+  alias Mechanize.{Query, Queryable}
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.Form.InconsistentFormError
+  alias Mechanize.Query.BadCriteriaError
 
-  use Mechanizex.Form.{FieldMatcher, FieldUpdater}
+  use Mechanize.Form.{FieldMatcher, FieldUpdater}
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]
@@ -86,7 +86,7 @@ defmodule Mechanizex.Form.RadioButton do
   end
 end
 
-defimpl Mechanizex.Form.ParameterizableField, for: Mechanizex.Form.RadioButton do
+defimpl Mechanize.Form.ParameterizableField, for: Mechanize.Form.RadioButton do
   def to_param(field) do
     if field.checked, do: [{field.name, field.value}], else: []
   end

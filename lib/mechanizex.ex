@@ -1,2 +1,0 @@
-defmodule Mechanizex do
-end

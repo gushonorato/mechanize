@@ -1,5 +1,5 @@
-defmodule Mechanizex.Response do
-  alias Mechanizex.Header
+defmodule Mechanize.Response do
+  alias Mechanize.Header
   defstruct body: nil, headers: [], code: nil, url: nil, location: nil
 
   @type t :: %__MODULE__{

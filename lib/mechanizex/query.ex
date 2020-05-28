@@ -1,6 +1,6 @@
-defmodule Mechanizex.Query do
-  alias Mechanizex.HTMLParser.Parseable
-  alias Mechanizex.Queryable
+defmodule Mechanize.Query do
+  alias Mechanize.HTMLParser.Parseable
+  alias Mechanize.Queryable
 
   defmodule BadCriteriaError do
     defexception [:message]

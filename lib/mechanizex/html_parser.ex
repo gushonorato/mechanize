@@ -1,6 +1,6 @@
-defmodule Mechanizex.HTMLParser do
-  alias Mechanizex.Page
-  alias Mechanizex.Page.Element
+defmodule Mechanize.HTMLParser do
+  alias Mechanize.Page
+  alias Mechanize.Page.Element
 
   @type selector :: String.t()
   @type attribute :: atom()
@@ -10,7 +10,7 @@ defmodule Mechanizex.HTMLParser do
   @callback raw_html(Page.t() | Element.t()) :: String.t()
 end
 
-defprotocol Mechanizex.HTMLParser.Parseable do
+defprotocol Mechanize.HTMLParser.Parseable do
   def parser(parseable)
   def parser_data(parseable)
   def page(parseable)

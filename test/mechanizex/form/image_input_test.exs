@@ -1,9 +1,9 @@
-defmodule Mechanizex.Form.ImageInputTest do
+defmodule Mechanize.Form.ImageInputTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Page
-  alias Mechanizex.Form.ImageInput
-  alias Mechanizex.Page.Element
-  alias Mechanizex.Query.BadCriteriaError
+  alias Mechanize.Page
+  alias Mechanize.Form.ImageInput
+  alias Mechanize.Page.Element
+  alias Mechanize.Query.BadCriteriaError
   import TestHelper
 
   setup do

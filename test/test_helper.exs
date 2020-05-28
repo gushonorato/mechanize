@@ -9,13 +9,13 @@ files
 
 import Mox
 
-defmock(Mechanizex.HTMLParser.Custom, for: Mechanizex.HTMLParser)
-defmock(Mechanizex.HTTPAdapter.Mock, for: Mechanizex.HTTPAdapter)
+defmock(Mechanize.HTMLParser.Custom, for: Mechanize.HTMLParser)
+defmock(Mechanize.HTTPAdapter.Mock, for: Mechanize.HTTPAdapter)
 
 defmodule TestHelper do
   def stub_requests(local_path) do
     bypass = Bypass.open()
-    browser = Mechanizex.Browser.new()
+    browser = Mechanize.Browser.new()
 
     Bypass.expect_once(bypass, "GET", local_path, fn conn ->
       "/" <> file_path = conn.request_path
@@ -23,7 +23,7 @@ defmodule TestHelper do
     end)
 
     page =
-      Mechanizex.Browser.get!(
+      Mechanize.Browser.get!(
         browser,
         endpoint_url(bypass, local_path)
       )

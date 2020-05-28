@@ -1,6 +1,6 @@
-defmodule Mechanizex.Form.Option do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.Queryable
+defmodule Mechanize.Form.Option do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.Queryable
 
   @derive [Elementable, Queryable]
   @enforce_keys [:element, :index]

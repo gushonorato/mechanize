@@ -1,5 +1,5 @@
-defmodule Mechanizex.Form.DetachedField do
-  alias Mechanizex.Form.ParameterizableField
+defmodule Mechanize.Form.DetachedField do
+  alias Mechanize.Form.ParameterizableField
 
   @derive [ParameterizableField]
   @enforce_keys [:name, :value]
@@ -11,6 +11,6 @@ defmodule Mechanizex.Form.DetachedField do
         }
 
   def new(name, value) do
-    %Mechanizex.Form.DetachedField{name: name, value: value}
+    %Mechanize.Form.DetachedField{name: name, value: value}
   end
 end

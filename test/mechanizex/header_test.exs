@@ -1,8 +1,8 @@
-defmodule Mechanizex.HeaderTest do
+defmodule Mechanize.HeaderTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Header
+  alias Mechanize.Header
 
-  doctest Mechanizex.Header
+  doctest Mechanize.Header
 
   @subject [{"content-type", "text/html"}, {"location", "https://example.com"}]
 

@@ -1,11 +1,11 @@
-defprotocol Mechanizex.Queryable do
+defprotocol Mechanize.Queryable do
   def attrs(queryable)
   def name(queryable)
   def text(queryable)
 end
 
-defmodule Mechanizex.Queryable.Defaults do
-  alias Mechanizex.Page.Element
+defmodule Mechanize.Queryable.Defaults do
+  alias Mechanize.Page.Element
 
   def attrs(queryable) do
     queryable
@@ -19,8 +19,8 @@ defmodule Mechanizex.Queryable.Defaults do
   def text(queryable), do: Element.text(queryable)
 end
 
-defimpl Mechanizex.Queryable, for: Any do
-  defdelegate attrs(queryable), to: Mechanizex.Queryable.Defaults
-  defdelegate name(queryable), to: Mechanizex.Queryable.Defaults
-  defdelegate text(queryable), to: Mechanizex.Queryable.Defaults
+defimpl Mechanize.Queryable, for: Any do
+  defdelegate attrs(queryable), to: Mechanize.Queryable.Defaults
+  defdelegate name(queryable), to: Mechanize.Queryable.Defaults
+  defdelegate text(queryable), to: Mechanize.Queryable.Defaults
 end

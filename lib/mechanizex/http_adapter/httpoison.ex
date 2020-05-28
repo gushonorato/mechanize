@@ -1,7 +1,7 @@
-defmodule Mechanizex.HTTPAdapter.Httpoison do
-  @behaviour Mechanizex.HTTPAdapter
-  alias Mechanizex.{Request, Response}
-  alias Mechanizex.HTTPAdapter.NetworkError
+defmodule Mechanize.HTTPAdapter.Httpoison do
+  @behaviour Mechanize.HTTPAdapter
+  alias Mechanize.{Request, Response}
+  alias Mechanize.HTTPAdapter.NetworkError
 
   @posix_errors [
     e2big: "Too long argument list",
@@ -144,7 +144,7 @@ defmodule Mechanizex.HTTPAdapter.Httpoison do
     nxdomain: "Hostname or domain name cannot be found"
   ]
 
-  @impl Mechanizex.HTTPAdapter
+  @impl Mechanize.HTTPAdapter
   def request!(%Request{} = req) do
     case HTTPoison.request(req.method, req.url, req.body, req.headers) do
       {:ok, res} ->

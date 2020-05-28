@@ -1,11 +1,11 @@
-defmodule Mechanizex.Form.SubmitButton do
-  alias Mechanizex.Page.{Element, Elementable}
-  alias Mechanizex.{Form, Queryable}
-  alias Mechanizex.Form.ParameterizableField
-  alias Mechanizex.Query.BadCriteriaError
+defmodule Mechanize.Form.SubmitButton do
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.{Form, Queryable}
+  alias Mechanize.Form.ParameterizableField
+  alias Mechanize.Query.BadCriteriaError
 
-  use Mechanizex.Form.FieldMatcher
-  use Mechanizex.Form.FieldUpdater
+  use Mechanize.Form.FieldMatcher
+  use Mechanize.Form.FieldUpdater
 
   @derive [ParameterizableField, Queryable, Elementable]
   defstruct element: nil, name: nil, value: nil, label: nil
@@ -18,7 +18,7 @@ defmodule Mechanizex.Form.SubmitButton do
         }
 
   def new(%Element{name: "button"} = el) do
-    %Mechanizex.Form.SubmitButton{
+    %Mechanize.Form.SubmitButton{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -27,7 +27,7 @@ defmodule Mechanizex.Form.SubmitButton do
   end
 
   def new(%Element{name: "input"} = el) do
-    %Mechanizex.Form.SubmitButton{
+    %Mechanize.Form.SubmitButton{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),

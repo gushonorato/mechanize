@@ -1,11 +1,11 @@
-defmodule Mechanizex.HTMLParser.FlokiTest do
+defmodule Mechanize.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.HTMLParser
-  alias Mechanizex.HTMLParser.Parseable
-  alias Mechanizex.Page
-  alias Mechanizex.Page.Element
+  alias Mechanize.HTMLParser
+  alias Mechanize.HTMLParser.Parseable
+  alias Mechanize.Page
+  alias Mechanize.Page.Element
 
-  doctest Mechanizex.HTMLParser.Floki
+  doctest Mechanize.HTMLParser.Floki
 
   @html """
     <html>

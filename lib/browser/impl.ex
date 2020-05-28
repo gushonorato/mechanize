@@ -1,9 +1,9 @@
-defmodule Mechanizex.Browser.Impl do
-  alias Mechanizex.{Page, Header, Request}
+defmodule Mechanize.Browser.Impl do
+  alias Mechanize.{Page, Header, Request}
 
   @user_agent_aliases %{
-    mechanizex:
-      "Mechanizex/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanizex/)",
+    mechanize:
+      "Mechanize/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanize/)",
     linux_firefox: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0",
     linux_konqueror: "Mozilla/5.0 (compatible; Konqueror/3; Linux)",
     linux_mozilla: "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030624",
@@ -37,9 +37,9 @@ defmodule Mechanizex.Browser.Impl do
       "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
   }
 
-  defstruct http_adapter: Mechanizex.HTTPAdapter.Httpoison,
-            html_parser: Mechanizex.HTMLParser.Floki,
-            http_headers: [{"user-agent", @user_agent_aliases[:mechanizex]}],
+  defstruct http_adapter: Mechanize.HTTPAdapter.Httpoison,
+            html_parser: Mechanize.HTMLParser.Floki,
+            http_headers: [{"user-agent", @user_agent_aliases[:mechanize]}],
             follow_redirect: true,
             redirect_limit: 5,
             follow_meta_refresh: false
@@ -183,7 +183,7 @@ defmodule Mechanizex.Browser.Impl do
   defp follow_redirect(req, res, browser, redirect_count) do
     cond do
       redirect_count >= get_redirect_limit(browser) ->
-        raise Mechanizex.Browser.RedirectLimitReachedError,
+        raise Mechanize.Browser.RedirectLimitReachedError,
               "Redirect limit of #{get_redirect_limit(browser)} reached"
 
       res.code in 307..308 ->

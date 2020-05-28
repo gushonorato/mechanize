@@ -1,0 +1,2 @@
+defmodule Mechanize do
+end

@@ -1,5 +1,5 @@
-defmodule Mechanizex.Page.Element do
-  alias Mechanizex.Page.Elementable
+defmodule Mechanize.Page.Element do
+  alias Mechanize.Page.Elementable
 
   defstruct name: nil,
             attrs: nil,
@@ -58,19 +58,19 @@ defmodule Mechanizex.Page.Element do
   end
 end
 
-defimpl Mechanizex.Page.Elementable, for: Mechanizex.Page.Element do
+defimpl Mechanize.Page.Elementable, for: Mechanize.Page.Element do
   def element(e), do: e
 end
 
-defimpl Mechanizex.HTMLParser.Parseable, for: Mechanizex.Page.Element do
-  alias Mechanizex.HTMLParser.Parseable
+defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page.Element do
+  alias Mechanize.HTMLParser.Parseable
   def parser(e), do: Parseable.parser(e.page)
   def parser_data(e), do: e.parser_data
   def page(e), do: e.page
 end
 
-defimpl Mechanizex.Queryable, for: Mechanizex.Page.Element do
-  defdelegate attrs(queryable), to: Mechanizex.Page.Element
-  defdelegate name(queryable), to: Mechanizex.Page.Element
-  defdelegate text(queryable), to: Mechanizex.Page.Element
+defimpl Mechanize.Queryable, for: Mechanize.Page.Element do
+  defdelegate attrs(queryable), to: Mechanize.Page.Element
+  defdelegate name(queryable), to: Mechanize.Page.Element
+  defdelegate text(queryable), to: Mechanize.Page.Element
 end

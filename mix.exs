@@ -1,9 +1,9 @@
-defmodule Mechanizex.MixProject do
+defmodule Mechanize.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :mechanizex,
+      app: :mechanize,
       version: "0.1.0-dev",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,

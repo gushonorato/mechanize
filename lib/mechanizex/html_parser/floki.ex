@@ -1,9 +1,9 @@
-defmodule Mechanizex.HTMLParser.Floki do
-  alias Mechanizex.HTMLParser
-  alias Mechanizex.Page.Element
-  alias Mechanizex.HTMLParser.Parseable
+defmodule Mechanize.HTMLParser.Floki do
+  alias Mechanize.HTMLParser
+  alias Mechanize.Page.Element
+  alias Mechanize.HTMLParser.Parseable
 
-  @behaviour Mechanizex.HTMLParser
+  @behaviour Mechanize.HTMLParser
 
   @impl HTMLParser
   def search(nil, _selector), do: raise(ArgumentError, "parseable is nil")

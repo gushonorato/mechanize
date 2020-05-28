@@ -1,5 +1,5 @@
-defmodule Mechanizex.Browser do
-  alias Mechanizex.{Page, Request}
+defmodule Mechanize.Browser do
+  alias Mechanize.{Page, Request}
 
   defmodule RedirectLimitReachedError do
     defexception [:message]

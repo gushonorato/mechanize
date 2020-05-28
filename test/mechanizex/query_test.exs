@@ -1,12 +1,12 @@
-defmodule Mechanizex.QueryTest do
+defmodule Mechanize.QueryTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.Page.Element
-  alias Mechanizex.{Page, Query}
-  alias Mechanizex.HTMLParser.Parseable
-  doctest Mechanizex.Query
+  alias Mechanize.Page.Element
+  alias Mechanize.{Page, Query}
+  alias Mechanize.HTMLParser.Parseable
+  doctest Mechanize.Query
 
   @page %Page{
-    parser: Mechanizex.HTMLParser.Floki,
+    parser: Mechanize.HTMLParser.Floki,
     body: File.read!("./test/htdocs/query_test.html")
   }
 

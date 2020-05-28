@@ -1,9 +1,9 @@
-defmodule Mechanizex.Form.TextInputTest do
+defmodule Mechanize.Form.TextInputTest do
   use ExUnit.Case, async: true
-  alias Mechanizex
-  alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.TextInput
-  alias Mechanizex.Query.BadCriteriaError
+  alias Mechanize
+  alias Mechanize.{Page, Form}
+  alias Mechanize.Form.TextInput
+  alias Mechanize.Query.BadCriteriaError
   import TestHelper
 
   setup do

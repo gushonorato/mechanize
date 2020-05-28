@@ -1,8 +1,8 @@
-defmodule Mechanizex.Form.SelectTest do
+defmodule Mechanize.Form.SelectTest do
   use ExUnit.Case, async: true
-  alias Mechanizex.{Page, Form}
-  alias Mechanizex.Form.{SelectList, Option}
-  alias Mechanizex.Page.Element
+  alias Mechanize.{Page, Form}
+  alias Mechanize.Form.{SelectList, Option}
+  alias Mechanize.Page.Element
   import TestHelper
 
   setup do
@@ -228,19 +228,19 @@ defmodule Mechanizex.Form.SelectTest do
 
   describe ".select" do
     test "raise when option not found", %{form: form} do
-      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No option found/, fn ->
+      assert_raise Mechanize.Query.BadCriteriaError, ~r/No option found/, fn ->
         SelectList.select(form, name: "select1", options: [label: ~r/Lero/])
       end
     end
 
     test "raise when select list not found", %{form: form} do
-      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No select found/, fn ->
+      assert_raise Mechanize.Query.BadCriteriaError, ~r/No select found/, fn ->
         SelectList.select(form, name: "lero", options: [label: ~r/Option/])
       end
     end
 
     test "raise when many options selected on single selection select list", %{form: form} do
-      assert_raise Mechanizex.Form.InconsistentFormError, ~r/Multiple selected/, fn ->
+      assert_raise Mechanize.Form.InconsistentFormError, ~r/Multiple selected/, fn ->
         SelectList.select(form, name: "select1", options: [label: ~r/Option/])
       end
     end
@@ -335,13 +335,13 @@ defmodule Mechanizex.Form.SelectTest do
     end
 
     test "raise when select list not found", %{form: form} do
-      assert_raise(Mechanizex.Query.BadCriteriaError, ~r/No select found/, fn ->
+      assert_raise(Mechanize.Query.BadCriteriaError, ~r/No select found/, fn ->
         SelectList.unselect(form, name: "lero", options: [name: ~r/Option/])
       end)
     end
 
     test "raise when option not found", %{form: form} do
-      assert_raise Mechanizex.Query.BadCriteriaError, ~r/No option found/, fn ->
+      assert_raise Mechanize.Query.BadCriteriaError, ~r/No option found/, fn ->
         SelectList.unselect(form, name: "multiple1", options: [name: ~r/Lero/])
       end
     end

@@ -1,4 +1,18 @@
 defmodule Mechanize.Browser do
+  @moduledoc """
+    Entry point module for every web page interaction using Mechanize.
+
+    ## Examples
+
+    To begin interacting with web pages, first start a new browser:
+
+      ```
+      iex> browser = Browser.new()
+      iex> is_pid(browser)
+      true
+      ```
+  """
+
   alias Mechanize.{Page, Request}
 
   defmodule RedirectLimitReachedError do

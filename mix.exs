@@ -10,7 +10,16 @@ defmodule Mechanize.MixProject do
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [tool: ExCoveralls]
+      test_coverage: [tool: ExCoveralls],
+      dialyzer: [plt_add_deps: :transitive],
+
+      # Docs
+      name: "Mechanize",
+      source_url: "https://github.com/ghonorato/mechanize",
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -30,7 +39,9 @@ defmodule Mechanize.MixProject do
       {:mox, "~> 0.5", only: :test},
       {:excoveralls, github: "parroty/excoveralls", only: [:dev, :test]},
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
-      {:bypass, "~> 1.0", only: :test}
+      {:bypass, "~> 1.0", only: :test},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
     ]
   end
 end

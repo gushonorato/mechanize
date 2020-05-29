@@ -62,7 +62,7 @@ Mechanize followed any redirects that Google may have sent. The browser gave us 
 
 Next, let's try finding some links to click.
 
-## Finding Links
+### Finding Links
 
 Mechanize returns a page struct whenever you get a page, post, or submit a
 form. Now that we've fetched Google's homepage, let's try listing all of the links:
@@ -127,7 +127,7 @@ Or chain them together to find a link with certain text and certain href:
 
 Now that we know how to find and click links, let's try something more complicated like filling out a form.
 
-## Filling out forms
+### Filling out forms
 
 Let's continue with our Google example.
 
@@ -183,7 +183,7 @@ b
 Before we go on to screen scraping, let's take a look at forms a little more
 in depth.  Unless you want to skip ahead!
 
-## Advanced Form techniques
+### Advanced Form techniques
 
 In this section, I want to touch on using the different types in input fields
 possible with a form.  Password and textarea fields can be treated just like
@@ -221,7 +221,7 @@ Form.check_checkbox(form, name: "box", value: "yes")
 Form.check_radio_button(form, name: "box", value: "yes")
 ```
 
-## Scraping Data
+### Scraping Data
 
 After you have used Mechanize to navigate to the page that you need to scrape, then scrape it using `Page.search/2` function:
 

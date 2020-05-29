@@ -13,7 +13,7 @@ defmodule Mechanize.Form do
     SelectList
   }
 
-  alias Mechanize.{Query, Request}
+  alias Mechanize.Query
 
   @derive [Mechanize.Page.Elementable]
   @enforce_keys [:element]
@@ -140,24 +140,24 @@ defmodule Mechanize.Form do
   defdelegate click_button(form, criteria), to: SubmitButton, as: :click
 
   def submit(form, button \\ nil) do
-    req =
-      case method(form) do
-        :post ->
-          %Request{
-            method: method(form),
-            url: action_url(form),
-            body: {:form, params(form.fields, button)}
-          }
+    case method(form) do
+      :post ->
+        Mechanize.Browser.request!(
+          browser(form),
+          :post,
+          action_url(form),
+          {:form, params(form.fields, button)}
+        )
 
-        :get ->
-          %Request{
-            method: method(form),
-            url: action_url(form),
-            params: params(form.fields, button)
-          }
-      end
-
-    Mechanize.Browser.request!(browser(form), req)
+      :get ->
+        Mechanize.Browser.request!(
+          browser(form),
+          :get,
+          action_url(form),
+          "",
+          params: params(form.fields, button)
+        )
+    end
   end
 
   defp method(form) do

@@ -137,7 +137,9 @@ defmodule Mechanize.Browser do
     request!(browser, :put, url, body, opts)
   end
 
-  def request!(browser, method, url, body \\ "", opts \\ []) do
+  def request!(browser, method, url, body \\ "", opts \\ [])
+
+  def request!(browser, method, url, body, opts) do
     {headers, opts} = Keyword.pop(opts, :headers, [])
     {params, _opts} = Keyword.pop(opts, :params, [])
 
@@ -150,7 +152,7 @@ defmodule Mechanize.Browser do
     })
   end
 
-  def request!(browser, req) do
+  defp request!(browser, req) do
     GenServer.call(browser, {:request!, req})
   end
 

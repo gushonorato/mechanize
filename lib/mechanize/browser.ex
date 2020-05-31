@@ -36,64 +36,185 @@ defmodule Mechanize.Browser do
     defexception [:message]
   end
 
+  @doc """
+  Start a new linked Mechanize Browser.
+
+  You can configure the browser using `opts` parameter:
+
+  * `http_adapter` set HTTP adapter used to fetch pages. Defaults to
+    `Mechanize.HTTPAdapter.Httpoison` module and it's the only available adapter at the moment.
+  * `html_parser` set HTTP adapter used to parse pages. Defaults to `Mechanize.HTMLParser.Floki`
+    module and it's the only available parser at the moment.
+  * `http_headers` set all default browser headers at once. These headers will be sent on every
+    request made by the current started browser. Defaults to
+    `[{"user-agent", @user_agent_aliases[:mechanize]}]`. Note that using this options will replace
+    all default headers. To append a new header, see `put_http_header/2` or `put_http_header/3`.
+  * `follow_redirect` follow HTTP 3xx redirects when `true`. Defaults to `true`.
+  * `redirect_limit` set maximun redirects to follow. Defaults to `5`.
+  * `follow_meta_refresh` follow `<meta http-equiv="refresh" ...>` tags when `true`.
+    Defaults to `false`.
+
+  ## Example
+
+  Start a browser that follows `<meta http-equiv="refresh" ...>`.
+    ```
+    iex> browser = Browser.new(follow_meta_refresh: true)
+    iex> is_pid(browser)
+    true
+    ```
+  """
   @spec new(keyword()) :: pid
   def new(opts \\ []) do
     {:ok, browser} = start_link(opts)
     browser
   end
 
+  @doc """
+  Start a new linked Mechanize Browser, similar to `new/1`, but return `GenServer.on_start()`
+  instead.
+
+  Use this function when you need more control. For all available `opts` see `new/1`.
+
+  ## Example
+
+    ```
+    iex> {:ok, browser} = Browser.start_link(follow_meta_refresh: true)
+    iex> is_pid(browser)
+    ```
+  """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__.Server, __MODULE__.Impl.new(opts))
   end
 
+  @doc """
+  Start a new unlinked Mechanize Browser, similar to `new/1`. It returns `GenServer.on_start()`
+  instead.
+
+  Use this function when you need more control. For all available `opts` see `new/1`.
+
+  ## Example
+
+    ```
+    iex> {:ok, browser} = Browser.start(follow_meta_refresh: true)
+    iex> is_pid(browser)
+    ```
+  """
   @spec start(keyword()) :: GenServer.on_start()
   def start(opts \\ []) do
     GenServer.start(__MODULE__.Server, __MODULE__.Impl.new(opts))
   end
 
+  @doc """
+  Changes the HTTP adapter used by the browser and return the browser.
+
+  At the moment, the only available adapter is `Mechanize.HTTPAdapter.Httpoison`.
+  """
   @spec put_http_adapter(pid, module) :: pid
   def put_http_adapter(browser, adapter) do
     :ok = GenServer.cast(browser, {:put_http_adapter, adapter})
     browser
   end
 
+  @doc """
+  Returns the HTTP adapter used by the browser.
+  """
   @spec get_http_adapter(pid) :: module
   def get_http_adapter(browser) do
     GenServer.call(browser, {:get_http_adapter})
   end
 
+  @doc """
+  Changes the HTML parser used by the browser and return the browser.
+
+  At the moment, the only available parser is `Mechanize.HTMLParser.Floki`.
+  """
   @spec put_html_parser(pid, module) :: pid
   def put_html_parser(browser, parser) do
     :ok = GenServer.cast(browser, {:put_html_parser, parser})
     browser
   end
 
+  @doc """
+  Returns the HTML parser used by the browser.
+  """
   @spec get_html_parser(pid) :: module
   def get_html_parser(browser) do
     GenServer.call(browser, {:get_html_parser})
   end
 
+  @doc """
+  Changes all default HTTP headers of the `browser` at once and returns the browser.
+
+  These headers will be sent on every request made by this browser. Note that all current headers
+  are replaced. To add a new reader preserving the existing, see `put_http_header/2` and
+  `put_http_header/3`.
+
+  ## Example
+
+  ```
+  Browser.put_htttp_headers(browser, [
+    {"accept", "text/html"},
+    {"accept-encoding", "gzip, deflate, br"}
+  ])
+  ```
+  """
   @spec put_http_headers(pid, Header.headers()) :: pid
   def put_http_headers(browser, headers) do
     :ok = GenServer.cast(browser, {:put_http_headers, headers})
     browser
   end
 
+  @doc """
+  Returns all `browser` default HTTP headers.
+
+  These headers are sent on every request made by this browser.
+
+  ## Example
+  ```
+  [
+    {"accept", "text/html"},
+    {"accept-encoding", "gzip, deflate, br"}
+  ] = Browser.get_http_headers(browser)
+  ```
+  """
   @spec get_http_headers(pid) :: module
   def get_http_headers(browser) do
     GenServer.call(browser, {:get_http_headers})
   end
 
+  @doc """
+  Put a new default header and preserve other existing headers.
+
+  Put the `header` on `browser` and returns `browser`. This header will be sent on every request
+  made by this browser.
+  ## Example
+
+  ```
+  Browser.put_http_header(browser, {"accept", "text/html"})
+  ```
+  """
   @spec put_http_header(pid, Header.header()) :: pid
   def put_http_header(browser, header) do
     :ok = GenServer.cast(browser, {:put_http_header, header})
     browser
   end
 
+  @doc """
+  Put a new default header and preserve other existing headers.
+
+  Put a header with `name` and `value` on `browser` and return `browser`. This header will be sent
+  on every request made by this browser.
+
+  ## Example
+
+  ```
+  Browser.put_http_header(browser, "accept", "text/html")
+  ```
+  """
   @spec put_http_header(pid, String.t(), String.t()) :: pid
-  def put_http_header(browser, key, value) do
-    :ok = GenServer.cast(browser, {:put_http_header, key, value})
+  def put_http_header(browser, name, value) do
+    :ok = GenServer.cast(browser, {:put_http_header, name, value})
     browser
   end
 

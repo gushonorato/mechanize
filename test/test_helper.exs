@@ -45,7 +45,11 @@ defmodule TestHelper do
     |> Enum.each(func)
   end
 
-  def endpoint_url(bypass, path \\ ""), do: URI.merge("http://localhost:#{bypass.port}/", path) |> URI.to_string()
+  def endpoint_url(bypass, path \\ "") do
+    "http://localhost:#{bypass.port}/"
+    |> URI.merge(path)
+    |> URI.to_string()
+  end
 
   def read_file!(path, map \\ []) do
     contents = File.read!(path)

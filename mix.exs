@@ -40,7 +40,6 @@ defmodule Mechanize.MixProject do
       {:excoveralls, github: "parroty/excoveralls", only: [:dev, :test]},
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
       {:bypass, "~> 1.0", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false}
     ]
   end

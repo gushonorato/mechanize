@@ -259,7 +259,7 @@ serp
 ```
 
 ## Authors
-Copyright © 2019 by Gustavo Honorato (gustavohonorato@gmail.com)
+Copyright © 2020 by Gustavo Honorato (gustavohonorato@gmail.com)
 
 ## License
 This library is distributed under the MIT license. Please see the LICENSE file.

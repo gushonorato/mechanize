@@ -15,7 +15,7 @@ defmodule Mechanize.Page.Link do
     unless href, do: raise(ClickError, "href attribute is missing")
 
     page = Element.page(link)
-    Browser.follow_url(page.browser, page, href)
+    Browser.follow_url!(page.browser, page, href)
   end
 
   def new(el) do

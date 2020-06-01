@@ -532,13 +532,20 @@ defmodule Mechanize.Browser do
     GenServer.call(browser, {:request!, req})
   end
 
-  @spec follow_url(t(), %Page{}, String.t()) :: %Page{}
-  def follow_url(browser, %Page{} = page, url) do
-    follow_url(browser, page.url, url)
+  @doc """
+  Follows the `url` issuing a GET request.
+
+  If the request does not fail, a `Page` struct is returned, otherwise, it raises
+  `Mechanize.HTTPAdapter.NetworkError`. The `url` could be absolute or relative to `page_or_base_url`.
+  """
+  @spec follow_url!(t(), Page.t() | String.t(), String.t()) :: Page.t()
+  def follow_url!(browser, page_or_base_url, url)
+
+  def follow_url!(browser, %Page{} = page, url) do
+    follow_url!(browser, page.url, url)
   end
 
-  @spec follow_url(t(), String.t(), String.t()) :: %Page{}
-  def follow_url(browser, base_url, url) do
-    GenServer.call(browser, {:follow_url, base_url, url})
+  def follow_url!(browser, base_url, url) do
+    GenServer.call(browser, {:follow_url!, base_url, url})
   end
 end

@@ -81,11 +81,11 @@ defmodule Mechanize.Browser.Impl do
 
       {delay, url} ->
         Process.sleep(delay * 1000)
-        follow_url(browser, page.url, url)
+        follow_url!(browser, page.url, url)
     end
   end
 
-  def follow_url(browser, base_url, rel_url) do
+  def follow_url!(browser, base_url, rel_url) do
     abs_url =
       base_url
       |> URI.merge(rel_url)

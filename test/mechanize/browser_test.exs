@@ -145,7 +145,7 @@ defmodule Mechanize.BrowserTest do
 
       page = Browser.request!(Browser.new(), :get, endpoint_url(bypass))
 
-      assert Page.body(page) == "OK PAGE"
+      assert Page.content(page) == "OK PAGE"
     end
 
     test "send correct methods", %{bypass: bypass} do
@@ -315,7 +315,7 @@ defmodule Mechanize.BrowserTest do
 
       assert page.status_code == 200
       assert page.url == endpoint_url(bypass, "/redirected")
-      assert page.body == "REDIRECT OK"
+      assert page.content == "REDIRECT OK"
     end
 
     test "do not follow redirect when location header is missing", %{bypass: bypass} do
@@ -570,7 +570,7 @@ defmodule Mechanize.BrowserTest do
       page = Browser.request!(browser, :get, endpoint_url(bypass, "/do_not_refresh"))
 
       assert page.status_code == 200
-      assert page.body == resp_body
+      assert page.content == resp_body
     end
 
     [200, 300, 404]
@@ -591,7 +591,7 @@ defmodule Mechanize.BrowserTest do
         page = Browser.request!(browser, :get, endpoint_url(bypass, "/refresh"))
 
         assert page.status_code == 200
-        assert page.body == "OK"
+        assert page.content == "OK"
       end
     end)
 
@@ -609,7 +609,7 @@ defmodule Mechanize.BrowserTest do
       page = Browser.request!(browser, :get, endpoint_url(bypass, "/refresh"))
 
       assert page.status_code == 200
-      assert page.body == "OK"
+      assert page.content == "OK"
     end
 
     test_http_delegates([:get!, :head!, :options!], fn {function_name, http_method} ->

@@ -233,8 +233,8 @@ defmodule Mechanize.PageTest do
     end
 
     test "page with meta refresh" do
-      body = read_file!("test/htdocs/meta_refresh.html", url: "http://www.google.com.br")
-      page = %Page{body: body, parser: Mechanize.HTMLParser.Floki}
+      content = read_file!("test/htdocs/meta_refresh.html", url: "http://www.google.com.br")
+      page = %Page{content: content, parser: Mechanize.HTMLParser.Floki}
 
       assert Page.meta_refresh(page) == {0, "http://www.google.com.br"}
     end
@@ -281,13 +281,13 @@ defmodule Mechanize.PageTest do
         }
       ]
       |> Stream.with_index(1)
-      |> Enum.each(fn {{body, expected_result}, index} ->
-        page = %Page{body: body, parser: Mechanize.HTMLParser.Floki, url: index}
+      |> Enum.each(fn {{content, expected_result}, index} ->
+        page = %Page{content: content, parser: Mechanize.HTMLParser.Floki, url: index}
         result = Page.meta_refresh(page)
 
         assert result == expected_result,
                "(test #{index}) expected #{inspect(expected_result)}, " <>
-                 "but was #{inspect(result)} on subject #{inspect(body)}"
+                 "but was #{inspect(result)} on subject #{inspect(content)}"
       end)
     end
 
@@ -304,9 +304,13 @@ defmodule Mechanize.PageTest do
       "<meta http-equiv=\"refresh\" content=\"a; url=http://www.google.com.br\"/>"
     ]
     |> Stream.with_index(1)
-    |> Enum.each(fn {body, index} ->
-      test "#{body} raises exception" do
-        page = %Page{body: unquote(body), parser: Mechanize.HTMLParser.Floki, url: unquote(index)}
+    |> Enum.each(fn {content, index} ->
+      test "#{content} raises exception" do
+        page = %Page{
+          content: unquote(content),
+          parser: Mechanize.HTMLParser.Floki,
+          url: unquote(index)
+        }
 
         assert_raise(InvalidMetaRefreshError, fn ->
           Page.meta_refresh(page)

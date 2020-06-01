@@ -2,12 +2,12 @@ defmodule Mechanize.Page do
   alias Mechanize.{Response, Query, Form}
   alias Mechanize.Page.{Link, Element}
 
-  defstruct response_chain: nil, status_code: nil, body: nil, url: nil, browser: nil, parser: nil
+  defstruct response_chain: nil, status_code: nil, content: nil, url: nil, browser: nil, parser: nil
 
   @type t :: %__MODULE__{
           response_chain: [Response.t()],
           status_code: integer(),
-          body: String.t(),
+          content: String.t(),
           url: String.t(),
           browser: pid(),
           parser: module()
@@ -23,7 +23,7 @@ defmodule Mechanize.Page do
 
   def browser(page), do: page.browser
   def url(page), do: page.url
-  def body(page), do: page.body
+  def content(page), do: page.content
 
   def meta_refresh(nil), do: raise(ArgumentError, "page is nil")
 
@@ -117,6 +117,6 @@ end
 
 defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page do
   def parser(page), do: page.parser
-  def parser_data(page), do: page.body
+  def parser_data(page), do: page.content
   def page(page), do: page
 end

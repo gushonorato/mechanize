@@ -7,7 +7,7 @@ defmodule Mechanize.QueryTest do
 
   @page %Page{
     parser: Mechanize.HTMLParser.Floki,
-    body: File.read!("./test/htdocs/query_test.html")
+    content: File.read!("./test/htdocs/query_test.html")
   }
 
   describe ".search" do
@@ -109,7 +109,10 @@ defmodule Mechanize.QueryTest do
         attrs: [{"href", "www.microsoft.com"}, {"rel", "nofollow"}],
         text: "Microsoft"
       },
-      %Element{name: "area", attrs: [{"href", "www.amazon.com"}, {"rel", "follow"}, {"alt", "Amazon"}]}
+      %Element{
+        name: "area",
+        attrs: [{"href", "www.amazon.com"}, {"rel", "follow"}, {"alt", "Amazon"}]
+      }
     ]
 
     test "raise if queryable is nil" do
@@ -187,7 +190,11 @@ defmodule Mechanize.QueryTest do
     test "select all using multiple element names" do
       assert @subject
              |> Query.matches(tags: [:a, :area])
-             |> Enum.map(&Element.attr(&1, :href)) == ["www.google.com", "www.microsoft.com", "www.amazon.com"]
+             |> Enum.map(&Element.attr(&1, :href)) == [
+               "www.google.com",
+               "www.microsoft.com",
+               "www.amazon.com"
+             ]
     end
 
     test "none selected" do

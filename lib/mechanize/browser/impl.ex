@@ -61,7 +61,7 @@ defmodule Mechanize.Browser.Impl do
     page = %Page{
       response_chain: resp_chain,
       status_code: last_response.code,
-      body: last_response.body,
+      content: last_response.body,
       url: last_response.url,
       parser: get_html_parser(browser)
     }

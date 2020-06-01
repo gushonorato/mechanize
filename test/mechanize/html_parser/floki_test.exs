@@ -43,21 +43,29 @@ defmodule Mechanize.HTMLParser.FlokiTest do
 
   @page %Page{
     browser: :fake_mechanize_pid,
-    body: @html
+    content: @html
   }
 
   @page_without_text %Page{
     browser: :fake_mechanize_pid,
-    body: @html_without_text
+    content: @html_without_text
   }
 
   @google %Element{
     name: "a",
-    attrs: [{"disabled", "disabled"}, {"href", "http://google.com"}, {"class", "company js-google js-cool"}],
+    attrs: [
+      {"disabled", "disabled"},
+      {"href", "http://google.com"},
+      {"class", "company js-google js-cool"}
+    ],
     text: "Google",
     parser_data: {
       "a",
-      [{"disabled", "disabled"}, {"href", "http://google.com"}, {"class", "company js-google js-cool"}],
+      [
+        {"disabled", "disabled"},
+        {"href", "http://google.com"},
+        {"class", "company js-google js-cool"}
+      ],
       ["Google"]
     },
     page: @page
@@ -188,7 +196,8 @@ defmodule Mechanize.HTMLParser.FlokiTest do
         |> HTMLParser.Floki.filter(".js-cool")
         |> Enum.map(&Parseable.parser_data/1) == [
           {"div", [{"id", "main"}, {"class", "container"}, {"data-method", "get"}], []},
-          {"div", [{"class", "content"}], [{"a", [{"href", "http://java.com"}, {"class", "js-java"}], ["Java"]}]}
+          {"div", [{"class", "content"}],
+           [{"a", [{"href", "http://java.com"}, {"class", "js-java"}], ["Java"]}]}
         ]
       )
     end

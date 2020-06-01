@@ -84,7 +84,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
       assert(
         form
         |> SubmitButton.click("Button 6")
-        |> Page.body() == "Lero lero"
+        |> Page.content() == "Lero lero"
       )
     end
 
@@ -98,7 +98,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
       assert(
         form
         |> SubmitButton.click(name: "button1")
-        |> Page.body() == "Lero lero"
+        |> Page.content() == "Lero lero"
       )
     end
   end

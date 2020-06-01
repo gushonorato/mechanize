@@ -10,7 +10,7 @@ defmodule Mechanize.BrowserTest do
   end
 
   setup_all do
-    {:ok, default_ua: Browser.get_user_agent_string(:mechanize)}
+    {:ok, default_ua: Browser.get_user_agent_string_from_alias(:mechanize)}
   end
 
   describe ".start" do
@@ -78,7 +78,7 @@ defmodule Mechanize.BrowserTest do
       assert Browser.new()
              |> Browser.put_user_agent(:windows_chrome)
              |> Browser.get_http_headers() == [
-               {"user-agent", Browser.get_user_agent_string(:windows_chrome)}
+               {"user-agent", Browser.get_user_agent_string_from_alias(:windows_chrome)}
              ]
     end
 
@@ -95,7 +95,7 @@ defmodule Mechanize.BrowserTest do
   describe ".get_user_agent_string" do
     test "get default user agent string" do
       assert Browser.get_user_agent_string(Browser.new()) ==
-               Browser.get_user_agent_string(:mechanize)
+               Browser.get_user_agent_string_from_alias(:mechanize)
     end
   end
 

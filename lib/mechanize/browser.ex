@@ -257,9 +257,9 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-  Put a new default header and preserve other existing headers.
+  Adds a new default HTTP header to `browser` if not present, otherwise updates the header value.
 
-  This header will be sent on every request made by this browser.
+  This header will be sent on every request made by this `browser`.
 
   ## Example
 
@@ -332,7 +332,27 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
+  Adds/updates user-agent header using human-friendly browser aliases.
 
+  ## Example
+
+  ```
+  Browser.put_user_agent(browser, :windows_firefox)
+  ```
+  is the same of using `put_http_header/3` this way:
+
+  ```
+  Browser.put_http_header(browser, "user-agent",
+    "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+  )
+  ```
+  ## Available aliases
+
+  #{
+    @user_agent_aliases
+    |> Enum.map(fn {k, v} -> "* `:#{k}` - #{v}" end)
+    |> Enum.join("\n")
+  }
   """
   @spec put_user_agent(t(), atom()) :: t()
   def put_user_agent(browser, ua_alias) do
@@ -370,54 +390,128 @@ defmodule Mechanize.Browser do
     browser
   end
 
-  @spec get_user_agent_string(atom) :: String.t()
-  def get_user_agent_string(ua_alias) when is_atom(ua_alias) do
+  @doc """
+  Returns the corresponding user agent string for a given `ua_alias`.
+
+  ## Example
+
+    iex> Browser.get_user_agent_string_from_alias(:windows_firefox)
+    "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+  """
+  @spec get_user_agent_string_from_alias(atom) :: String.t()
+  def get_user_agent_string_from_alias(ua_alias) when is_atom(ua_alias) do
     case Map.fetch(@user_agent_aliases, ua_alias) do
       {:ok, value} -> value
       :error -> nil
     end
   end
 
+  @doc """
+  Returns user agent string for `browser`.
+
+  This is the same of `Browser.get_http_header_value(browser, "user-agent")`.
+  """
   @spec get_user_agent_string(t()) :: String.t()
   def get_user_agent_string(browser) do
     get_http_header_value(browser, "user-agent")
   end
 
-  @spec head!(t(), String.t(), keyword) :: Mechanize.Page.t()
+  @doc """
+    Issues a to request the given `url`. See `request!/6` for details.
+  """
+  @spec get!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def get!(browser, url, opts \\ []) do
     request!(browser, :get, url, "", opts)
   end
 
+  @doc """
+    Issues a HEAD request to the given `url`. See `request!/6` for details.
+  """
   @spec head!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def head!(browser, url, opts \\ []) do
     request!(browser, :head, url, "", opts)
   end
 
+  @doc """
+    Issues a OPTIONS request to the given `url`. See `request!/6` for details.
+  """
   @spec options!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def options!(browser, url, opts \\ []) do
     request!(browser, :options, url, "", opts)
   end
 
+  @doc """
+    Issues a DELETE request to the given `url`. See `request!/6` for details.
+  """
   @spec delete!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def delete!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :delete, url, body, opts)
   end
 
+  @doc """
+    Issues a PATCH request to the given `url`. See `request!/6` for details.
+  """
   @spec patch!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def patch!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :patch, url, body, opts)
   end
 
+  @doc """
+    Issues a POST request to the given `url`. See `request!/6` for details.
+  """
   @spec post!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def post!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :post, url, body, opts)
   end
 
+  @doc """
+    Issues a PUT request to the given `url`. See `request!/6` for details.
+  """
   @spec put!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def put!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :put, url, body, opts)
   end
 
+  @doc """
+  Issues a HTTP request using `method` to the given `url`.
+
+  If the request does not fail, a `Page` struct is returned, otherwise, it raises
+    `Mechanize.HTTPAdapter.NetworkError`.
+
+
+  This function accepts `opts`:
+
+  * `:headers` - a list of additional headers for this request.
+  * `:params` - a list of params to be merged into the `url`.
+
+  ## Examples
+
+  ```
+  Browser.request!(browser, :get, "https://www.example.com")
+  # GET https://www.example.com
+  ```
+
+  Request with custom headers:
+
+  ```
+  Browser.request!(browser, :get, "https://www.example.com", "", headers: [
+    {"accept", "text/html"}, {"user-agent", "Custom UA"}
+  ])
+  # GET https://www.example.com
+  # Accept: text/html
+  # User-agent: Custom UA
+  ```
+
+  Request with custom params:
+
+  ```
+  Browser.request!(browser, :get, "https://www.example.com", "", params: [
+    {"search", "mechanize"}, {"order", "name"}
+  ])
+  # GET https://www.example.com?search=mechanize&order=name
+  ```
+
+  """
   @spec request!(t(), :atom, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def request!(browser, method, url, body \\ "", opts \\ [])
 

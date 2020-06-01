@@ -86,14 +86,9 @@ defmodule Mechanize.BrowserTest do
     test "raise error when invalid alias passed" do
       Process.flag(:trap_exit, true)
 
-      b = Browser.new()
-
-      b
-      |> Browser.put_user_agent(:lero)
-      |> :sys.get_state()
-      |> catch_exit()
-
-      assert_received {:EXIT, b, {%ArgumentError{message: "invalid user agent alias lero"}, _}}
+      assert_raise ArgumentError, "invalid user agent alias lero", fn ->
+        Browser.put_user_agent(Browser.new(), :lero)
+      end
     end
   end
 

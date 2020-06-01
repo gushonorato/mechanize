@@ -32,16 +32,8 @@ defmodule Mechanize.Browser.Server do
     {:noreply, Impl.put_follow_redirect(state, value)}
   end
 
-  def handle_cast({:put_user_agent, ua_alias}, state) do
-    {:noreply, Impl.put_user_agent(state, ua_alias)}
-  end
-
   def handle_cast({:put_http_header, key, value}, state) do
     {:noreply, Impl.put_http_header(state, key, value)}
-  end
-
-  def handle_cast({:put_user_agent_string, agent_string}, state) do
-    {:noreply, Impl.put_user_agent_string(state, agent_string)}
   end
 
   def handle_call({:get_http_adapter}, _from, state) do
@@ -66,10 +58,6 @@ defmodule Mechanize.Browser.Server do
 
   def handle_call({:get_redirect_limit}, _from, state) do
     {:reply, Impl.get_redirect_limit(state), state}
-  end
-
-  def handle_call({:get_user_agent_string}, _from, state) do
-    {:reply, Impl.get_user_agent_string(state), state}
   end
 
   def handle_call({:request!, req}, _from, state) do

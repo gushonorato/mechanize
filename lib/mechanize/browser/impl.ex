@@ -3,48 +3,14 @@ defmodule Mechanize.Browser.Impl do
 
   alias Mechanize.{Page, Header, Request}
 
-  @user_agent_aliases %{
-    mechanize:
-      "Mechanize/#{Mix.Project.config()[:version]} Elixir/#{System.version()} (http://github.com/gushonorato/mechanize/)",
-    linux_firefox: "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0",
-    linux_konqueror: "Mozilla/5.0 (compatible; Konqueror/3; Linux)",
-    linux_mozilla: "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030624",
-    mac_firefox: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:43.0) Gecko/20100101 Firefox/43.0",
-    mac_mozilla: "Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.4a) Gecko/20030401",
-    mac_safari_4:
-      "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10",
-    mac_safari:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-    windows_chrome:
-      "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.125 Safari/537.36",
-    windows_ie_6: "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
-    windows_ie_7: "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
-    windows_ie_8:
-      "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
-    windows_ie_9: "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)",
-    windows_ie_10: "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; WOW64; Trident/6.0)",
-    windows_ie_11: "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko",
-    windows_edge:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586",
-    windows_mozilla: "Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6",
-    windows_firefox: "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0",
-    iphone:
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B5110e Safari/601.1",
-    ipad:
-      "Mozilla/5.0 (iPad; CPU OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1",
-    android:
-      "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 7 Build/LMY47V) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.76 Safari/537.36",
-    googlebot: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-    googlebot_mobile:
-      "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-  }
-
-  defstruct http_adapter: Mechanize.HTTPAdapter.Httpoison,
-            html_parser: Mechanize.HTMLParser.Floki,
-            http_headers: [{"user-agent", @user_agent_aliases[:mechanize]}],
-            follow_redirect: true,
-            redirect_limit: 5,
-            follow_meta_refresh: false
+  defstruct [
+    :http_adapter,
+    :html_parser,
+    :http_headers,
+    :follow_redirect,
+    :redirect_limit,
+    :follow_meta_refresh
+  ]
 
   @opaque t :: %__MODULE__{
             http_adapter: any(),
@@ -65,7 +31,9 @@ defmodule Mechanize.Browser.Impl do
   def put_html_parser(browser, parser), do: %__MODULE__{browser | html_parser: parser}
   def get_html_parser(browser), do: browser.html_parser
 
-  def put_http_headers(browser, headers), do: %__MODULE__{browser | http_headers: Header.normalize(headers)}
+  def put_http_headers(browser, headers),
+    do: %__MODULE__{browser | http_headers: Header.normalize(headers)}
+
   def get_http_headers(browser), do: browser.http_headers
 
   def put_http_header(browser, {key, value}) do
@@ -83,28 +51,6 @@ defmodule Mechanize.Browser.Impl do
 
   def put_redirect_limit(browser, limit), do: %__MODULE__{browser | redirect_limit: limit}
   def get_redirect_limit(browser), do: browser.redirect_limit
-
-  def put_user_agent(browser, ua_alias) do
-    case Map.fetch(@user_agent_aliases, ua_alias) do
-      {:ok, user_agent_string} -> put_user_agent_string(browser, user_agent_string)
-      :error -> raise ArgumentError, "invalid user agent alias #{ua_alias}"
-    end
-  end
-
-  def put_user_agent_string(browser, agent_string) do
-    put_http_header(browser, "user-agent", agent_string)
-  end
-
-  def get_user_agent_string(ua_alias) when is_atom(ua_alias) do
-    case Map.fetch(@user_agent_aliases, ua_alias) do
-      {:ok, value} -> value
-      :error -> nil
-    end
-  end
-
-  def get_user_agent_string(browser) do
-    get_http_header_value(browser, "user-agent")
-  end
 
   def request!(browser, req) do
     check_request_url!(req)

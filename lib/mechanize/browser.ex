@@ -29,8 +29,9 @@ defmodule Mechanize.Browser do
       %Page{} = Browser.get!(b, "https://www.google.com.br")
 
   """
-
   alias Mechanize.{Page, Request}
+
+  @type t :: pid
 
   defmodule RedirectLimitReachedError do
     defexception [:message]
@@ -63,7 +64,7 @@ defmodule Mechanize.Browser do
     true
     ```
   """
-  @spec new(keyword()) :: pid
+  @spec new(keyword()) :: t()
   def new(opts \\ []) do
     {:ok, browser} = start_link(opts)
     browser
@@ -110,7 +111,7 @@ defmodule Mechanize.Browser do
 
   At the moment, the only available adapter is `Mechanize.HTTPAdapter.Httpoison`.
   """
-  @spec put_http_adapter(pid, module) :: pid
+  @spec put_http_adapter(t(), module()) :: t()
   def put_http_adapter(browser, adapter) do
     :ok = GenServer.cast(browser, {:put_http_adapter, adapter})
     browser
@@ -119,7 +120,7 @@ defmodule Mechanize.Browser do
   @doc """
   Returns the HTTP adapter used by the browser.
   """
-  @spec get_http_adapter(pid) :: module
+  @spec get_http_adapter(t()) :: module()
   def get_http_adapter(browser) do
     GenServer.call(browser, {:get_http_adapter})
   end
@@ -129,22 +130,22 @@ defmodule Mechanize.Browser do
 
   At the moment, the only available parser is `Mechanize.HTMLParser.Floki`.
   """
-  @spec put_html_parser(pid, module) :: pid
+  @spec put_html_parser(t(), module()) :: t()
   def put_html_parser(browser, parser) do
     :ok = GenServer.cast(browser, {:put_html_parser, parser})
     browser
   end
 
   @doc """
-  Returns the HTML parser used by the browser.
+  Returns the HTML parser used by `browser`.
   """
-  @spec get_html_parser(pid) :: module
+  @spec get_html_parser(t()) :: module
   def get_html_parser(browser) do
     GenServer.call(browser, {:get_html_parser})
   end
 
   @doc """
-  Changes all default HTTP headers of the `browser` at once and returns the browser.
+  Configure all HTTP headers of `browser` at once.
 
   These headers will be sent on every request made by this browser. Note that all current headers
   are replaced. To add a new reader preserving the existing, see `put_http_header/2` and
@@ -159,7 +160,7 @@ defmodule Mechanize.Browser do
   ])
   ```
   """
-  @spec put_http_headers(pid, Header.headers()) :: pid
+  @spec put_http_headers(t(), Header.headers()) :: t()
   def put_http_headers(browser, headers) do
     :ok = GenServer.cast(browser, {:put_http_headers, headers})
     browser
@@ -167,8 +168,6 @@ defmodule Mechanize.Browser do
 
   @doc """
   Returns all `browser` default HTTP headers.
-
-  These headers are sent on every request made by this browser.
 
   ## Example
   ```
@@ -178,7 +177,7 @@ defmodule Mechanize.Browser do
   ] = Browser.get_http_headers(browser)
   ```
   """
-  @spec get_http_headers(pid) :: module
+  @spec get_http_headers(t()) :: module
   def get_http_headers(browser) do
     GenServer.call(browser, {:get_http_headers})
   end
@@ -186,15 +185,15 @@ defmodule Mechanize.Browser do
   @doc """
   Put a new default header and preserve other existing headers.
 
-  Put the `header` on `browser` and returns `browser`. This header will be sent on every request
-  made by this browser.
+  This header will be sent on every requestmade by this browser.
+
   ## Example
 
   ```
   Browser.put_http_header(browser, {"accept", "text/html"})
   ```
   """
-  @spec put_http_header(pid, Header.header()) :: pid
+  @spec put_http_header(t(), Header.header()) :: t()
   def put_http_header(browser, header) do
     :ok = GenServer.cast(browser, {:put_http_header, header})
     browser
@@ -203,8 +202,7 @@ defmodule Mechanize.Browser do
   @doc """
   Put a new default header and preserve other existing headers.
 
-  Put a header with `name` and `value` on `browser` and return `browser`. This header will be sent
-  on every request made by this browser.
+  This header will be sent on every request made by this browser.
 
   ## Example
 
@@ -212,46 +210,99 @@ defmodule Mechanize.Browser do
   Browser.put_http_header(browser, "accept", "text/html")
   ```
   """
-  @spec put_http_header(pid, String.t(), String.t()) :: pid
+  @spec put_http_header(t(), String.t(), String.t()) :: t()
   def put_http_header(browser, name, value) do
     :ok = GenServer.cast(browser, {:put_http_header, name, value})
     browser
   end
 
-  @spec get_http_header_value(pid, String.t()) :: String.t()
-  def get_http_header_value(browser, key) do
-    GenServer.call(browser, {:get_http_header_value, key})
+  @doc """
+  Get value of HTTP header form `browser` by its `name`.
+
+  In case of a `browser` having more than one HTTP header with same `name`, this function will
+  return the first matched header value.
+
+  ## Example
+
+  ```
+  Browser.get_http_header_value(browser, "user-agent")
+  ```
+  """
+  @spec get_http_header_value(t(), String.t()) :: String.t()
+  def get_http_header_value(browser, name) do
+    GenServer.call(browser, {:get_http_header_value, name})
   end
 
-  @spec put_follow_redirect(pid, boolean) :: pid
-  def put_follow_redirect(browser, value) do
-    :ok = GenServer.cast(browser, {:put_follow_redirect, value})
+  @doc """
+  Enable/disable 3xx redirect follow.
+
+  ## Examples
+  ```
+  Browser.put_follow_redirect(browser, true) # Follow 3xx redirects
+
+  Browser.put_follow_redirect(browser, false) # Don't follow 3xx redirects
+  ```
+  """
+  @spec put_follow_redirect(t(), boolean()) :: t()
+  def put_follow_redirect(browser, redirect) do
+    :ok = GenServer.cast(browser, {:put_follow_redirect, redirect})
     browser
   end
 
-  @spec follow_redirect?(pid) :: boolean
+  @doc """
+  Return if `browser` is following 3xx redirects.
+  """
+  @spec follow_redirect?(t()) :: boolean()
   def follow_redirect?(browser) do
     GenServer.call(browser, {:follow_redirect?})
   end
 
-  @spec put_redirect_limit(pid, integer) :: pid
+  @doc """
+  Put the limit of redirects followed by `browser` on a redirect chain.
+  """
+  @spec put_redirect_limit(t(), integer()) :: t()
   def put_redirect_limit(browser, limit) do
     :ok = GenServer.cast(browser, {:put_redirect_limit, limit})
     browser
   end
 
-  @spec get_redirect_limit(pid) :: integer
+  @doc """
+  Return the max number of redirects `browser` will follow on a redirect chain.
+  """
+  @spec get_redirect_limit(t()) :: integer()
   def get_redirect_limit(browser) do
     GenServer.call(browser, {:get_redirect_limit})
   end
 
-  @spec put_user_agent(pid, atom) :: pid
+  @spec put_user_agent(t(), atom()) :: t()
   def put_user_agent(browser, ua_alias) do
     :ok = GenServer.cast(browser, {:put_user_agent, ua_alias})
     browser
   end
 
-  @spec put_user_agent_string(pid, String.t()) :: pid
+  @doc """
+  Adds an user-agent header if not present, otherwise replaces the previous header value with
+  `agent_string`.
+
+  See `put_user_agent/2` for a more convenient way to add/update user-agent header.
+
+  ## Examples
+
+  ```
+  Browser.put_user_agent_string(browser,
+    "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+  )
+  ```
+
+  is the same of using `put_http_header/3` this way:
+
+  ```
+  Browser.put_http_header(browser, "user-agent",
+    "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0"
+  )
+  ```
+  """
+  @spec put_user_agent_string(t(), String.t()) :: t()
   def put_user_agent_string(browser, agent_string) do
     :ok = GenServer.cast(browser, {:put_user_agent_string, agent_string})
     browser
@@ -262,47 +313,47 @@ defmodule Mechanize.Browser do
     __MODULE__.Impl.get_user_agent_string(ua_alias)
   end
 
-  @spec get_user_agent_string(pid) :: String.t()
+  @spec get_user_agent_string(t()) :: String.t()
   def get_user_agent_string(browser) do
     GenServer.call(browser, {:get_user_agent_string})
   end
 
-  @spec head!(pid, String.t(), keyword) :: Mechanize.Page.t()
+  @spec head!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def get!(browser, url, opts \\ []) do
     request!(browser, :get, url, "", opts)
   end
 
-  @spec head!(pid, String.t(), keyword) :: Mechanize.Page.t()
+  @spec head!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def head!(browser, url, opts \\ []) do
     request!(browser, :head, url, "", opts)
   end
 
-  @spec options!(pid, String.t(), keyword) :: Mechanize.Page.t()
+  @spec options!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def options!(browser, url, opts \\ []) do
     request!(browser, :options, url, "", opts)
   end
 
-  @spec delete!(pid, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
+  @spec delete!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def delete!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :delete, url, body, opts)
   end
 
-  @spec patch!(pid, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
+  @spec patch!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def patch!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :patch, url, body, opts)
   end
 
-  @spec post!(pid, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
+  @spec post!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def post!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :post, url, body, opts)
   end
 
-  @spec put!(pid, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
+  @spec put!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def put!(browser, url, body \\ "", opts \\ []) do
     request!(browser, :put, url, body, opts)
   end
 
-  @spec request!(pid, :atom, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
+  @spec request!(t(), :atom, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def request!(browser, method, url, body \\ "", opts \\ [])
 
   def request!(browser, method, url, body, opts) do
@@ -322,12 +373,12 @@ defmodule Mechanize.Browser do
     GenServer.call(browser, {:request!, req})
   end
 
-  @spec follow_url(pid, %Page{}, String.t()) :: %Page{}
+  @spec follow_url(t(), %Page{}, String.t()) :: %Page{}
   def follow_url(browser, %Page{} = page, url) do
     follow_url(browser, page.url, url)
   end
 
-  @spec follow_url(pid, String.t(), String.t()) :: %Page{}
+  @spec follow_url(t(), String.t(), String.t()) :: %Page{}
   def follow_url(browser, base_url, url) do
     GenServer.call(browser, {:follow_url, base_url, url})
   end

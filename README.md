@@ -194,19 +194,19 @@ will de-select the other options (unless it is a multi select!).
 For example, let's select an `option` with visible text "Option 1" on a `select` with `name="select1"`.
 
 ```elixir
-Form.select(form, name: "select1", options: [label: "Option 1"])
+Form.select(form, name: "select1", option: [label: "Option 1"])
 ```
 
 Whe can also select an `option` by an attribute, in this case we'll select by `value` attribute:
 
 ```elixir
-Form.select(form, name: "select1", options: [value: "1"])
+Form.select(form, name: "select1", option: [value: "1"])
 ```
 
 Or select the third option of a `select` (note that Mechanize uses a zero-based index):
 
 ```elixir
-Form.select(form, name: "select1", options: [index: 2])
+Form.select(form, name: "select1", option: 2)
 ```
 
 Now let's take a look at `checkboxes` and `radio buttons`.  To select a `checkbox`, just check it like this:

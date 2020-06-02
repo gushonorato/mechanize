@@ -25,4 +25,8 @@ defmodule Mechanize.Form.Option do
       selected: Element.attr_present?(el, :selected)
     }
   end
+
+  defdelegate fetch(term, key), to: Map
+  defdelegate get_and_update(data, key, function), to: Map
+  defdelegate pop(data, key), to: Map
 end

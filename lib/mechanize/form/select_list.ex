@@ -28,6 +28,10 @@ defmodule Mechanize.Form.SelectList do
     }
   end
 
+  defdelegate fetch(term, key), to: Map
+  defdelegate get_and_update(data, key, function), to: Map
+  defdelegate pop(data, key), to: Map
+
   def options(%__MODULE__{} = select), do: options([select])
   def options(selects), do: Enum.flat_map(selects, & &1.options)
 
@@ -44,54 +48,82 @@ defmodule Mechanize.Form.SelectList do
     |> Enum.map(&Option.new(&1))
   end
 
-  def update_options_with(form, criteria, opts_criteria, fun) do
-    Form.update_select_lists_with(form, criteria, fn select ->
-      assert_options_found(select.options, opts_criteria)
-      %__MODULE__{select | options: Enum.map(select.options, &fun.(select, &1))}
-    end)
+  defp assert_select_found(form, criteria) do
+    selects = get_in(form, [:fields, Access.filter(&Query.match_criteria?(&1, criteria))])
+
+    if selects == [] do
+      raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
+    end
+
+    form
+  end
+
+  defp assert_options_found(form, criteria, opts_criteria) do
+    options =
+      get_in(form, [
+        :fields,
+        Access.filter(&Query.match_criteria?(&1, criteria)),
+        :options,
+        Access.filter(&Query.match_criteria?(&1, opts_criteria))
+      ])
+
+    if options == [[]] do
+      raise(BadCriteriaError, "No option found with criteria #{inspect(criteria)} in select")
+    end
+
+    form
   end
 
   def select(form, criteria) do
-    {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
-    assert_select_found(form, criteria)
+    {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])
 
     form
-    |> update_options_with(criteria, opts_criteria, fn select, opt ->
-      cond do
-        Query.match_criteria?(opt, opts_criteria) ->
-          %Option{opt | selected: true}
+    |> assert_select_found(criteria)
+    |> assert_options_found(criteria, opts_criteria)
+    |> ensure_single_selected(criteria)
+    |> update_select(criteria, opts_criteria, true)
+    |> assert_single_option_selected()
+  end
 
-        Element.attr_present?(select, :multiple) ->
-          opt
+  defp ensure_single_selected(form, criteria) do
+    put_in(
+      form,
+      [
+        :fields,
+        Access.filter(&match_single_selection?(&1, criteria)),
+        :options,
+        Access.all(),
+        :selected
+      ],
+      false
+    )
+  end
 
-        true ->
-          %Option{opt | selected: false}
-      end
-    end)
-    |> assert_single_option_selected
+  defp match_single_selection?(select, criteria) do
+    !Element.attr_present?(select, :multiple) and Query.match_criteria?(select, criteria)
+  end
+
+  defp update_select(form, criteria, opts_criteria, selected) do
+    put_in(
+      form,
+      [
+        :fields,
+        Access.filter(&Query.match_criteria?(&1, criteria)),
+        :options,
+        Access.filter(&Query.match_criteria?(&1, opts_criteria)),
+        :selected
+      ],
+      selected
+    )
   end
 
   def unselect(form, criteria) do
-    {opts_criteria, criteria} = Keyword.pop(criteria, :options, [])
-    assert_select_found(form, criteria)
+    {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])
 
-    update_options_with(form, criteria, opts_criteria, fn _select, opt ->
-      if Query.match_criteria?(opt, opts_criteria) do
-        %Option{opt | selected: false}
-      else
-        opt
-      end
-    end)
-  end
-
-  defp assert_select_found(form, criteria) do
-    if Form.select_lists_with(form, criteria) == [],
-      do: raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
-  end
-
-  defp assert_options_found(options, criteria) do
-    if Enum.filter(options, &Query.match_criteria?(&1, criteria)) == [],
-      do: raise(BadCriteriaError, "No option found with criteria #{inspect(criteria)} in select")
+    form
+    |> assert_select_found(criteria)
+    |> assert_options_found(criteria, opts_criteria)
+    |> update_select(criteria, opts_criteria, false)
   end
 
   defp assert_single_option_selected(form) do
@@ -105,7 +137,8 @@ defmodule Mechanize.Form.SelectList do
         form
 
       names ->
-        raise InconsistentFormError, "Multiple selected options on single select list with name(s) #{names}"
+        raise InconsistentFormError,
+              "Multiple selected options on single select list with name(s) #{names}"
     end
   end
 end

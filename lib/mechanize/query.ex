@@ -34,6 +34,19 @@ defmodule Mechanize.Query do
 
   def match_criteria?(_element, []), do: true
 
+  def match_criteria?(element, index) when is_integer(index) do
+    case element.index do
+      nil ->
+        raise ArgumentError, "element is not indexed"
+
+      ^index ->
+        true
+
+      _ ->
+        false
+    end
+  end
+
   def match_criteria?(element, [{:tag, tag} | criterias]) do
     match_criteria?(element, [{:tags, [tag]} | criterias])
   end

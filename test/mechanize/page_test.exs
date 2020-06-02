@@ -193,7 +193,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, "SEO Master")
+      Page.click_link(page, text: "SEO Master")
     end
 
     test "relative link", %{bypass: bypass, page: page} do
@@ -201,7 +201,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, "Back")
+      Page.click_link(page, text: "Back")
     end
 
     test "image area links", %{bypass: bypass, page: page} do
@@ -214,7 +214,7 @@ defmodule Mechanize.PageTest do
 
     test "raise if link does't have href attribute", %{page: page} do
       assert_raise ClickError, "href attribute is missing", fn ->
-        Page.click_link(page, "Stealth Company")
+        Page.click_link(page, text: "Stealth Company")
       end
     end
 

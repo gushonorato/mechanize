@@ -124,12 +124,6 @@ defmodule Mechanize.Page do
     |> Link.click()
   end
 
-  def click_link(page, text) when is_binary(text) do
-    page
-    |> link_with(text: text)
-    |> Link.click()
-  end
-
   defdelegate links(page), to: __MODULE__, as: :links_with
 
   def link_with(page, criteria \\ []) do

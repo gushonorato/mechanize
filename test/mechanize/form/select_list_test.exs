@@ -1,7 +1,7 @@
 defmodule Mechanize.Form.SelectTest do
   use ExUnit.Case, async: true
   alias Mechanize.{Page, Form}
-  alias Mechanize.Form.{SelectList, Option}
+  alias Mechanize.Form.SelectList
   alias Mechanize.Page.Element
   import TestHelper
 
@@ -35,11 +35,13 @@ defmodule Mechanize.Form.SelectTest do
       assert form
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected, &1.index}) == [
-               {"Option 1", "1", "Option 1", false, 0},
-               {"Option 2", "2", "Option 2", true, 1},
+             |> Enum.map(
+               &{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected, &1.index}
+             ) == [
+               {"Label 1", "1", "Option 1", false, 0},
+               {nil, "2", "Option 2", true, 1},
                {"Label 3", "3", "Option 3", false, 2},
-               {"Option 4", "Option 4", "Option 4", false, 3}
+               {nil, "Option 4", "Option 4", false, 3}
              ]
     end
 
@@ -47,12 +49,12 @@ defmodule Mechanize.Form.SelectTest do
       assert form
              |> Form.select_lists_with(name: ~r/^select/)
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
-               {"Option 2", "2", "Option 2", true},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", false},
+               {nil, "2", "Option 2", true},
                {"Label 3", "3", "Option 3", false},
-               {"Option 4", "Option 4", "Option 4", false},
-               {"Option 5", "5", "Option 5", false}
+               {nil, "Option 4", "Option 4", false},
+               {nil, "5", "Option 5", false}
              ]
     end
 
@@ -61,8 +63,8 @@ defmodule Mechanize.Form.SelectTest do
              |> Form.select_lists_with(name: "select2")
              |> List.first()
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 5", "5", "Option 5", false}
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {nil, "5", "Option 5", false}
              ]
     end
   end
@@ -82,20 +84,20 @@ defmodule Mechanize.Form.SelectTest do
 
     test "raise when many options selected on single selection select list", %{form: form} do
       assert_raise Mechanize.Form.InconsistentFormError, ~r/Multiple selected/, fn ->
-        SelectList.select(form, name: "select1", option: [label: ~r/Option/])
+        SelectList.select(form, name: "select1", option: [label: ~r/Label/])
       end
     end
 
     test "multi select list", %{form: form} do
       assert form
-             |> SelectList.select(name: "multiple1", option: [label: ~r/Option/])
+             |> SelectList.select(name: "multiple1", option: [label: ~r/Label/])
              |> Form.select_lists_with(name: "multiple1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", true},
-               {"Option 2", "2", "Option 2", true},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", true},
+               {nil, "2", "Option 2", true},
                {"Label 3", "3", "Option 3", true},
-               {"Option 4", "Option 4", "Option 4", true}
+               {nil, "Option 4", "Option 4", false}
              ]
     end
 
@@ -109,11 +111,11 @@ defmodule Mechanize.Form.SelectTest do
              |> SelectList.select(name: "select1", option: [text: "Option 3"])
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
-               {"Option 2", "2", "Option 2", false},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", false},
+               {nil, "2", "Option 2", false},
                {"Label 3", "3", "Option 3", true},
-               {"Option 4", "Option 4", "Option 4", false}
+               {nil, "Option 4", "Option 4", false}
              ]
     end
 
@@ -122,11 +124,11 @@ defmodule Mechanize.Form.SelectTest do
              |> SelectList.select(name: "select1", option: [label: "Label 3"])
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
-               {"Option 2", "2", "Option 2", false},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", false},
+               {nil, "2", "Option 2", false},
                {"Label 3", "3", "Option 3", true},
-               {"Option 4", "Option 4", "Option 4", false}
+               {nil, "Option 4", "Option 4", false}
              ]
     end
 
@@ -135,11 +137,11 @@ defmodule Mechanize.Form.SelectTest do
              |> SelectList.select(name: "select1", option: [value: "1"])
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", true},
-               {"Option 2", "2", "Option 2", false},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", true},
+               {nil, "2", "Option 2", false},
                {"Label 3", "3", "Option 3", false},
-               {"Option 4", "Option 4", "Option 4", false}
+               {nil, "Option 4", "Option 4", false}
              ]
     end
 
@@ -148,11 +150,11 @@ defmodule Mechanize.Form.SelectTest do
              |> SelectList.select(name: "select1", option: 2)
              |> Form.select_lists_with(name: "select1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.value, Element.text(&1), &1.selected}) == [
-               {"Option 1", "1", "Option 1", false},
-               {"Option 2", "2", "Option 2", false},
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", false},
+               {nil, "2", "Option 2", false},
                {"Label 3", "3", "Option 3", true},
-               {"Option 4", "Option 4", "Option 4", false}
+               {nil, "Option 4", "Option 4", false}
              ]
     end
 
@@ -215,14 +217,14 @@ defmodule Mechanize.Form.SelectTest do
 
     test "select option by label", %{form: form} do
       assert form
-             |> SelectList.unselect(name: "multiple1", option: [label: "Option 2"])
+             |> SelectList.unselect(name: "multiple1", option: [label: "Label 3"])
              |> Form.select_lists_with(name: "multiple1")
              |> SelectList.options()
-             |> Enum.map(&{&1.label, &1.selected}) == [
-               {"Option 1", false},
-               {"Option 2", false},
-               {"Label 3", true},
-               {"Option 4", false}
+             |> Enum.map(&{Element.attr(&1, :label), &1.selected}) == [
+               {"Label 1", false},
+               {nil, true},
+               {"Label 3", false},
+               {nil, false}
              ]
     end
 

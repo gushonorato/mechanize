@@ -68,9 +68,3 @@ defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page.Element do
   def parser_data(e), do: e.parser_data
   def page(e), do: e.page
 end
-
-defimpl Mechanize.Queryable, for: Mechanize.Page.Element do
-  defdelegate attrs(queryable), to: Mechanize.Page.Element
-  defdelegate name(queryable), to: Mechanize.Page.Element
-  defdelegate text(queryable), to: Mechanize.Page.Element
-end

@@ -2,13 +2,12 @@ defmodule Mechanize.Form.Checkbox do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.{Queryable}
   alias Mechanize.Query.BadCriteriaError
 
   use Mechanize.Form.FieldMatcher, suffix: "es"
   use Mechanize.Form.FieldUpdater, suffix: "es"
 
-  @derive [Queryable, Elementable]
+  @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, value: nil, checked: false
 

@@ -1,6 +1,6 @@
 defmodule Mechanize.Query do
   alias Mechanize.HTMLParser.Parseable
-  alias Mechanize.Queryable
+  alias Mechanize.Page.Element
 
   defmodule BadCriteriaError do
     defexception [:message]
@@ -52,7 +52,7 @@ defmodule Mechanize.Query do
   end
 
   def match_criteria?(element, [{:tags, tags} | criterias]) do
-    String.to_atom(Queryable.name(element)) in tags and match_criteria?(element, criterias)
+    String.to_atom(Element.name(element)) in tags and match_criteria?(element, criterias)
   end
 
   def match_criteria?(element, [{:text, text} | criterias]) do
@@ -81,15 +81,15 @@ defmodule Mechanize.Query do
   end
 
   defp match_text?(element, nil) do
-    Queryable.text(element) == nil
+    Element.text(element) == nil
   end
 
   defp match_text?(element, text) when is_binary(text) do
-    Queryable.text(element) == text
+    Element.text(element) == text
   end
 
   defp match_text?(element, text) do
-    Queryable.text(element) != nil and Queryable.text(element) =~ text
+    Element.text(element) != nil and Element.text(element) =~ text
   end
 
   defp parser(elements) when is_list(elements),
@@ -97,9 +97,9 @@ defmodule Mechanize.Query do
 
   defp parser(element), do: Parseable.parser(element)
 
-  defp attr(queryable, attr_name) do
-    queryable
-    |> Queryable.attrs()
+  defp attr(element, attr_name) do
+    element
+    |> Element.attrs()
     |> List.keyfind(Atom.to_string(attr_name), 0, {nil, nil})
     |> elem(1)
   end

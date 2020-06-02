@@ -2,13 +2,13 @@ defmodule Mechanize.Form.ImageInput do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.{Form, Queryable}
+  alias Mechanize.Form
   alias Mechanize.Query.BadCriteriaError
 
   use Mechanize.Form.FieldMatcher
   use Mechanize.Form.FieldUpdater
 
-  @derive [Elementable, Queryable]
+  @derive [Elementable]
   defstruct element: nil, name: nil, x: 0, y: 0
 
   @type t :: %__MODULE__{

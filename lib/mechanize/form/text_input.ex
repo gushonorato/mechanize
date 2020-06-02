@@ -3,12 +3,11 @@ defmodule Mechanize.Form.TextInput do
 
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.ParameterizableField
-  alias Mechanize.Queryable
   alias Mechanize.Query.BadCriteriaError
 
   use Mechanize.Form.{FieldMatcher, FieldUpdater}
 
-  @derive [ParameterizableField, Queryable, Elementable]
+  @derive [ParameterizableField, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, value: nil
 
@@ -53,7 +52,8 @@ defmodule Mechanize.Form.TextInput do
     if text_inputs_with(form, criteria) == [],
       do:
         raise(BadCriteriaError,
-          message: "Can't fill text input with criteria #{inspect(criteria)} because it was not found"
+          message:
+            "Can't fill text input with criteria #{inspect(criteria)} because it was not found"
         )
   end
 end

@@ -2,14 +2,14 @@ defmodule Mechanize.Form.SubmitButton do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.{Form, Queryable}
+  alias Mechanize.Form
   alias Mechanize.Form.ParameterizableField
   alias Mechanize.Query.BadCriteriaError
 
   use Mechanize.Form.FieldMatcher
   use Mechanize.Form.FieldUpdater
 
-  @derive [ParameterizableField, Queryable, Elementable]
+  @derive [ParameterizableField, Elementable]
   defstruct element: nil, name: nil, value: nil, label: nil
 
   @type t :: %__MODULE__{
@@ -66,7 +66,8 @@ defmodule Mechanize.Form.SubmitButton do
   defp maybe_click_on_button(buttons, form) do
     case buttons do
       [] ->
-        raise BadCriteriaError, message: "Can't click on submit button because no button was found for given criteria"
+        raise BadCriteriaError,
+          message: "Can't click on submit button because no button was found for given criteria"
 
       [button] ->
         click(form, button)

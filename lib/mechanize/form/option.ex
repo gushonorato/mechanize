@@ -2,9 +2,8 @@ defmodule Mechanize.Form.Option do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Queryable
 
-  @derive [Elementable, Queryable]
+  @derive [Elementable]
   @enforce_keys [:element, :index]
   defstruct element: nil, label: nil, value: nil, selected: false, index: nil
 

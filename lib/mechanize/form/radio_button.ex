@@ -1,14 +1,14 @@
 defmodule Mechanize.Form.RadioButton do
   @moduledoc false
 
-  alias Mechanize.{Query, Queryable}
+  alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.InconsistentFormError
   alias Mechanize.Query.BadCriteriaError
 
   use Mechanize.Form.{FieldMatcher, FieldUpdater}
 
-  @derive [Queryable, Elementable]
+  @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, value: nil, checked: false
 
@@ -83,7 +83,8 @@ defmodule Mechanize.Form.RadioButton do
 
       group_names ->
         raise InconsistentFormError,
-          message: "Multiple radio buttons with same name (#{Enum.join(group_names, ", ")}) are checked"
+          message:
+            "Multiple radio buttons with same name (#{Enum.join(group_names, ", ")}) are checked"
     end
   end
 end

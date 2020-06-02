@@ -5,11 +5,11 @@ defmodule Mechanize.Form.SelectList do
   alias Mechanize.Form.{Option, InconsistentFormError}
   alias Mechanize.Query
   alias Mechanize.Query.BadCriteriaError
-  alias Mechanize.{Form, Query, Queryable}
+  alias Mechanize.{Form, Query}
 
   use Mechanize.Form.FieldMatcher
 
-  @derive [Queryable, Elementable]
+  @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, options: []
 

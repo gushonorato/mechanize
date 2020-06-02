@@ -132,8 +132,6 @@ defmodule Mechanize.Form do
 
   defdelegate select_lists(form), to: SelectList
   defdelegate select_lists_with(form, criteria), to: SelectList
-  defdelegate update_select_lists(form, fun), to: SelectList
-  defdelegate update_select_lists_with(form, criteria, fun), to: SelectList
   defdelegate select(form, criteria), to: SelectList
   defdelegate unselect(form, criteria), to: SelectList
 

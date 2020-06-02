@@ -8,7 +8,6 @@ defmodule Mechanize.Form.SelectList do
   alias Mechanize.{Form, Query, Queryable}
 
   use Mechanize.Form.FieldMatcher
-  use Mechanize.Form.FieldUpdater
 
   @derive [Queryable, Elementable]
   @enforce_keys [:element]

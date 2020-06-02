@@ -10,9 +10,9 @@ One of Mechanize's main design goals is to enable developers to easily create co
 - Follow and tracks 3xx redirects
 - Follow meta-refresh
 - Automatically stores and sends cookies (TODO)
-- File upload (TODO)
-- Track of the sites that you have visited as a history (TODO)
 - Proxy support (TODO)
+- Track of the sites that you have visited as a history (TODO)
+- File upload (TODO)
 - Obey robots.txt (TODO)
 
 ## Installation

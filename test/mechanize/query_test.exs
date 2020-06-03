@@ -234,30 +234,30 @@ defmodule Mechanize.QueryTest do
     end
   end
 
-  describe ".search_matches" do
+  describe ".elements_with" do
     test "raise if parseable is nil" do
       assert_raise ArgumentError, "parseable is nil", fn ->
-        Query.search_matches(nil, "div")
+        Query.elements_with(nil, "div")
       end
     end
 
     test "raise if selector is nil" do
       assert_raise ArgumentError, "selector is nil", fn ->
-        Query.search_matches(@page, nil)
+        Query.elements_with(@page, nil)
       end
     end
 
     test "select none by selector" do
-      assert Query.search_matches(@page, ".asia", class: "spanish") == []
+      assert Query.elements_with(@page, ".asia", class: "spanish") == []
     end
 
     test "select none by criteria" do
-      assert Query.search_matches(@page, ".spanish", class: "english") == []
+      assert Query.elements_with(@page, ".spanish", class: "english") == []
     end
 
     test "select by css and criteria" do
       assert @page
-             |> Query.search_matches(".continent > *", class: "portuguese")
+             |> Query.elements_with(".continent > *", class: "portuguese")
              |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
     end
   end

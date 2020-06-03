@@ -26,7 +26,7 @@ defmodule Mechanize.Query do
     Enum.filter(queryable, &match_criteria?(&1, criteria))
   end
 
-  def search_matches(parseable, selector, criteria \\ []) do
+  def elements_with(parseable, selector, criteria \\ []) do
     parseable
     |> search(selector)
     |> matches(criteria)

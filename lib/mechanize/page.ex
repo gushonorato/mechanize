@@ -160,7 +160,7 @@ defmodule Mechanize.Page do
 
   defdelegate search(page, selector), to: Query
   defdelegate filter(page, selector), to: Query
-  defdelegate elements_with(page, selector, criteria \\ []), to: Query, as: :search_matches
+  defdelegate elements_with(page, selector, criteria \\ []), to: Query
 end
 
 defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page do

@@ -7,11 +7,6 @@ files
 |> Enum.filter(&String.ends_with?(&1, [".ex", ".exs"]))
 |> Enum.each(&Code.require_file("support/#{&1}", __DIR__))
 
-import Mox
-
-defmock(Mechanize.HTMLParser.Custom, for: Mechanize.HTMLParser)
-defmock(Mechanize.HTTPAdapter.Mock, for: Mechanize.HTTPAdapter)
-
 defmodule TestHelper do
   def stub_requests(local_path) do
     bypass = Bypass.open()

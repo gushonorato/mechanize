@@ -1,222 +1,160 @@
 defmodule Mechanize.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
   alias Mechanize.HTMLParser
-  alias Mechanize.HTMLParser.Parseable
-  alias Mechanize.Page
   alias Mechanize.Page.Element
+  import TestHelper
 
-  doctest Mechanize.HTMLParser.Floki
-
-  @html """
-    <html>
-    <head>
-    <title>Test</title>
-    <meta name="description" content="Test webpage"/>
-    </head>
-    <body>
-      <div id="main" class="container" data-method="get">
-        <a disabled href="http://google.com" class="company js-google js-cool">Google</a>
-      </div>
-      <div class="content">
-        <a disabled href="http://google.com" class="company js-google js-cool">Google</a>
-        <a href="http://elixir-lang.org" class="js-elixir js-cool">Elixir lang</a>
-        <a href="http://java.com" class="js-java">Java</a>
-      </div>
-    </body>
-    </html>
-  """
-
-  @html_without_text """
-    <html>
-    <head>
-    <title></title>
-    <meta name="description" content="Test webpage"/>
-    </head>
-    <body>
-      <div id="main" class="container" data-method="get">
-      </div>
-      <div class="content">
-      </div>
-    </body>
-    </html>
-  """
-
-  @page %Page{
-    browser: :fake_mechanize_pid,
-    content: @html
-  }
-
-  @page_without_text %Page{
-    browser: :fake_mechanize_pid,
-    content: @html_without_text
-  }
-
-  @google %Element{
-    name: "a",
-    attrs: [
-      {"disabled", "disabled"},
-      {"href", "http://google.com"},
-      {"class", "company js-google js-cool"}
-    ],
-    text: "Google",
-    parser_data: {
-      "a",
-      [
-        {"disabled", "disabled"},
-        {"href", "http://google.com"},
-        {"class", "company js-google js-cool"}
-      ],
-      ["Google"]
-    },
-    page: @page
-  }
+  setup_all do
+    {:ok, %{page: page}} = stub_requests("/test/htdocs/html_parser_test.html")
+    {:ok, %{page: page, parser: Mechanize.HTMLParser.Floki}}
+  end
 
   describe ".search" do
-    test "raise if parseable is nil" do
-      assert_raise ArgumentError, "parseable is nil", fn ->
-        assert HTMLParser.Floki.search(nil, ".google")
+    test "raises if page_or_elements is nil", %{parser: parser} do
+      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+        parser.search(nil, ".continent")
       end
     end
 
-    test "raise if selector is nil" do
+    test "raises if selector is nil", %{parser: parser, page: page} do
       assert_raise ArgumentError, "selector is nil", fn ->
-        assert HTMLParser.Floki.search(@page, nil)
+        parser.search(page, nil)
       end
     end
 
-    test "element not found" do
-      assert HTMLParser.Floki.search(@page, ".unknown") == []
+    test "returns empty list when nothing found", %{parser: parser, page: page} do
+      assert parser.search(page, ".unknown") == []
     end
 
-    test "one element with children found" do
-      element = %Element{
-        name: "div",
-        attrs: [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
-        text: "Google",
-        parser_data: {
-          "div",
-          [{"id", "main"}, {"class", "container"}, {"data-method", "get"}],
-          [
-            {"a",
-             [
-               {"disabled", "disabled"},
-               {"href", "http://google.com"},
-               {"class", "company js-google js-cool"}
-             ], ["Google"]}
-          ]
-        },
-        page: @page
-      }
-
-      assert HTMLParser.Floki.search(@page, ".container") == [element]
+    test "returns empty list on search empty list" do
+      assert HTMLParser.Floki.search([], ".portuguese") == []
     end
 
-    test "multiple elements found" do
-      assert HTMLParser.Floki.search(@page, ".js-google") == [@google, @google]
+    test "multiple elements found", %{parser: parser, page: page} do
+      assert page
+             |> parser.search(".portuguese")
+             |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
     end
 
-    test "only element child nodes" do
-      result =
-        @page
-        |> HTMLParser.Floki.search(".container")
-        |> HTMLParser.Floki.search(".js-google")
-
-      assert result == [@google]
+    test "search chained siblings", %{parser: parser, page: page} do
+      assert page
+             |> parser.search(".continent")
+             |> parser.search(".portuguese")
+             |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
     end
 
-    test "empty elements list" do
-      assert HTMLParser.Floki.search([], ".js-google") == []
-    end
-
-    test "elements from different pages" do
-      assert_raise ArgumentError, fn ->
-        HTMLParser.Floki.search(
-          [%Element{page: @page}, %Element{page: @page_without_text}],
-          ".js-google"
-        )
-      end
+    test "search nested parents", %{parser: parser, page: page} do
+      assert page
+             |> parser.search(".world")
+             |> parser.search(".america")
+             |> parser.search(".portuguese")
+             |> Enum.map(&Element.text/1) == ["Brazil"]
     end
   end
 
   describe ".filter" do
-    test "raise when parseable is nil" do
-      assert_raise ArgumentError, "parseable is nil", fn ->
-        HTMLParser.Floki.filter(nil, "a")
+    test "raise when page_or_elements is nil", %{page: page, parser: parser} do
+      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+        parser.filter(nil, "a")
       end
     end
 
-    test "raise when selector is nil" do
+    test "raise when selector is nil", %{page: page, parser: parser} do
       assert_raise ArgumentError, "selector is nil", fn ->
-        HTMLParser.Floki.filter(@page, nil)
+        parser.filter(page, nil)
       end
     end
 
-    test "empty element list" do
-      assert HTMLParser.Floki.filter([], "form") == []
+    test "empty element list", %{parser: parser} do
+      assert parser.filter([], "form") == []
     end
 
-    test "returns a list of elements" do
-      subject = HTMLParser.Floki.filter(@page, "a")
+    test "returns a list of elements", %{page: page, parser: parser} do
+      subject = parser.filter(page, "a")
 
       assert is_list(subject)
       Enum.each(subject, fn e -> assert match?(%Element{}, e) end)
     end
 
-    test "remove selected elements from a page" do
-      assert(
-        @page
-        |> HTMLParser.Floki.filter("a")
-        |> List.first()
-        |> Parseable.parser_data() ==
-          {"html", [],
-           [
-             {"head", [],
-              [
-                {"title", [], ["Test"]},
-                {"meta", [{"name", "description"}, {"content", "Test webpage"}], []}
-              ]},
-             {"body", [],
-              [
-                {"div",
-                 [
-                   {"id", "main"},
-                   {"class", "container"},
-                   {"data-method", "get"}
-                 ], []},
-                {"div", [{"class", "content"}], []}
-              ]}
-           ]}
-      )
-    end
+    test "remove selected elements from a page"
 
-    test "remove selected elements from a list of elements" do
-      assert(
-        @page
-        |> HTMLParser.Floki.search("div")
-        |> HTMLParser.Floki.filter(".js-cool")
-        |> Enum.map(&Parseable.parser_data/1) == [
-          {"div", [{"id", "main"}, {"class", "container"}, {"data-method", "get"}], []},
-          {"div", [{"class", "content"}],
-           [{"a", [{"href", "http://java.com"}, {"class", "js-java"}], ["Java"]}]}
-        ]
-      )
-    end
+    test "remove selected elements from a list of elements"
   end
 
   describe ".raw_html" do
-    test "parseable is nil" do
-      assert_raise ArgumentError, "parseable is nil", fn ->
-        HTMLParser.Floki.raw_html(nil)
+    test "parseable is nil", %{parser: parser} do
+      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+        parser.raw_html(nil)
       end
     end
 
-    test "parseable is a page" do
-      assert HTMLParser.Floki.raw_html(@page) == @html
+    test "returns raw contents of a page", %{page: page, parser: parser} do
+      assert parser.raw_html(page) == page.content
     end
 
-    test "parseable is an element" do
-      assert HTMLParser.Floki.raw_html(@google) ==
-               ~s(<a disabled="disabled" href="http://google.com" class="company js-google js-cool">Google</a>)
+    test "returns a raw content of single element", %{page: page, parser: parser} do
+      assert page
+             |> parser.search(".europe .portuguese")
+             |> List.first()
+             |> parser.raw_html() ==
+               ~s(<div class="portuguese">Portugal</div>)
+    end
+  end
+
+  describe "element parsing" do
+    setup %{page: page, parser: parser, selector: selector} do
+      {:ok,
+       %{
+         element:
+           page
+           |> parser.search(selector)
+           |> List.first()
+       }}
+    end
+
+    @tag selector: "#attribute_without_value"
+    test "attribute without value", %{element: element} do
+      assert element.attrs == [{"id", "attribute_without_value"}, {"value", "value"}]
+    end
+
+    @tag selector: "#attribute_with_empty_value"
+    test "attribute with empty value", %{element: element} do
+      assert element.attrs == [{"id", "attribute_with_empty_value"}, {"value", ""}]
+    end
+
+    @tag selector: "#attribute_with_value"
+    test "attribute with value", %{element: element} do
+      assert element.attrs == [{"id", "attribute_with_value"}, {"value", "10"}]
+    end
+
+    @tag selector: "#attribute_with_untrimmed_value"
+    test "attribute with untrimmed value", %{element: element} do
+      assert element.attrs == [{"id", "attribute_with_untrimmed_value"}, {"value", "  10   "}]
+    end
+
+    @tag selector: "#attribute_absent"
+    test "attribute absent", %{element: element} do
+      assert element.attrs == [{"id", "attribute_absent"}]
+    end
+
+    @tag selector: "#text_empty"
+    test "text empty", %{element: element} do
+      assert element.text == ""
+    end
+
+    @tag selector: "#text_absent"
+    test "text absent", %{element: element} do
+      assert element.text == ""
+    end
+
+    @tag selector: "#text_present"
+    test "text present", %{element: element} do
+      assert element.text == "Lero"
+    end
+
+    @tag selector: "#text_untrimmed"
+    test "text untrimmed", %{element: element} do
+      assert element.text == "   Lero   "
     end
   end
 end

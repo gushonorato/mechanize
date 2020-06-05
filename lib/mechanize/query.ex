@@ -1,39 +1,77 @@
 defmodule Mechanize.Query do
-  alias Mechanize.HTMLParser.Parseable
-  alias Mechanize.Page.Element
+  alias Mechanize.Page.{Element, Elementable}
+  alias Mechanize.Page
 
   defmodule BadCriteriaError do
     defexception [:message]
   end
 
-  def search(nil, _selector), do: raise(ArgumentError, "parseable is nil")
+  def search(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
+  def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
 
-  def search(_parseable, nil), do: raise(ArgumentError, "selector is nil")
+  def search(%Page{} = page, selector), do: page.parser.search(page, selector)
 
-  def search(parseable, selector), do: parser(parseable).search(parseable, selector)
+  def search(elementables, selector) when is_list(elementables) do
+    elements = Enum.map(elementables, &Elementable.element/1)
+    parser = List.first(elements).parser
 
-  def filter(nil, _selector), do: raise(ArgumentError, "parseable is nil")
-
-  def filter(_parseable, nil), do: raise(ArgumentError, "selector is nil")
-
-  def filter(parseable, selector), do: parser(parseable).filter(parseable, selector)
-
-  def matches(nil, _criteria) do
-    raise ArgumentError, "queryable is nil"
+    parser.search(elements, selector)
   end
 
-  def matches(queryable, criteria) do
-    Enum.filter(queryable, &match_criteria?(&1, criteria))
+  def search(elementable, selector) do
+    search([elementable], selector)
   end
 
-  def elements_with(parseable, selector, criteria \\ []) do
-    parseable
+  def filter(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
+  def filter(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
+
+  def filter(%Page{} = page, selector), do: page.parser.filter(page, selector)
+
+  def filter(elementables, selector) when is_list(elementables) do
+    elements = Enum.map(elementables, &Elementable.element/1)
+    parser = List.first(elements).parser
+
+    parser.search(elements, selector)
+  end
+
+  def filter(elementable, selector), do: filter([elementable], selector)
+
+  def elements_with(page_or_elements, selector, criteria \\ []) do
+    page_or_elements
     |> search(selector)
-    |> matches(criteria)
+    |> Enum.filter(&match_criteria?(&1, criteria))
   end
+
+  def match?(nil, _types, _criteria) do
+    raise ArgumentError, "element is nil"
+  end
+
+  def match?(_element, nil, _criteria) do
+    raise ArgumentError, "types is nil"
+  end
+
+  def match?(_element, _types, nil) do
+    raise ArgumentError, "criteria is nil"
+  end
+
+  def match?(element, types, criteria) do
+    match_type?(element, types) and match_criteria?(element, criteria)
+  end
+
+  def match_type?(element, types) when is_list(types) do
+    element.__struct__ in types
+  end
+
+  def match_type?(element, type) do
+    match_type?(element, [type])
+  end
+
+  def match_criteria?(nil, _criteria), do: raise(ArgumentError, "element is nil")
+  def match_criteria?(_element, nil), do: raise(ArgumentError, "criteria is nil")
 
   def match_criteria?(_element, []), do: true
 
+  # TODO: Add tests
   def match_criteria?(element, index) when is_integer(index) do
     case element.index do
       nil ->
@@ -47,60 +85,38 @@ defmodule Mechanize.Query do
     end
   end
 
-  def match_criteria?(element, [{:tag, tag} | criterias]) do
-    match_criteria?(element, [{:tags, [tag]} | criterias])
-  end
-
-  def match_criteria?(element, [{:tags, tags} | criterias]) do
-    String.to_atom(Element.name(element)) in tags and match_criteria?(element, criterias)
-  end
-
-  def match_criteria?(element, [{:text, text} | criterias]) do
-    match_text?(element, text) and match_criteria?(element, criterias)
-  end
-
   def match_criteria?(element, [attributes | criterias]) do
     match_attribute?(element, attributes) and match_criteria?(element, criterias)
   end
 
-  defp match_attribute?(element, {attr_name, value}) when value == nil or value == false do
-    attr(element, attr_name) == nil
+  defp match_attribute?(_element, {:text, nil}) do
+    raise ArgumentError, "criteria :text is nil"
   end
 
-  defp match_attribute?(element, {attr_name, true}) do
-    attr(element, attr_name) != nil
+  defp match_attribute?(element, {:text, value}) when is_binary(value) do
+    Element.text(element) == value
   end
 
-  defp match_attribute?(element, {attr_name, value}) when is_binary(value) or is_integer(value) do
-    attr(element, attr_name) == value
+  defp match_attribute?(element, {:text, value}) do
+    Element.text(element) =~ value
+  end
+
+  defp match_attribute?(_element, {attr_name, nil}) do
+    raise ArgumentError, "criteria :#{attr_name} is nil"
+  end
+
+  defp match_attribute?(element, {attr_name, boolean}) when is_boolean(boolean) do
+    Element.attr_present?(element, attr_name) == boolean
+  end
+
+  defp match_attribute?(element, {attr_name, value}) when is_binary(value) do
+    Element.attr(element, attr_name) == value
   end
 
   defp match_attribute?(element, {attr_name, value}) do
-    attr_value = attr(element, attr_name)
-    attr_value != nil and attr_value =~ value
-  end
-
-  defp match_text?(element, nil) do
-    Element.text(element) == nil
-  end
-
-  defp match_text?(element, text) when is_binary(text) do
-    Element.text(element) == text
-  end
-
-  defp match_text?(element, text) do
-    Element.text(element) != nil and Element.text(element) =~ text
-  end
-
-  defp parser(elements) when is_list(elements),
-    do: elements |> List.first() |> Parseable.parser()
-
-  defp parser(element), do: Parseable.parser(element)
-
-  defp attr(element, attr_name) do
-    element
-    |> Element.attrs()
-    |> List.keyfind(Atom.to_string(attr_name), 0, {nil, nil})
-    |> elem(1)
+    case Element.attr(element, attr_name) do
+      nil -> false
+      attr_value -> attr_value =~ value
+    end
   end
 end

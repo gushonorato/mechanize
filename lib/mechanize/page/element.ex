@@ -5,6 +5,7 @@ defmodule Mechanize.Page.Element do
             attrs: nil,
             parser_data: nil,
             text: nil,
+            parser: nil,
             page: nil
 
   @type t :: %__MODULE__{
@@ -12,6 +13,7 @@ defmodule Mechanize.Page.Element do
           attrs: list(),
           parser_data: list(),
           text: String.t(),
+          parser: module(),
           page: Page.t()
         }
 
@@ -60,11 +62,4 @@ end
 
 defimpl Mechanize.Page.Elementable, for: Mechanize.Page.Element do
   def element(e), do: e
-end
-
-defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page.Element do
-  alias Mechanize.HTMLParser.Parseable
-  def parser(e), do: Parseable.parser(e.page)
-  def parser_data(e), do: e.parser_data
-  def page(e), do: e.page
 end

@@ -12,6 +12,7 @@ defmodule Mechanize.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       dialyzer: [plt_add_deps: :transitive],
+      elixirc_paths: elixirc_paths(Mix.env()),
 
       # Docs
       name: "Mechanize",
@@ -22,6 +23,9 @@ defmodule Mechanize.MixProject do
       ]
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help compile.app" to learn about applications.
   def application do

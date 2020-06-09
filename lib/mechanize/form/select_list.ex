@@ -48,7 +48,7 @@ defmodule Mechanize.Form.SelectList do
   end
 
   defp assert_select_found(form, criteria) do
-    selects = get_in(form, [:fields, Access.filter(&Query.match_criteria?(&1, criteria))])
+    selects = get_in(form, [:fields, Access.filter(&Query.match?(&1, __MODULE__, criteria))])
 
     if selects == [] do
       raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
@@ -61,7 +61,7 @@ defmodule Mechanize.Form.SelectList do
     options =
       get_in(form, [
         :fields,
-        Access.filter(&Query.match_criteria?(&1, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
         :options,
         Access.filter(&Query.match_criteria?(&1, opts_criteria))
       ])
@@ -72,6 +72,10 @@ defmodule Mechanize.Form.SelectList do
 
     form
   end
+
+  def select(form, criteria \\ [])
+
+  def select(nil, _criteria), do: raise(ArgumentError, "form is nil")
 
   def select(form, criteria) do
     {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])
@@ -85,11 +89,13 @@ defmodule Mechanize.Form.SelectList do
   end
 
   defp ensure_single_selected(form, criteria) do
+    criteria = Keyword.put(criteria, :multiple, false)
+
     put_in(
       form,
       [
         :fields,
-        Access.filter(&match_single_selection?(&1, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
         :options,
         Access.all(),
         :selected
@@ -98,16 +104,12 @@ defmodule Mechanize.Form.SelectList do
     )
   end
 
-  defp match_single_selection?(select, criteria) do
-    !Element.attr_present?(select, :multiple) and Query.match_criteria?(select, criteria)
-  end
-
   defp update_select(form, criteria, opts_criteria, selected) do
     put_in(
       form,
       [
         :fields,
-        Access.filter(&Query.match_criteria?(&1, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
         :options,
         Access.filter(&Query.match_criteria?(&1, opts_criteria)),
         :selected
@@ -115,6 +117,9 @@ defmodule Mechanize.Form.SelectList do
       selected
     )
   end
+
+  def unselect(form, criteria \\ [])
+  def unselect(nil, _criteria), do: raise(ArgumentError, "form is nil")
 
   def unselect(form, criteria) do
     {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])

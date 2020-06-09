@@ -28,6 +28,18 @@ defmodule Mechanize.Form.SelectTest do
              |> Form.select_lists_with(name: "select1")
              |> Enum.map(& &1.name) == ["select1"]
     end
+
+    test "returns only select lists" do
+      {:ok, %{page: page}} = stub_requests("/test/htdocs/form_test.html")
+
+      result =
+        page
+        |> Page.form_with(name: "form_with_all_field_types")
+        |> Form.select_lists_with(name: "input1")
+
+      assert [%SelectList{}] = result
+      assert result |> List.first() |> Element.attr(:id) == "select"
+    end
   end
 
   describe ".options" do
@@ -170,6 +182,20 @@ defmodule Mechanize.Form.SelectTest do
                {"Option 4", true}
              ]
     end
+
+    test "selects only selects in form" do
+      {:ok, %{page: page}} = stub_requests("/test/htdocs/form_test.html")
+
+      page
+      |> Page.form_with(name: "form_with_all_field_types")
+      |> SelectList.select(name: "input1", option: [text: "Option 1"])
+    end
+
+    test "raise if form is nil" do
+      assert_raise ArgumentError, "form is nil", fn ->
+        SelectList.select(nil, name: "input1", option: [text: "Option 1"])
+      end
+    end
   end
 
   describe ".unselect" do
@@ -186,6 +212,12 @@ defmodule Mechanize.Form.SelectTest do
     test "raise when option not found", %{form: form} do
       assert_raise Mechanize.Query.BadCriteriaError, ~r/No option found/, fn ->
         SelectList.unselect(form, name: "multiple1", option: [name: ~r/Lero/])
+      end
+    end
+
+    test "raise if form is nil" do
+      assert_raise ArgumentError, "form is nil", fn ->
+        SelectList.unselect(nil, name: "input1", option: [text: "Option 1"])
       end
     end
 

@@ -162,9 +162,3 @@ defmodule Mechanize.Page do
   defdelegate filter(page, selector), to: Query
   defdelegate elements_with(page, selector, criteria \\ []), to: Query
 end
-
-defimpl Mechanize.HTMLParser.Parseable, for: Mechanize.Page do
-  def parser(page), do: page.parser
-  def parser_data(page), do: page.content
-  def page(page), do: page
-end

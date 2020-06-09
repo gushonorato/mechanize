@@ -1,6 +1,5 @@
 defmodule Mechanize.HTMLParser.FlokiTest do
   use ExUnit.Case, async: true
-  alias Mechanize.HTMLParser
   alias Mechanize.Page.Element
   import TestHelper
 
@@ -10,8 +9,8 @@ defmodule Mechanize.HTMLParser.FlokiTest do
   end
 
   describe ".search" do
-    test "raises if page_or_elements is nil", %{parser: parser} do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+    test "raises if page_or_element is nil", %{parser: parser} do
+      assert_raise ArgumentError, "page_or_element is nil", fn ->
         parser.search(nil, ".continent")
       end
     end
@@ -26,29 +25,32 @@ defmodule Mechanize.HTMLParser.FlokiTest do
       assert parser.search(page, ".unknown") == []
     end
 
-    test "returns empty list on search empty list" do
-      assert HTMLParser.Floki.search([], ".portuguese") == []
+    test "search page with single element found", %{parser: parser, page: page} do
+      assert page
+             |> parser.search(".america .portuguese")
+             |> Enum.map(&Element.text/1) == ["Brazil"]
     end
 
-    test "multiple elements found", %{parser: parser, page: page} do
+    test "search page with multiple elements found", %{parser: parser, page: page} do
       assert page
              |> parser.search(".portuguese")
              |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
     end
 
-    test "search chained siblings", %{parser: parser, page: page} do
-      assert page
-             |> parser.search(".continent")
-             |> parser.search(".portuguese")
-             |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
-    end
+    test "search element with single element found", %{parser: parser, page: page} do
+      [element] = parser.search(page, ".america")
 
-    test "search nested parents", %{parser: parser, page: page} do
-      assert page
-             |> parser.search(".world")
-             |> parser.search(".america")
+      assert element
              |> parser.search(".portuguese")
              |> Enum.map(&Element.text/1) == ["Brazil"]
+    end
+
+    test "search element with multiple elements found", %{parser: parser, page: page} do
+      [element] = parser.search(page, ".america")
+
+      assert element
+             |> parser.search(".spanish")
+             |> Enum.map(&Element.text/1) == ["Chile", "Argentina"]
     end
   end
 
@@ -65,20 +67,41 @@ defmodule Mechanize.HTMLParser.FlokiTest do
       end
     end
 
-    test "empty element list", %{parser: parser} do
-      assert parser.filter([], "form") == []
+    test "returns an element", %{page: page, parser: parser} do
+      [%Element{}] = parser.filter(page, "a")
     end
 
-    test "returns a list of elements", %{page: page, parser: parser} do
-      subject = parser.filter(page, "a")
+    test "remove child elements from a page", %{page: page, parser: parser} do
+      [result] = parser.filter(page, "div")
 
-      assert is_list(subject)
-      Enum.each(subject, fn e -> assert match?(%Element{}, e) end)
+      node =
+        """
+         <!DOCTYPE html>
+         <html lang="en">
+           <head>
+             <meta charset="UTF-8">
+             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+           </head>
+           <body>
+           </body>
+         </html>
+        """
+        |> parser.parse_document()
+        |> List.first()
+
+      assert result.parser_data == node
     end
 
-    test "remove selected elements from a page"
+    test "remove child elements from parent element", %{page: page, parser: parser} do
+      [element] = parser.search(page, ".america")
+      [element] = parser.filter(element, ".portuguese")
 
-    test "remove selected elements from a list of elements"
+      assert Element.text(element) == "ChileArgentina"
+    end
+
+    test "remove all elements", %{page: page, parser: parser} do
+      assert parser.filter(page, "html") == []
+    end
   end
 
   describe ".raw_html" do

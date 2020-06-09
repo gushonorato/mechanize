@@ -12,10 +12,9 @@ defmodule Mechanize.Query do
   def search(%Page{} = page, selector), do: page.parser.search(page, selector)
 
   def search(elementables, selector) when is_list(elementables) do
-    elements = Enum.map(elementables, &Elementable.element/1)
-    parser = List.first(elements).parser
-
-    parser.search(elements, selector)
+    elementables
+    |> Enum.map(&Elementable.element/1)
+    |> Enum.flat_map(fn el -> el.parser.search(el, selector) end)
   end
 
   def search(elementable, selector) do
@@ -28,10 +27,9 @@ defmodule Mechanize.Query do
   def filter(%Page{} = page, selector), do: page.parser.filter(page, selector)
 
   def filter(elementables, selector) when is_list(elementables) do
-    elements = Enum.map(elementables, &Elementable.element/1)
-    parser = List.first(elements).parser
-
-    parser.search(elements, selector)
+    elementables
+    |> Enum.map(&Elementable.element/1)
+    |> Enum.flat_map(fn el -> el.parser.filter(el, selector) end)
   end
 
   def filter(elementable, selector), do: filter([elementable], selector)

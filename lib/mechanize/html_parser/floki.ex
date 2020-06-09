@@ -8,29 +8,30 @@ defmodule Mechanize.HTMLParser.Floki do
   @behaviour Mechanize.HTMLParser
 
   @impl HTMLParser
-  def search(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
+  def search(nil, _selector), do: raise(ArgumentError, "page_or_element is nil")
 
   @impl HTMLParser
   def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
 
   @impl HTMLParser
-  def search([], _selector), do: []
+  def parse_document(html_as_string) do
+    {:ok, document} = Floki.parse_document(html_as_string)
+    document
+  end
 
   @impl HTMLParser
   def search(%Page{} = page, selector) do
     page.content
+    |> parse_document()
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, page))
   end
 
   @impl HTMLParser
-  def search(elements, selector) do
-    check_elements_from_same_page(elements)
-
-    elements
-    |> Enum.map(& &1.parser_data)
+  def search(%Element{} = element, selector) do
+    element.parser_data
     |> Floki.find(selector)
-    |> Enum.map(&create_element(&1, List.first(elements).page))
+    |> Enum.map(&create_element(&1, element.page))
   end
 
   @impl HTMLParser
@@ -44,23 +45,18 @@ defmodule Mechanize.HTMLParser.Floki do
   end
 
   @impl HTMLParser
-  def filter([], _selector), do: []
-
-  @impl HTMLParser
-  def filter(elements, selector) when is_list(elements) do
-    check_elements_from_same_page(elements)
-
-    elements
-    |> Enum.map(& &1.parser_data)
+  def filter(%Element{} = element, selector) do
+    element.parser_data
+    |> List.wrap()
     |> Floki.filter_out(selector)
-    |> Enum.map(&create_element(&1, List.first(elements).page))
+    |> Enum.map(&create_element(&1, element.page))
   end
 
   @impl HTMLParser
   def filter(%Page{} = page, selector) do
     page.content
+    |> parse_document()
     |> Floki.filter_out(selector)
-    |> List.wrap()
     |> Enum.map(&create_element(&1, page))
   end
 
@@ -80,12 +76,6 @@ defmodule Mechanize.HTMLParser.Floki do
     |> Elementable.element()
     |> (fn elem -> elem.parser_data end).()
     |> Floki.raw_html(encode: false)
-  end
-
-  defp check_elements_from_same_page(elements) do
-    Enum.reduce(elements, List.first(elements).page, fn e, page ->
-      unless page == e.page, do: raise(ArgumentError, "Elements are not from the same page")
-    end)
   end
 
   defp create_element({name, attributes, _} = tree, page) do

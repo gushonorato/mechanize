@@ -32,6 +32,10 @@ defmodule Mechanize.QueryTest do
       end
     end
 
+    test "empty page_or_elements" do
+      assert Query.search([], ".english") == []
+    end
+
     test "if none matched return empty list", %{page: page} do
       assert Query.search(page, ".english") == []
     end
@@ -49,6 +53,13 @@ defmodule Mechanize.QueryTest do
              |> Enum.map(&Element.text/1) == ["Chile", "Argentina"]
     end
 
+    test "match siblings in nested search", %{page: page} do
+      assert page
+             |> Query.search(".continent")
+             |> Query.search(".portuguese")
+             |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
+    end
+
     test "search elements returned by filter", %{page: page} do
       assert page
              |> Query.filter(".america")
@@ -57,45 +68,88 @@ defmodule Mechanize.QueryTest do
     end
   end
 
-  # TODO: Verify if .filter is OK to be removed
-  # describe ".filter" do
-  #   test "return element list", %{page: page} do
-  #     assert is_list(Query.filter(page, ".europe"))
-  #   end
+  describe ".filter" do
+    test "return element list", %{page: page} do
+      assert is_list(Query.filter(page, ".europe"))
+    end
 
-  #   test "raise if parseable is nill" do
-  #     assert_raise ArgumentError, "page_or_elements is nil", fn ->
-  #       Query.filter(nil, ".spanish")
-  #     end
-  #   end
+    test "raise if parseable is nill" do
+      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+        Query.filter(nil, ".spanish")
+      end
+    end
 
-  #   test "raise if selector is nil", %{page: page} do
-  #     assert_raise ArgumentError, "selector is nil", fn ->
-  #       Query.filter(page, nil)
-  #     end
-  #   end
+    test "raise if selector is nil", %{page: page} do
+      assert_raise ArgumentError, "selector is nil", fn ->
+        Query.filter(page, nil)
+      end
+    end
 
-  #   test "if all matched return empty list", %{page: page} do
-  #     assert Query.filter(page, "*") == []
-  #   end
+    test "empty page_or_elements" do
+      assert Query.filter([], ".english") == []
+    end
 
-  #   test "return elements of a page unmatched by css selector", %{page: page} do
-  #     assert page
-  #            |> Query.filter(".spanish")
-  #            |>
-  #   end
+    test "if all matched return empty list", %{page: page} do
+      assert Query.filter(page, "*") == []
+    end
 
-  #   test "filter element returned by .search", %{page: page} do
-  #     assert page
-  #            |> Query.search(".continent")
-  #            |> Query.filter(".spanish")
-  #            |> Enum.map(fn parseable -> Parseable.parser(parseable).raw_html(parseable) end) ==
-  #              [
-  #                ~s(<div class="europe continent"><div class="portuguese">Portugal</div></div>),
-  #                ~s(<div class="america continent"><div class="portuguese">Brazil</div></div>)
-  #              ]
-  #   end
-  # end
+    test "returns elements of a page unmatched by css selector", %{page: page} do
+      [expected] =
+        """
+          <!DOCTYPE html>
+          <body>
+          <div class="europe continent">
+            <div class="portuguese">Portugal</div>
+          </div>
+
+          <div class="america continent">
+            <div class="portuguese">Brazil</div>
+          </div>
+        </body>
+
+        </html>
+        """
+        |> page.parser.parse_document()
+
+      [result] = Query.filter(page, ".spanish")
+
+      assert result.parser_data == expected
+    end
+
+    test "accepts single element returned by .search", %{page: page} do
+      [expected] =
+        """
+          <div class="america continent">
+            <div class="portuguese">Brazil</div>
+          </div>
+        """
+        |> page.parser.parse_document()
+
+      [result] =
+        page
+        |> Query.search(".america")
+        |> Query.filter(".spanish")
+
+      assert result.parser_data == expected
+    end
+
+    test "accepts many elements returned by .search", %{page: page} do
+      expected =
+        [
+          ~s(<div class="europe continent"><div class="portuguese">Portugal</div></div>),
+          ~s(<div class="america continent"><div class="portuguese">Brazil</div></div>)
+        ]
+        |> Enum.flat_map(fn html -> page.parser.parse_document(html) end)
+
+      result =
+        page
+        |> Query.search(".continent")
+        |> Query.filter(".spanish")
+        |> Enum.map(& &1.parser_data)
+
+      assert result == expected
+    end
+  end
 
   describe ".elements_with" do
     test "raise if parseable is nil" do

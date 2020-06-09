@@ -6,8 +6,11 @@ defmodule Mechanize.HTMLParser do
 
   @type selector :: String.t()
   @type attribute :: atom()
+  @type parser_node :: any()
 
-  @callback search(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
-  @callback filter(Page.t() | list(Element.t()) | [], selector) :: list(Element.t())
+  @callback parse_document(String.t()) :: list(parser_node())
+
+  @callback search(Page.t() | Element.t(), selector) :: list(Element.t())
+  @callback filter(Page.t() | Element.t(), selector) :: list(Element.t())
   @callback raw_html(Page.t() | Element.t()) :: String.t()
 end

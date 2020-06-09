@@ -11,7 +11,7 @@ defmodule Mechanize.Page.Element do
   @type t :: %__MODULE__{
           name: atom(),
           attrs: list(),
-          parser_data: list(),
+          parser_data: Mechanize.HTMLParser.parser_node(),
           text: String.t(),
           parser: module(),
           page: Page.t()

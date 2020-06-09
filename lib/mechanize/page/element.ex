@@ -1,17 +1,12 @@
 defmodule Mechanize.Page.Element do
   alias Mechanize.Page.Elementable
 
-  defstruct name: nil,
-            attrs: nil,
-            parser_data: nil,
-            text: nil,
-            parser: nil,
-            page: nil
+  defstruct [:name, :attrs, :parser_node, :text, :parser, :page]
 
   @type t :: %__MODULE__{
           name: atom(),
           attrs: list(),
-          parser_data: Mechanize.HTMLParser.parser_node(),
+          parser_node: Mechanize.HTMLParser.parser_node(),
           text: String.t(),
           parser: module(),
           page: Page.t()

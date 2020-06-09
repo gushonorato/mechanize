@@ -29,7 +29,7 @@ defmodule Mechanize.HTMLParser.Floki do
 
   @impl HTMLParser
   def search(%Element{} = element, selector) do
-    element.parser_data
+    element.parser_node
     |> Floki.find(selector)
     |> Enum.map(&create_element(&1, element.page))
   end
@@ -46,7 +46,7 @@ defmodule Mechanize.HTMLParser.Floki do
 
   @impl HTMLParser
   def filter(%Element{} = element, selector) do
-    element.parser_data
+    element.parser_node
     |> List.wrap()
     |> Floki.filter_out(selector)
     |> Enum.map(&create_element(&1, element.page))
@@ -74,7 +74,7 @@ defmodule Mechanize.HTMLParser.Floki do
   def raw_html(elementable) do
     elementable
     |> Elementable.element()
-    |> (fn elem -> elem.parser_data end).()
+    |> (fn elem -> elem.parser_node end).()
     |> Floki.raw_html(encode: false)
   end
 
@@ -82,7 +82,7 @@ defmodule Mechanize.HTMLParser.Floki do
     %Element{
       name: name,
       attrs: attributes,
-      parser_data: tree,
+      parser_node: tree,
       text: Floki.text(tree),
       parser: __MODULE__,
       page: page

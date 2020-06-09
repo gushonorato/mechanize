@@ -89,7 +89,7 @@ defmodule Mechanize.HTMLParser.FlokiTest do
         |> parser.parse_document()
         |> List.first()
 
-      assert result.parser_data == node
+      assert result.parser_node == node
     end
 
     test "remove child elements from parent element", %{page: page, parser: parser} do

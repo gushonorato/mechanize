@@ -113,7 +113,7 @@ defmodule Mechanize.QueryTest do
 
       [result] = Query.filter(page, ".spanish")
 
-      assert result.parser_data == expected
+      assert result.parser_node == expected
     end
 
     test "accepts single element returned by .search", %{page: page} do
@@ -130,7 +130,7 @@ defmodule Mechanize.QueryTest do
         |> Query.search(".america")
         |> Query.filter(".spanish")
 
-      assert result.parser_data == expected
+      assert result.parser_node == expected
     end
 
     test "accepts many elements returned by .search", %{page: page} do
@@ -145,7 +145,7 @@ defmodule Mechanize.QueryTest do
         page
         |> Query.search(".continent")
         |> Query.filter(".spanish")
-        |> Enum.map(& &1.parser_data)
+        |> Enum.map(& &1.parser_node)
 
       assert result == expected
     end

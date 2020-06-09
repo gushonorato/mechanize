@@ -8,16 +8,16 @@ defmodule Mechanize.HTMLParser.Floki do
   @behaviour Mechanize.HTMLParser
 
   @impl HTMLParser
-  def search(nil, _selector), do: raise(ArgumentError, "page_or_element is nil")
-
-  @impl HTMLParser
-  def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
-
-  @impl HTMLParser
   def parse_document(html_as_string) do
     {:ok, document} = Floki.parse_document(html_as_string)
     document
   end
+
+  @impl HTMLParser
+  def search(nil, _selector), do: raise(ArgumentError, "page_or_element is nil")
+
+  @impl HTMLParser
+  def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
 
   @impl HTMLParser
   def search(%Page{} = page, selector) do

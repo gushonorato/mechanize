@@ -55,7 +55,7 @@ defmodule Mechanize.HTMLParser.FlokiTest do
   end
 
   describe ".filter" do
-    test "raise when page_or_elements is nil", %{page: page, parser: parser} do
+    test "raise when page_or_elements is nil", %{parser: parser} do
       assert_raise ArgumentError, "page_or_elements is nil", fn ->
         parser.filter(nil, "a")
       end

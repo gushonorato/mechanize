@@ -69,8 +69,4 @@ defmodule Mechanize.Browser.Server do
 
     {:reply, browser.current_page, browser}
   end
-
-  def handle_call({:follow_url!, base_url, url}, _from, state) do
-    {:reply, Impl.follow_url!(state, base_url, url), state}
-  end
 end

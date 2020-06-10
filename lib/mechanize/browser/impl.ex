@@ -107,16 +107,6 @@ defmodule Mechanize.Browser.Impl do
     |> URI.to_string()
   end
 
-  # TODO: Remove this function
-  def follow_url!(browser, base_url, rel_url) do
-    abs_url =
-      base_url
-      |> URI.merge(rel_url)
-      |> URI.to_string()
-
-    request!(browser, %Request{method: :get, url: abs_url})
-  end
-
   defp follow_meta_refresh(browser, delay, url) do
     Process.sleep(delay * 1000)
     request!(browser, %Request{method: :get, url: resolve_url(browser.current_page, url)})

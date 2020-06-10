@@ -26,13 +26,6 @@ defmodule Mechanize.Page do
           parser: module()
         }
 
-  defmodule ClickError do
-    @moduledoc """
-    Raised when an error occurs on a click action.
-    """
-    defexception [:message]
-  end
-
   defmodule InvalidMetaRefreshError do
     @moduledoc """
     Raised when Mechanize can not parse the `content` attribute of a

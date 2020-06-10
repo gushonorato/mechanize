@@ -30,9 +30,17 @@ defmodule Mechanize.Browser do
 
   """
   alias Mechanize.{Page, Request}
+  alias Mechanize.Page.{Element, Link}
 
   @type t :: pid
   @type response_chain :: [Mechanize.Response.t()]
+
+  defmodule ClickError do
+    @moduledoc """
+    Raised when an error occurs on a click action.
+    """
+    defexception [:message]
+  end
 
   defmodule RedirectLimitReachedError do
     defexception [:message]
@@ -537,6 +545,11 @@ defmodule Mechanize.Browser do
 
   defp request!(browser, req) do
     GenServer.call(browser, {:request!, req})
+  end
+
+  def click_link(browser, %Link{} = link) do
+    unless Element.attr_present?(link, :href), do: raise(ClickError, "href attribute is missing")
+    get!(browser, link.url)
   end
 
   @doc """

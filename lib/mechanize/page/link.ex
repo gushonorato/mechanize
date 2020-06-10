@@ -1,24 +1,27 @@
 defmodule Mechanize.Page.Link do
-  alias Mechanize.Page.{Element, ClickError}
+  alias Mechanize.Page.Element
   alias Mechanize.Browser
 
   @derive [Mechanize.Page.Elementable]
-  defstruct element: nil
+  defstruct [:element, :url]
 
   @type t :: %__MODULE__{
-          element: Element.t()
+          element: Element.t(),
+          url: String.t()
         }
 
-  def click(%Mechanize.Page.Link{} = link) do
-    href = Element.attr(link, :href)
-
-    unless href, do: raise(ClickError, "href attribute is missing")
-
-    page = Element.page(link)
-    Browser.follow_url!(page.browser, page, href)
+  def click(%__MODULE__{} = link) do
+    Browser.click_link(link.element.page.browser, link)
   end
 
-  def new(el) do
-    %__MODULE__{element: el}
+  def new(%Element{name: name} = el) when name == "a" or name == "area" do
+    %__MODULE__{
+      element: el,
+      url: resolve_url(el)
+    }
+  end
+
+  defp resolve_url(el) do
+    Browser.resolve_url(Element.page(el), Element.attr(el, :href))
   end
 end

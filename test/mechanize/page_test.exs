@@ -1,7 +1,7 @@
 defmodule Mechanize.PageTest do
   use ExUnit.Case, async: true
   alias Mechanize
-  alias Mechanize.Page.{Element, Link, ClickError, InvalidMetaRefreshError}
+  alias Mechanize.Page.{Element, Link, InvalidMetaRefreshError}
   alias Mechanize.Page
   import TestHelper
 
@@ -213,13 +213,13 @@ defmodule Mechanize.PageTest do
     end
 
     test "raise if link does't have href attribute", %{page: page} do
-      assert_raise ClickError, "href attribute is missing", fn ->
+      assert_raise Mechanize.Browser.ClickError, "href attribute is missing", fn ->
         Page.click_link(page, text: "Stealth Company")
       end
     end
 
     test "raise if image area link does't have href attribute", %{page: page} do
-      assert_raise ClickError, "href attribute is missing", fn ->
+      assert_raise Mechanize.Browser.ClickError, "href attribute is missing", fn ->
         Page.click_link(page, alt: "Nibiru")
       end
     end

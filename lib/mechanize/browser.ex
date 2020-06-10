@@ -421,6 +421,8 @@ defmodule Mechanize.Browser do
     GenServer.call(browser, {:current_page})
   end
 
+  defdelegate resolve_url(page_or_base_url, relative_url), to: __MODULE__.Impl
+
   @doc """
     Issues a to request the given `url`. See `request!/6` for details.
   """

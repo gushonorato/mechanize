@@ -89,9 +89,22 @@ defmodule Mechanize.Browser.Impl do
         browser
 
       {delay, url} ->
-        Process.sleep(delay * 1000)
-        follow_url!(browser, page.url, url)
+        follow_meta_refresh(browser, delay, url)
     end
+  end
+
+  def resolve_url(nil, _url) do
+    raise ArgumentError, "page_or_base_url is nil"
+  end
+
+  def resolve_url(%Page{} = page, url) do
+    resolve_url(page.url, url)
+  end
+
+  def resolve_url(base_url, url) do
+    base_url
+    |> URI.merge(url || "")
+    |> URI.to_string()
   end
 
   # TODO: Remove this function
@@ -102,6 +115,11 @@ defmodule Mechanize.Browser.Impl do
       |> URI.to_string()
 
     request!(browser, %Request{method: :get, url: abs_url})
+  end
+
+  defp follow_meta_refresh(browser, delay, url) do
+    Process.sleep(delay * 1000)
+    request!(browser, %Request{method: :get, url: resolve_url(browser.current_page, url)})
   end
 
   defp check_request_url!(%Request{} = req) do

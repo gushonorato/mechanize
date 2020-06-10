@@ -137,6 +137,34 @@ defmodule Mechanize.BrowserTest do
     end
   end
 
+  describe ".resolve_url" do
+    test "page_or_base_url is nil" do
+      assert_raise ArgumentError, "page_or_base_url is nil", fn ->
+        assert Browser.resolve_url(nil, "/lero")
+      end
+    end
+
+    test "url is nil" do
+      assert Browser.resolve_url("https://seomaster.com.br/lero", nil) ==
+               "https://seomaster.com.br/lero"
+    end
+
+    test "url is empty" do
+      assert Browser.resolve_url("https://seomaster.com.br/lero", "") ==
+               "https://seomaster.com.br/lero"
+    end
+
+    test "resolves url against a page" do
+      assert %Page{url: "https://seomaster.com.br/lero/xpto.html"}
+             |> Browser.resolve_url("abc.jpg") == "https://seomaster.com.br/lero/abc.jpg"
+    end
+
+    test "resolves url against a base_url" do
+      assert Browser.resolve_url("https://seomaster.com.br/lero/xpto.html", "abc.jpg") ==
+               "https://seomaster.com.br/lero/abc.jpg"
+    end
+  end
+
   describe ".current_page" do
     test "not fetched page return nil" do
       browser = Browser.new()

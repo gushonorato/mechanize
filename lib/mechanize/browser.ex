@@ -29,7 +29,7 @@ defmodule Mechanize.Browser do
       %Page{} = Browser.get!(b, "https://www.google.com.br")
 
   """
-  alias Mechanize.{Page, Request}
+  alias Mechanize.Request
   alias Mechanize.Page.{Element, Link}
 
   @type t :: pid

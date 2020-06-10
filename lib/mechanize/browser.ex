@@ -13,14 +13,16 @@ defmodule Mechanize.Browser do
 
       iex> {:ok, browser} = Browser.start_link()
       iex> is_pid(browser)
+      true
 
       iex> {:ok, browser} = Browser.start()
       iex> is_pid(browser)
+      true
 
     It's possible to configure Mechanize Browser passing configuration parameters to `new/1`,
     `start_link/1` and `start/1` functions:
 
-      iex> Browser.new(redirect_limit: 10)
+      Browser.new(redirect_limit: 10)
 
     See `request!/4` for all available options.
 
@@ -129,6 +131,7 @@ defmodule Mechanize.Browser do
     ```
     iex> {:ok, browser} = Browser.start_link(follow_meta_refresh: true)
     iex> is_pid(browser)
+    true
     ```
   """
   @spec start_link(keyword()) :: GenServer.on_start()
@@ -147,6 +150,7 @@ defmodule Mechanize.Browser do
     ```
     iex> {:ok, browser} = Browser.start(follow_meta_refresh: true)
     iex> is_pid(browser)
+    true
     ```
   """
   @spec start(keyword()) :: GenServer.on_start()

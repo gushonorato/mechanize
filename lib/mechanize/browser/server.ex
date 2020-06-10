@@ -60,13 +60,14 @@ defmodule Mechanize.Browser.Server do
     {:reply, Impl.get_redirect_limit(state), state}
   end
 
-  def handle_call({:request!, req}, _from, state) do
-    page =
-      state
-      |> Impl.request!(req)
-      |> Map.put(:browser, self())
+  def handle_call({:current_page}, _from, state) do
+    {:reply, Impl.current_page(state), state}
+  end
 
-    {:reply, page, state}
+  def handle_call({:request!, req}, _from, state) do
+    browser = Impl.request!(state, req)
+
+    {:reply, browser.current_page, browser}
   end
 
   def handle_call({:follow_url!, base_url, url}, _from, state) do

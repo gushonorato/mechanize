@@ -32,6 +32,7 @@ defmodule Mechanize.Browser do
   alias Mechanize.{Page, Request}
 
   @type t :: pid
+  @type response_chain :: [Mechanize.Response.t()]
 
   defmodule RedirectLimitReachedError do
     defexception [:message]
@@ -414,6 +415,10 @@ defmodule Mechanize.Browser do
   @spec get_user_agent_string(t()) :: String.t()
   def get_user_agent_string(browser) do
     get_http_header_value(browser, "user-agent")
+  end
+
+  def current_page(browser) do
+    GenServer.call(browser, {:current_page})
   end
 
   @doc """

@@ -137,6 +137,31 @@ defmodule Mechanize.BrowserTest do
     end
   end
 
+  describe ".current_page" do
+    test "not fetched page return nil" do
+      browser = Browser.new()
+      assert Browser.current_page(browser) == nil
+    end
+
+    test "returns last fetched page", %{bypass: bypass} do
+      Bypass.expect_once(bypass, "GET", "/old_page", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK OLD PAGE")
+      end)
+
+      Bypass.expect_once(bypass, "GET", "/current_page", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK CURRENT PAGE")
+      end)
+
+      browser = Browser.new()
+
+      page = Browser.get!(browser, endpoint_url(bypass, "/old_page"))
+      assert Browser.current_page(browser) == page
+
+      another_page = Browser.get!(browser, endpoint_url(bypass, "/current_page"))
+      assert Browser.current_page(browser) == another_page
+    end
+  end
+
   describe ".request!" do
     test "get request content", %{bypass: bypass} do
       Bypass.expect_once(bypass, "GET", "/", fn conn ->

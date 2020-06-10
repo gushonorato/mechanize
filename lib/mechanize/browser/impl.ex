@@ -9,7 +9,8 @@ defmodule Mechanize.Browser.Impl do
     :http_headers,
     :follow_redirect,
     :redirect_limit,
-    :follow_meta_refresh
+    :follow_meta_refresh,
+    :current_page
   ]
 
   @opaque t :: %__MODULE__{
@@ -18,11 +19,18 @@ defmodule Mechanize.Browser.Impl do
             http_headers: keyword(),
             follow_redirect: boolean(),
             redirect_limit: integer(),
-            follow_meta_refresh: boolean()
+            follow_meta_refresh: boolean(),
+            current_page: Page.t()
           }
 
-  def new(fields \\ []) do
-    struct(%__MODULE__{}, fields)
+  def new(opts \\ []) do
+    %__MODULE__{}
+    |> put_http_adapter(opts[:http_adapter])
+    |> put_html_parser(opts[:html_parser])
+    |> put_http_headers(opts[:http_headers])
+    |> put_follow_redirect(opts[:follow_redirect])
+    |> put_redirect_limit(opts[:redirect_limit])
+    |> put_follow_meta_refresh(opts[:follow_meta_refresh])
   end
 
   def put_http_adapter(browser, adapter), do: %__MODULE__{browser | http_adapter: adapter}
@@ -52,32 +60,33 @@ defmodule Mechanize.Browser.Impl do
   def put_redirect_limit(browser, limit), do: %__MODULE__{browser | redirect_limit: limit}
   def get_redirect_limit(browser), do: browser.redirect_limit
 
-  def request!(browser, req) do
-    check_request_url!(req)
-    resp_chain = request!(browser, req, 0)
+  def put_follow_meta_refresh(browser, value), do: %__MODULE__{browser | follow_meta_refresh: value}
+  def follow_meta_refresh?(browser), do: browser.follow_meta_refresh
 
-    last_response = List.first(resp_chain)
-
-    page = %Page{
-      response_chain: resp_chain,
-      status_code: last_response.code,
-      content: last_response.body,
-      url: last_response.url,
-      parser: get_html_parser(browser)
-    }
-
-    maybe_follow_meta_refresh(browser, page)
+  def current_page(browser) do
+    browser.current_page
   end
 
-  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: false}, page), do: page
+  def request!(browser, req) do
+    check_request_url!(req)
 
-  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true} = browser, page) do
+    browser
+    |> request!(req, 0)
+    |> create_current_page(browser)
+    |> maybe_follow_meta_refresh()
+  end
+
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: false} = browser), do: browser
+
+  defp maybe_follow_meta_refresh(%__MODULE__{follow_meta_refresh: true} = browser) do
+    page = browser.current_page
+
     case Page.meta_refresh(page) do
       nil ->
-        page
+        browser
 
       {_delay, nil} ->
-        page
+        browser
 
       {delay, url} ->
         Process.sleep(delay * 1000)
@@ -85,6 +94,7 @@ defmodule Mechanize.Browser.Impl do
     end
   end
 
+  # TODO: Remove this function
   def follow_url!(browser, base_url, rel_url) do
     abs_url =
       base_url
@@ -150,5 +160,19 @@ defmodule Mechanize.Browser.Impl do
 
         request!(browser, new_req, redirect_count + 1) ++ [res]
     end
+  end
+
+  defp create_current_page([response | _] = response_chain, browser) do
+    %__MODULE__{
+      browser
+      | current_page: %Page{
+          response_chain: response_chain,
+          status_code: response.code,
+          content: response.body,
+          url: response.url,
+          parser: get_html_parser(browser),
+          browser: self()
+        }
+    }
   end
 end

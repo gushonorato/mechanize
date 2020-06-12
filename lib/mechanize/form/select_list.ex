@@ -5,9 +5,6 @@ defmodule Mechanize.Form.SelectList do
   alias Mechanize.Form.{Option, InconsistentFormError}
   alias Mechanize.Query
   alias Mechanize.Query.BadCriteriaError
-  alias Mechanize.{Form, Query}
-
-  use Mechanize.Form.FieldMatcher
 
   @derive [Elementable]
   @enforce_keys [:element]
@@ -25,6 +22,13 @@ defmodule Mechanize.Form.SelectList do
       name: Element.attr(el, :name),
       options: fetch_options(el)
     }
+  end
+
+  def select_lists_with(form, criteria \\ []) do
+    get_in(form, [
+      :fields,
+      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+    ])
   end
 
   defdelegate fetch(term, key), to: Map
@@ -132,7 +136,7 @@ defmodule Mechanize.Form.SelectList do
 
   defp assert_single_option_selected(form) do
     form
-    |> Form.select_lists_with(multiple: false)
+    |> select_lists_with(multiple: false)
     |> Stream.map(fn select -> {select.name, length(selected_options(select))} end)
     |> Stream.filter(fn {_, selected} -> selected > 1 end)
     |> Enum.map(fn {name, _} -> name end)

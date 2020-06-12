@@ -130,7 +130,7 @@ defmodule Mechanize.Form do
   defdelegate check_radio_button(form, criteria), to: RadioButton, as: :check
   defdelegate uncheck_radio_button(form, criteria), to: RadioButton, as: :uncheck
 
-  defdelegate select_lists(form), to: SelectList
+  defdelegate select_lists(form), to: SelectList, as: :select_lists_with
   defdelegate select_lists_with(form, criteria), to: SelectList
   defdelegate select(form, criteria), to: SelectList
   defdelegate unselect(form, criteria), to: SelectList

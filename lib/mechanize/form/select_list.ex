@@ -26,14 +26,10 @@ defmodule Mechanize.Form.SelectList do
 
   def select_lists_with(form, criteria \\ []) do
     get_in(form, [
-      :fields,
+      Access.key(:fields),
       Access.filter(&Query.match?(&1, __MODULE__, criteria))
     ])
   end
-
-  defdelegate fetch(term, key), to: Map
-  defdelegate get_and_update(data, key, function), to: Map
-  defdelegate pop(data, key), to: Map
 
   def options(%__MODULE__{} = select), do: options([select])
   def options(selects), do: Enum.flat_map(selects, & &1.options)
@@ -52,7 +48,8 @@ defmodule Mechanize.Form.SelectList do
   end
 
   defp assert_select_found(form, criteria) do
-    selects = get_in(form, [:fields, Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+    selects =
+      get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
 
     if selects == [] do
       raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
@@ -64,9 +61,9 @@ defmodule Mechanize.Form.SelectList do
   defp assert_options_found(form, criteria, opts_criteria) do
     options =
       get_in(form, [
-        :fields,
+        Access.key(:fields),
         Access.filter(&Query.match?(&1, __MODULE__, criteria)),
-        :options,
+        Access.key(:options),
         Access.filter(&Query.match_criteria?(&1, opts_criteria))
       ])
 
@@ -98,11 +95,11 @@ defmodule Mechanize.Form.SelectList do
     put_in(
       form,
       [
-        :fields,
+        Access.key(:fields),
         Access.filter(&Query.match?(&1, __MODULE__, criteria)),
-        :options,
+        Access.key(:options),
         Access.all(),
-        :selected
+        Access.key(:selected)
       ],
       false
     )
@@ -112,11 +109,11 @@ defmodule Mechanize.Form.SelectList do
     put_in(
       form,
       [
-        :fields,
+        Access.key(:fields),
         Access.filter(&Query.match?(&1, __MODULE__, criteria)),
-        :options,
+        Access.key(:options),
         Access.filter(&Query.match_criteria?(&1, opts_criteria)),
-        :selected
+        Access.key(:selected)
       ],
       selected
     )

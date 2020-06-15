@@ -34,10 +34,6 @@ defmodule Mechanize.Form do
     %Mechanize.Form{element: element, fields: parse_fields(page, element)}
   end
 
-  defdelegate fetch(term, key), to: Map
-  defdelegate get_and_update(data, key, function), to: Map
-  defdelegate pop(data, key), to: Map
-
   def put_field(form, field, value) do
     put_field(form, DetachedField.new(field, value))
   end

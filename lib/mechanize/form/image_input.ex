@@ -24,7 +24,7 @@ defmodule Mechanize.Form.ImageInput do
   end
 
   def image_inputs_with(form, criteria \\ []) do
-    get_in(form, [:fields, Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
   end
 
   def click_image(form, %__MODULE__{} = image) do

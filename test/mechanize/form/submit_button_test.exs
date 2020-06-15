@@ -35,8 +35,8 @@ defmodule Mechanize.Form.SubmitButtonTest do
       result =
         form
         |> SubmitButton.submit_buttons_with()
-        |> Enum.map(fn f = %{name: name, value: value, label: label} ->
-          {name, value, label, Element.attr(f, :id), Element.attr_present?(f, :disabled)}
+        |> Enum.map(fn f = %{name: name, value: value, visible_text: visible_text} ->
+          {name, value, visible_text, Element.attr(f, :id), Element.attr_present?(f, :disabled)}
         end)
 
       assert result == expectation
@@ -44,7 +44,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
   end
 
   describe ".click_button" do
-    test "label not match", %{form: form} do
+    test "visible text not match", %{form: form} do
       assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
         SubmitButton.click_button(form, "Button 1")
       end
@@ -56,7 +56,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
       end
     end
 
-    test "multiple labels match", %{form: form} do
+    test "multiple visible texts match", %{form: form} do
       assert_raise BadCriteriaError, ~r/16 buttons were found./i, fn ->
         SubmitButton.click_button(form, ~r/Button/i)
       end
@@ -74,7 +74,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
       end
     end
 
-    test "button click success with label", %{form: form, bypass: bypass} do
+    test "button click success with visible text", %{form: form, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.method == "POST"
         assert conn.request_path == "/submit"

@@ -7,13 +7,13 @@ defmodule Mechanize.Form.SubmitButton do
   alias Mechanize.Query.BadCriteriaError
 
   @derive [ParameterizableField, Elementable]
-  defstruct [:element, :name, :value, :label]
+  defstruct [:element, :name, :value, :visible_text]
 
   @type t :: %__MODULE__{
           element: Element.t(),
           name: String.t(),
           value: String.t(),
-          label: String.t()
+          visible_text: String.t()
         }
 
   def new(%Element{name: "button"} = el) do
@@ -21,7 +21,7 @@ defmodule Mechanize.Form.SubmitButton do
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
-      label: Element.text(el)
+      visible_text: Element.text(el)
     }
   end
 
@@ -30,7 +30,7 @@ defmodule Mechanize.Form.SubmitButton do
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
-      label: Element.attr(el, :value)
+      visible_text: Element.attr(el, :value)
     }
   end
 
@@ -51,10 +51,10 @@ defmodule Mechanize.Form.SubmitButton do
     |> maybe_click_on_button(form)
   end
 
-  def click_button(form, label) when is_binary(label) do
+  def click_button(form, visible_text) when is_binary(visible_text) do
     form
     |> submit_buttons_with()
-    |> Enum.filter(&(&1.label == label))
+    |> Enum.filter(&(&1.visible_text == visible_text))
     |> maybe_click_on_button(form)
   end
 
@@ -62,10 +62,10 @@ defmodule Mechanize.Form.SubmitButton do
     Form.submit(form, button)
   end
 
-  def click_button(form, label) do
+  def click_button(form, visible_text) do
     form
     |> submit_buttons_with()
-    |> Enum.filter(&(&1.label != nil and &1.label =~ label))
+    |> Enum.filter(&(&1.visible_text != nil and &1.visible_text =~ visible_text))
     |> maybe_click_on_button(form)
   end
 

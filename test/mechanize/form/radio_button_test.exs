@@ -59,7 +59,8 @@ defmodule Mechanize.Form.RadioButtonTest do
 
       fields =
         form
-        |> Form.radio_buttons_with(fn f -> f.checked end)
+        |> RadioButton.radio_buttons_with()
+        |> Enum.filter(& &1.checked)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert fields == [{"color", "orange", true}, {"download", "yes", true}]
@@ -67,7 +68,8 @@ defmodule Mechanize.Form.RadioButtonTest do
       fields =
         form
         |> RadioButton.check(name: "download", value: "no")
-        |> Form.radio_buttons_with(fn f -> f.checked end)
+        |> RadioButton.radio_buttons_with()
+        |> Enum.filter(& &1.checked)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert fields == [{"color", "orange", true}, {"download", "no", true}]
@@ -94,7 +96,7 @@ defmodule Mechanize.Form.RadioButtonTest do
     test "uncheck radio by name and value", %{form: form} do
       fields =
         form
-        |> Form.radio_buttons_with(fn f -> f.checked end)
+        |> Form.radio_buttons_with(checked: true)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
 
       assert fields == [{"color", "orange", true}]
@@ -102,7 +104,8 @@ defmodule Mechanize.Form.RadioButtonTest do
       fields =
         form
         |> RadioButton.uncheck(name: "color")
-        |> Form.radio_buttons_with(fn f -> f.checked end)
+        |> Form.radio_buttons()
+        |> Enum.filter(& &1.checked)
 
       assert fields == []
     end
@@ -117,7 +120,8 @@ defmodule Mechanize.Form.RadioButtonTest do
   describe ".submit" do
     test "submit only checked radio buttons", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert {:ok, "user=gustavo&passwd=123456&color=red&download=yes", _} = Plug.Conn.read_body(conn)
+        assert {:ok, "user=gustavo&passwd=123456&color=red&download=yes", _} =
+                 Plug.Conn.read_body(conn)
 
         Plug.Conn.resp(conn, 200, "OK")
       end)

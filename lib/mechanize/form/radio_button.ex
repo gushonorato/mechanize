@@ -6,8 +6,6 @@ defmodule Mechanize.Form.RadioButton do
   alias Mechanize.Form.InconsistentFormError
   alias Mechanize.Query.BadCriteriaError
 
-  use Mechanize.Form.{FieldMatcher, FieldUpdater}
-
   @derive [Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, value: nil, checked: false
@@ -28,6 +26,29 @@ defmodule Mechanize.Form.RadioButton do
     }
   end
 
+  def radio_buttons_with(form, criteria \\ []) do
+    get_in(form, [
+      Access.key(:fields),
+      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+    ])
+  end
+
+  def clear_radios(form, radio_names) do
+    update_radio_button(form, false, name: radio_names)
+  end
+
+  def update_radio_button(form, checked, criteria) do
+    put_in(
+      form,
+      [
+        Access.key(:fields),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.key(:checked)
+      ],
+      checked
+    )
+  end
+
   def check(form, criteria) do
     assert_radio_found(
       form,
@@ -35,26 +56,16 @@ defmodule Mechanize.Form.RadioButton do
       "Can't check radio with criteria #{inspect(criteria)} because it was not found"
     )
 
-    radio_groups =
+    radio_names =
       form
       |> radio_buttons_with(criteria)
       |> Stream.map(& &1.name)
       |> Enum.uniq()
 
     form
-    |> update_radio_buttons(fn field ->
-      cond do
-        Query.match_criteria?(field, criteria) ->
-          %__MODULE__{field | checked: true}
-
-        field.name in radio_groups ->
-          %__MODULE__{field | checked: false}
-
-        true ->
-          field
-      end
-    end)
-    |> assert_single_radio_in_group_checked
+    |> clear_radios(radio_names)
+    |> update_radio_button(true, criteria)
+    |> assert_single_radio_in_group_checked()
   end
 
   def uncheck(form, criteria) do
@@ -64,7 +75,7 @@ defmodule Mechanize.Form.RadioButton do
       "Can't uncheck radio with criteria #{inspect(criteria)} because it was not found"
     )
 
-    update_radio_buttons_with(form, criteria, &%__MODULE__{&1 | checked: false})
+    update_radio_button(form, false, criteria)
   end
 
   defp assert_radio_found(form, criteria, error_msg) do
@@ -73,18 +84,19 @@ defmodule Mechanize.Form.RadioButton do
 
   defp assert_single_radio_in_group_checked(form) do
     form
-    |> radio_buttons_with(fn radio -> radio.checked end)
-    |> Enum.group_by(&Element.attr(&1, :name))
-    |> Stream.filter(fn {_, radios_checked} -> length(radios_checked) > 1 end)
-    |> Enum.map(fn {group_name, _} -> group_name end)
+    |> radio_buttons_with()
+    |> Enum.filter(& &1.checked)
+    |> Enum.reduce(%{}, fn radio, acc -> Map.update(acc, radio.name, 0, &(&1 + 1)) end)
+    |> Enum.filter(fn {_radio_name, count} -> count > 1 end)
+    |> Enum.map(fn {radio_name, _count} -> radio_name end)
     |> case do
       [] ->
         form
 
-      group_names ->
+      radio_names ->
         raise InconsistentFormError,
           message:
-            "Multiple radio buttons with same name (#{Enum.join(group_names, ", ")}) are checked"
+            "Cannot check multiple radio buttons with same name (#{Enum.join(radio_names, ", ")})"
     end
   end
 end

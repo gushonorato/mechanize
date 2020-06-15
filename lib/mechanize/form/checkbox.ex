@@ -1,11 +1,9 @@
 defmodule Mechanize.Form.Checkbox do
   @moduledoc false
 
+  alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Query.BadCriteriaError
-
-  use Mechanize.Form.FieldMatcher, suffix: "es"
-  use Mechanize.Form.FieldUpdater, suffix: "es"
 
   @derive [Elementable]
   @enforce_keys [:element]
@@ -27,28 +25,40 @@ defmodule Mechanize.Form.Checkbox do
     }
   end
 
-  def check(form, criteria) do
+  def checkboxes_with(form, criteria \\ []) do
+    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+  end
+
+  def update_checkbox(form, checked, criteria) do
+    put_in(
+      form,
+      [
+        Access.key(:fields),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.key(:checked)
+      ],
+      checked
+    )
+  end
+
+  def check_checkbox(form, criteria) do
     assert_checkbox_found(
       form,
       criteria,
       "Can't check checkbox with criteria #{inspect(criteria)} because it was not found"
     )
 
-    update_checkboxes_with(form, criteria, fn checkbox ->
-      %__MODULE__{checkbox | checked: true}
-    end)
+    update_checkbox(form, true, criteria)
   end
 
-  def uncheck(form, criteria) do
+  def uncheck_checkbox(form, criteria) do
     assert_checkbox_found(
       form,
       criteria,
       "Can't uncheck checkbox with criteria #{inspect(criteria)} because it was not found"
     )
 
-    update_checkboxes_with(form, criteria, fn checkbox ->
-      %__MODULE__{checkbox | checked: false}
-    end)
+    update_checkbox(form, false, criteria)
   end
 
   defp assert_checkbox_found(form, criteria, error_msg) do

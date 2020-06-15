@@ -110,10 +110,10 @@ defmodule Mechanize.Form do
   defdelegate update_text_inputs_with(form, criteria, fun), to: TextInput
   defdelegate fill_text(form, criteria), to: TextInput
 
-  defdelegate checkboxes(form), to: Checkbox
+  defdelegate checkboxes(form), to: Checkbox, as: :checkboxes_with
   defdelegate checkboxes_with(form, criteria), to: Checkbox
-  defdelegate check_checkbox(form, criteria), to: Checkbox, as: :check
-  defdelegate uncheck_checkbox(form, criteria), to: Checkbox, as: :uncheck
+  defdelegate check_checkbox(form, criteria), to: Checkbox
+  defdelegate uncheck_checkbox(form, criteria), to: Checkbox
 
   defdelegate image_inputs(form), to: ImageInput, as: :image_inputs_with
   defdelegate image_inputs_with(form, criteria), to: ImageInput

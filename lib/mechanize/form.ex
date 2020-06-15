@@ -119,8 +119,6 @@ defmodule Mechanize.Form do
 
   defdelegate image_inputs(form), to: ImageInput
   defdelegate image_inputs_with(form, criteria), to: ImageInput
-  defdelegate update_image_inputs(form, fun), to: ImageInput
-  defdelegate update_image_inputs_with(form, criteria, fun), to: ImageInput
   defdelegate click_image(form, criteria), to: ImageInput, as: :click
 
   defdelegate radio_buttons(form), to: RadioButton, as: :radio_buttons_with

@@ -51,11 +51,11 @@ defmodule Mechanize.Form.RadioButtonTest do
 
   describe ".check" do
     test "returns form", %{form: form} do
-      assert match?(%Form{}, RadioButton.uncheck(form, name: "download", value: "no"))
+      assert match?(%Form{}, RadioButton.uncheck_radio_button(form, name: "download", value: "no"))
     end
 
     test "check by name and value", %{form: form} do
-      form = RadioButton.check(form, name: "download", value: "yes")
+      form = RadioButton.check_radio_button(form, name: "download", value: "yes")
 
       fields =
         form
@@ -67,7 +67,7 @@ defmodule Mechanize.Form.RadioButtonTest do
 
       fields =
         form
-        |> RadioButton.check(name: "download", value: "no")
+        |> RadioButton.check_radio_button(name: "download", value: "no")
         |> RadioButton.radio_buttons_with()
         |> Enum.filter(& &1.checked)
         |> Enum.map(&{&1.name, &1.value, &1.checked})
@@ -77,7 +77,7 @@ defmodule Mechanize.Form.RadioButtonTest do
 
     test "check multiple radios with same name", %{form: form} do
       assert_raise InconsistentFormError, ~r/same name \(color\)/, fn ->
-        RadioButton.check(form, name: "color")
+        RadioButton.check_radio_button(form, name: "color")
       end
     end
 
@@ -90,7 +90,7 @@ defmodule Mechanize.Form.RadioButtonTest do
 
   describe ".uncheck" do
     test "returns form", %{form: form} do
-      assert match?(%Form{}, RadioButton.uncheck(form, name: "color"))
+      assert match?(%Form{}, RadioButton.uncheck_radio_button(form, name: "color"))
     end
 
     test "uncheck radio by name and value", %{form: form} do
@@ -103,7 +103,7 @@ defmodule Mechanize.Form.RadioButtonTest do
 
       fields =
         form
-        |> RadioButton.uncheck(name: "color")
+        |> RadioButton.uncheck_radio_button(name: "color")
         |> Form.radio_buttons()
         |> Enum.filter(& &1.checked)
 
@@ -112,7 +112,7 @@ defmodule Mechanize.Form.RadioButtonTest do
 
     test "raise when uncheck inexistent radio button", %{form: form} do
       assert_raise BadCriteriaError, ~r/it was not found/, fn ->
-        RadioButton.uncheck(form, name: "lero")
+        RadioButton.uncheck_radio_button(form, name: "lero")
       end
     end
   end

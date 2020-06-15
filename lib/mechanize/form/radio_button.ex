@@ -49,7 +49,7 @@ defmodule Mechanize.Form.RadioButton do
     )
   end
 
-  def check(form, criteria) do
+  def check_radio_button(form, criteria) do
     assert_radio_found(
       form,
       criteria,
@@ -68,7 +68,7 @@ defmodule Mechanize.Form.RadioButton do
     |> assert_single_radio_in_group_checked()
   end
 
-  def uncheck(form, criteria) do
+  def uncheck_radio_button(form, criteria) do
     assert_radio_found(
       form,
       criteria,

@@ -69,12 +69,8 @@ defmodule Mechanize.Query do
 
   def match_criteria?(_element, []), do: true
 
-  # TODO: Add tests
   def match_criteria?(element, index) when is_integer(index) do
-    case element.index do
-      nil ->
-        raise ArgumentError, "element is not indexed"
-
+    case Map.get(element, :index) do
       ^index ->
         true
 

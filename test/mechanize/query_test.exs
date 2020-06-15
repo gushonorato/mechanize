@@ -236,6 +236,18 @@ defmodule Mechanize.QueryTest do
       assert Query.match_criteria?(fake_2a, []) == true
     end
 
+    test "match by index attribute" do
+      assert Query.match_criteria?(%{index: 1}, 1) == true
+    end
+
+    test "does not match by index attribute" do
+      assert Query.match_criteria?(%{index: 1}, 2) == false
+    end
+
+    test "does not match if index is not present" do
+      assert Query.match_criteria?(%{value: 1}, 1) == false
+    end
+
     test "present attributes match true", %{fake_1a: fake_1a} do
       assert Query.match_criteria?(fake_1a, value: true) == true
     end

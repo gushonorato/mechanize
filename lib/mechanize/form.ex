@@ -112,8 +112,6 @@ defmodule Mechanize.Form do
 
   defdelegate checkboxes(form), to: Checkbox
   defdelegate checkboxes_with(form, criteria), to: Checkbox
-  defdelegate update_checkboxes(form, fun), to: Checkbox
-  defdelegate update_checkboxes_with(form, criteria, fun), to: Checkbox
   defdelegate check_checkbox(form, criteria), to: Checkbox, as: :check
   defdelegate uncheck_checkbox(form, criteria), to: Checkbox, as: :uncheck
 

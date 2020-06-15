@@ -91,6 +91,10 @@ defmodule Mechanize.Query do
     raise ArgumentError, "criteria :text is nil"
   end
 
+  defp match_attribute?(element, {:text, value}) when is_list(value) do
+    Element.text(element) in value
+  end
+
   defp match_attribute?(element, {:text, value}) when is_binary(value) do
     Element.text(element) == value
   end
@@ -101,6 +105,10 @@ defmodule Mechanize.Query do
 
   defp match_attribute?(_element, {attr_name, nil}) do
     raise ArgumentError, "criteria :#{attr_name} is nil"
+  end
+
+  defp match_attribute?(element, {attr_name, value}) when is_list(value) do
+    Element.attr(element, attr_name) in value
   end
 
   defp match_attribute?(element, {attr_name, boolean}) when is_boolean(boolean) do

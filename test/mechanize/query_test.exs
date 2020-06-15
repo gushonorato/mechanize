@@ -256,6 +256,18 @@ defmodule Mechanize.QueryTest do
       assert Query.match_criteria?(fake_1a, empty_attr: "") == true
     end
 
+    test "attributes matches list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, value: ["A", "B"]) == true
+    end
+
+    test "attributes does not matches list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, value: ["B", "C"]) == false
+    end
+
+    test "attributes does not matches an empty list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, value: []) == false
+    end
+
     test "attributes matches string", %{fake_1a: fake_1a} do
       assert Query.match_criteria?(fake_1a, value: "A") == true
     end
@@ -300,6 +312,20 @@ defmodule Mechanize.QueryTest do
       assert_raise ArgumentError, "criteria :text is nil", fn ->
         Query.match_criteria?(fake_1a, text: nil)
       end
+    end
+
+    test "text matches a list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, text: ["ElementableFake 1A", "ElementableFake 1B"]) ==
+               true
+    end
+
+    test "text does not match a list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, text: ["ElementableFake 2A", "ElementableFake 1B"]) ==
+               false
+    end
+
+    test "text matches does not match an empty list", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, text: []) == false
     end
 
     test "text matches string", %{fake_1a: fake_1a} do

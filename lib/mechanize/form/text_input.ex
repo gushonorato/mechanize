@@ -6,8 +6,6 @@ defmodule Mechanize.Form.TextInput do
   alias Mechanize.Form.ParameterizableField
   alias Mechanize.Query.BadCriteriaError
 
-  use Mechanize.Form.FieldUpdater
-
   @derive [ParameterizableField, Elementable]
   @enforce_keys [:element]
   defstruct element: nil, name: nil, value: nil
@@ -47,9 +45,19 @@ defmodule Mechanize.Form.TextInput do
     assert_value_present(value)
     assert_text_input_found(form, criteria)
 
-    update_text_inputs_with(form, criteria, fn input ->
-      %__MODULE__{input | value: value}
-    end)
+    update_text_input(form, value, criteria)
+  end
+
+  defp update_text_input(form, value, criteria) do
+    put_in(
+      form,
+      [
+        Access.key(:fields),
+        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.key(:value)
+      ],
+      value
+    )
   end
 
   defp assert_value_present(value) do

@@ -2,15 +2,12 @@ defmodule Mechanize.Form.SubmitButton do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Form
+  alias Mechanize.{Form, Query}
   alias Mechanize.Form.ParameterizableField
   alias Mechanize.Query.BadCriteriaError
 
-  use Mechanize.Form.FieldMatcher
-  use Mechanize.Form.FieldUpdater
-
   @derive [ParameterizableField, Elementable]
-  defstruct element: nil, name: nil, value: nil, label: nil
+  defstruct [:element, :name, :value, :label]
 
   @type t :: %__MODULE__{
           element: Element.t(),
@@ -20,7 +17,7 @@ defmodule Mechanize.Form.SubmitButton do
         }
 
   def new(%Element{name: "button"} = el) do
-    %Mechanize.Form.SubmitButton{
+    %__MODULE__{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -29,7 +26,7 @@ defmodule Mechanize.Form.SubmitButton do
   end
 
   def new(%Element{name: "input"} = el) do
-    %Mechanize.Form.SubmitButton{
+    %__MODULE__{
       element: el,
       name: Element.attr(el, :name),
       value: Element.attr(el, :value),
@@ -37,29 +34,38 @@ defmodule Mechanize.Form.SubmitButton do
     }
   end
 
-  def click(_form, nil) do
+  def submit_buttons_with(form, criteria \\ []) do
+    get_in(form, [
+      Access.key(:fields),
+      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+    ])
+  end
+
+  def click_button(_form, nil) do
     raise ArgumentError, message: "Can't click on button because button is nil."
   end
 
-  def click(form, criteria) when is_list(criteria) do
+  def click_button(form, criteria) when is_list(criteria) do
     form
-    |> Form.submit_buttons_with(criteria)
+    |> submit_buttons_with(criteria)
     |> maybe_click_on_button(form)
   end
 
-  def click(form, label) when is_binary(label) do
+  def click_button(form, label) when is_binary(label) do
     form
-    |> Form.submit_buttons_with(fn button -> button.label == label end)
+    |> submit_buttons_with()
+    |> Enum.filter(&(&1.label == label))
     |> maybe_click_on_button(form)
   end
 
-  def click(form, %__MODULE__{} = button) do
+  def click_button(form, %__MODULE__{} = button) do
     Form.submit(form, button)
   end
 
-  def click(form, label) do
+  def click_button(form, label) do
     form
-    |> Form.submit_buttons_with(fn button -> button.label != nil and button.label =~ label end)
+    |> submit_buttons_with()
+    |> Enum.filter(&(&1.label != nil and &1.label =~ label))
     |> maybe_click_on_button(form)
   end
 
@@ -70,7 +76,7 @@ defmodule Mechanize.Form.SubmitButton do
           message: "Can't click on submit button because no button was found for given criteria"
 
       [button] ->
-        click(form, button)
+        click_button(form, button)
 
       buttons ->
         raise BadCriteriaError,

@@ -11,7 +11,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
     {:ok, Map.put(vars, :form, Page.form_with(page))}
   end
 
-  describe ".submit_buttons" do
+  describe ".submit_buttons_with" do
     test "get all submit buttons", %{form: form} do
       expectation = [
         {"button1", "button1_value", "button1_value", nil, false},
@@ -34,7 +34,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
       result =
         form
-        |> SubmitButton.submit_buttons()
+        |> SubmitButton.submit_buttons_with()
         |> Enum.map(fn f = %{name: name, value: value, label: label} ->
           {name, value, label, Element.attr(f, :id), Element.attr_present?(f, :disabled)}
         end)
@@ -46,31 +46,31 @@ defmodule Mechanize.Form.SubmitButtonTest do
   describe ".click_button" do
     test "label not match", %{form: form} do
       assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
-        SubmitButton.click(form, "Button 1")
+        SubmitButton.click_button(form, "Button 1")
       end
     end
 
     test "criteria not match", %{form: form} do
       assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
-        SubmitButton.click(form, name: "lero")
+        SubmitButton.click_button(form, name: "lero")
       end
     end
 
     test "multiple labels match", %{form: form} do
       assert_raise BadCriteriaError, ~r/16 buttons were found./i, fn ->
-        SubmitButton.click(form, ~r/Button/i)
+        SubmitButton.click_button(form, ~r/Button/i)
       end
     end
 
     test "multiple criteria match", %{form: form} do
       assert_raise BadCriteriaError, ~r/12 buttons were found./i, fn ->
-        SubmitButton.click(form, name: ~r/button/)
+        SubmitButton.click_button(form, name: ~r/button/)
       end
     end
 
     test "a nil button", %{form: form} do
       assert_raise ArgumentError, ~r/button is nil./i, fn ->
-        SubmitButton.click(form, nil)
+        SubmitButton.click_button(form, nil)
       end
     end
 
@@ -83,7 +83,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
       assert(
         form
-        |> SubmitButton.click("Button 6")
+        |> SubmitButton.click_button("Button 6")
         |> Page.content() == "Lero lero"
       )
     end
@@ -97,7 +97,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
       assert(
         form
-        |> SubmitButton.click(name: "button1")
+        |> SubmitButton.click_button(name: "button1")
         |> Page.content() == "Lero lero"
       )
     end

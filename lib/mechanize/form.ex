@@ -127,11 +127,9 @@ defmodule Mechanize.Form do
   defdelegate select(form, criteria), to: SelectList
   defdelegate unselect(form, criteria), to: SelectList
 
-  defdelegate submit_buttons(form), to: SubmitButton
+  defdelegate submit_buttons(form), to: SubmitButton, as: :submit_buttons_with
   defdelegate submit_buttons_with(form, criteria), to: SubmitButton
-  defdelegate update_submit_buttons(form, fun), to: SubmitButton
-  defdelegate update_submit_buttons_with(form, criteria, fun), to: SubmitButton
-  defdelegate click_button(form, criteria), to: SubmitButton, as: :click
+  defdelegate click_button(form, criteria), to: SubmitButton
 
   def submit(form, button \\ nil) do
     case method(form) do

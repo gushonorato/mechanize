@@ -104,10 +104,8 @@ defmodule Mechanize.Form do
     |> Enum.filter(&Query.match_criteria?(&1, criteria))
   end
 
-  defdelegate text_inputs(form), to: TextInput
+  defdelegate text_inputs(form), to: TextInput, as: :text_inputs_with
   defdelegate text_inputs_with(form, criteria), to: TextInput
-  defdelegate update_text_inputs(form, fun), to: TextInput
-  defdelegate update_text_inputs_with(form, criteria, fun), to: TextInput
   defdelegate fill_text(form, criteria), to: TextInput
 
   defdelegate checkboxes(form), to: Checkbox, as: :checkboxes_with

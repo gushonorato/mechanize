@@ -14,7 +14,7 @@ defmodule Mechanize.Form.TextInputTest do
   describe ".text_inputs" do
     test "get all text inputs", %{form: form} do
       assert form
-             |> TextInput.text_inputs()
+             |> TextInput.text_inputs_with()
              |> Enum.map(&{&1.name, &1.value}) == [
                {"color1", "color1 value"},
                {"date1", "date1 value"},
@@ -62,7 +62,7 @@ defmodule Mechanize.Form.TextInputTest do
     test "fill existent text field", %{form: form} do
       assert form
              |> TextInput.fill_text(name: "text1", with: "new text1 value")
-             |> TextInput.text_inputs()
+             |> TextInput.text_inputs_with()
              |> Enum.map(&{&1.name, &1.value}) == [
                {"color1", "color1 value"},
                {"date1", "date1 value"},

@@ -1,11 +1,12 @@
 defmodule Mechanize.Form.TextInput do
   @moduledoc false
 
+  alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.ParameterizableField
   alias Mechanize.Query.BadCriteriaError
 
-  use Mechanize.Form.{FieldMatcher, FieldUpdater}
+  use Mechanize.Form.FieldUpdater
 
   @derive [ParameterizableField, Elementable]
   @enforce_keys [:element]
@@ -31,6 +32,13 @@ defmodule Mechanize.Form.TextInput do
       name: Element.attr(el, :name),
       value: Element.text(el)
     }
+  end
+
+  def text_inputs_with(form, criteria \\ []) do
+    get_in(form, [
+      Access.key(:fields),
+      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+    ])
   end
 
   def fill_text(form, criteria) do

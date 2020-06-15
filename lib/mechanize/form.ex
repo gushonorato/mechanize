@@ -117,9 +117,9 @@ defmodule Mechanize.Form do
   defdelegate check_checkbox(form, criteria), to: Checkbox, as: :check
   defdelegate uncheck_checkbox(form, criteria), to: Checkbox, as: :uncheck
 
-  defdelegate image_inputs(form), to: ImageInput
+  defdelegate image_inputs(form), to: ImageInput, as: :image_inputs_with
   defdelegate image_inputs_with(form, criteria), to: ImageInput
-  defdelegate click_image(form, criteria), to: ImageInput, as: :click
+  defdelegate click_image(form, criteria), to: ImageInput
 
   defdelegate radio_buttons(form), to: RadioButton, as: :radio_buttons_with
   defdelegate radio_buttons_with(form, criteria), to: RadioButton

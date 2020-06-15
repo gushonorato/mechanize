@@ -1,12 +1,10 @@
 defmodule Mechanize.Form.ImageInput do
   @moduledoc false
 
-  alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form
+  alias Mechanize.Query
+  alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Query.BadCriteriaError
-
-  use Mechanize.Form.FieldMatcher
-  use Mechanize.Form.FieldUpdater
 
   @derive [Elementable]
   defstruct element: nil, name: nil, x: 0, y: 0
@@ -25,11 +23,15 @@ defmodule Mechanize.Form.ImageInput do
     }
   end
 
-  def click(form, %__MODULE__{} = image) do
+  def image_inputs_with(form, criteria \\ []) do
+    get_in(form, [:fields, Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+  end
+
+  def click_image(form, %__MODULE__{} = image) do
     Form.submit(form, image)
   end
 
-  def click(form, criteria) do
+  def click_image(form, criteria) do
     {x, criteria} = Keyword.pop(criteria, :x, 0)
     {y, criteria} = Keyword.pop(criteria, :y, 0)
 
@@ -44,7 +46,7 @@ defmodule Mechanize.Form.ImageInput do
         raise BadCriteriaError, message: "Can't click on image input because it was not found"
 
       [image] ->
-        click(form, %__MODULE__{image | x: x, y: y})
+        click_image(form, %__MODULE__{image | x: x, y: y})
 
       images ->
         raise BadCriteriaError,

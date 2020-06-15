@@ -46,62 +46,12 @@ defmodule Mechanize.Form do
     %__MODULE__{form | fields: [field | form.fields]}
   end
 
-  def update_fields(form, fun) do
-    %__MODULE__{form | fields: Enum.map(form.fields, fun)}
-  end
-
-  def update_fields(form, type, fun) when is_atom(type) do
-    update_fields(form, [type], fun)
-  end
-
-  def update_fields(form, types, fun) do
-    update_fields(form, fn field ->
-      if field.__struct__ in types do
-        fun.(field)
-      else
-        field
-      end
-    end)
-  end
-
-  def update_fields(form, types, criteria, fun) do
-    update_fields(form, types, fn field ->
-      if Query.match_criteria?(field, criteria) do
-        fun.(field)
-      else
-        field
-      end
-    end)
-  end
-
-  def delete_fields(form, fun) when is_function(fun) do
-    %__MODULE__{form | fields: Enum.reject(form.fields, fun)}
-  end
-
-  def delete_fields_with(form, criteria) do
-    delete_fields(form, &Query.match_criteria?(&1, criteria))
-  end
-
   def fields(nil) do
     raise ArgumentError, "form is nil"
   end
 
   def fields(form) do
     form.fields
-  end
-
-  def fields_with(form, type, fun) when is_function(fun) do
-    form
-    |> fields()
-    |> Stream.filter(&(type == &1.__struct__))
-    |> Enum.filter(fun)
-  end
-
-  def fields_with(form, type, criteria) do
-    form
-    |> fields()
-    |> Stream.filter(&(type == &1.__struct__))
-    |> Enum.filter(&Query.match_criteria?(&1, criteria))
   end
 
   defdelegate text_inputs(form), to: TextInput, as: :text_inputs_with

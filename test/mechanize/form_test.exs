@@ -13,7 +13,11 @@ defmodule Mechanize.FormTest do
   describe ".put_field" do
     test "returns form", %{page: page} do
       form = Page.form_with(page, name: "login_form")
-      assert match?(%Form{}, Form.put_field(form, %DetachedField{name: "remember", value: "remember"}))
+
+      assert match?(
+               %Form{},
+               Form.put_field(form, %DetachedField{name: "remember", value: "remember"})
+             )
     end
 
     test "put a new field on form", %{page: page} do
@@ -55,69 +59,6 @@ defmodule Mechanize.FormTest do
                {"pass", "123456"},
                {"send", "Send"}
              ]
-    end
-  end
-
-  describe ".delete_fields" do
-    test "returns a form", %{page: page} do
-      form = Page.form_with(page, name: "login_form")
-      assert match?(%Form{}, Form.delete_fields(form, fn field -> field.name == "username" end))
-    end
-
-    test "remove all fields that function return true", %{page: page} do
-      assert page
-             |> Page.form_with(name: "login_form")
-             |> Form.delete_fields(&(&1.name == "username"))
-             |> Form.fields()
-             |> Enum.map(&{&1.name, &1.value}) == [
-               {"pass", "123456"},
-               {"send", "Send"}
-             ]
-    end
-
-    test "empty list if all fields deleted", %{page: page} do
-      assert page
-             |> Page.form_with(name: "login_form")
-             |> Form.delete_fields(fn _ -> true end)
-             |> Form.fields()
-             |> Enum.map(&{&1.name, &1.value}) == []
-    end
-  end
-
-  describe ".delete_fields_with" do
-    test "returns a form", %{page: page} do
-      form = Page.form_with(page, name: "login_form")
-      assert match?(%Form{}, Form.delete_fields_with(form, name: "username"))
-    end
-
-    test "remove all field with matching name", %{page: page} do
-      assert page
-             |> Page.form_with(name: "login_form")
-             |> Form.delete_fields_with(name: "username")
-             |> Form.fields()
-             |> Enum.map(&{&1.name, &1.value}) == [
-               {"pass", "123456"},
-               {"send", "Send"}
-             ]
-    end
-
-    test "remove all field with matching value", %{page: page} do
-      assert page
-             |> Page.form_with(name: "login_form")
-             |> Form.delete_fields_with(value: "123456")
-             |> Form.fields()
-             |> Enum.map(&{&1.name, &1.value}) == [
-               {"username", "gustavo"},
-               {"send", "Send"}
-             ]
-    end
-
-    test "empty list if all fields deleted", %{page: page} do
-      assert page
-             |> Page.form_with(name: "login_form")
-             |> Form.delete_fields_with(name: ~r/./)
-             |> Form.fields()
-             |> Enum.map(&{&1.name, &1.value}) == []
     end
   end
 
@@ -233,7 +174,10 @@ defmodule Mechanize.FormTest do
 
     test "content-type header added when POST", %{page: page, bypass: bypass} do
       Bypass.expect_once(bypass, fn conn ->
-        assert Plug.Conn.get_req_header(conn, "content-type") == ["application/x-www-form-urlencoded"]
+        assert Plug.Conn.get_req_header(conn, "content-type") == [
+                 "application/x-www-form-urlencoded"
+               ]
+
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
@@ -253,7 +197,10 @@ defmodule Mechanize.FormTest do
       |> Form.submit()
     end
 
-    test "absent action attribute must send request to current page path", %{page: page, bypass: bypass} do
+    test "absent action attribute must send request to current page path", %{
+      page: page,
+      bypass: bypass
+    } do
       Bypass.expect_once(bypass, fn conn ->
         assert conn.request_path == "/test/htdocs/form_test.html"
         Plug.Conn.resp(conn, 200, "OK")

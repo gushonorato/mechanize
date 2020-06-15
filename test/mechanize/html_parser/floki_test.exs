@@ -54,25 +54,25 @@ defmodule Mechanize.HTMLParser.FlokiTest do
     end
   end
 
-  describe ".filter" do
+  describe ".filter_out" do
     test "raise when page_or_elements is nil", %{parser: parser} do
       assert_raise ArgumentError, "page_or_elements is nil", fn ->
-        parser.filter(nil, "a")
+        parser.filter_out(nil, "a")
       end
     end
 
     test "raise when selector is nil", %{page: page, parser: parser} do
       assert_raise ArgumentError, "selector is nil", fn ->
-        parser.filter(page, nil)
+        parser.filter_out(page, nil)
       end
     end
 
     test "returns an element", %{page: page, parser: parser} do
-      [%Element{}] = parser.filter(page, "a")
+      [%Element{}] = parser.filter_out(page, "a")
     end
 
     test "remove child elements from a page", %{page: page, parser: parser} do
-      [result] = parser.filter(page, "div")
+      [result] = parser.filter_out(page, "div")
 
       node =
         """
@@ -94,13 +94,13 @@ defmodule Mechanize.HTMLParser.FlokiTest do
 
     test "remove child elements from parent element", %{page: page, parser: parser} do
       [element] = parser.search(page, ".america")
-      [element] = parser.filter(element, ".portuguese")
+      [element] = parser.filter_out(element, ".portuguese")
 
       assert Element.text(element) == "ChileArgentina"
     end
 
     test "remove all elements", %{page: page, parser: parser} do
-      assert parser.filter(page, "html") == []
+      assert parser.filter_out(page, "html") == []
     end
   end
 

@@ -156,7 +156,7 @@ defmodule Mechanize.Form do
 
       form_id ->
         page
-        |> Query.filter(~s(form[id="#{form_id}"]))
+        |> Query.filter_out(~s(form[id="#{form_id}"]))
         |> Query.search(~s([form="#{form_id}"]))
         |> Kernel.++(fields)
     end

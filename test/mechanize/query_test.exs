@@ -62,35 +62,35 @@ defmodule Mechanize.QueryTest do
 
     test "search elements returned by filter", %{page: page} do
       assert page
-             |> Query.filter(".america")
+             |> Query.filter_out(".america")
              |> Query.search(".spanish")
              |> Enum.map(&Element.text/1) == ["Spain"]
     end
   end
 
-  describe ".filter" do
+  describe ".filter_out" do
     test "return element list", %{page: page} do
-      assert is_list(Query.filter(page, ".europe"))
+      assert is_list(Query.filter_out(page, ".europe"))
     end
 
     test "raise if parseable is nill" do
       assert_raise ArgumentError, "page_or_elements is nil", fn ->
-        Query.filter(nil, ".spanish")
+        Query.filter_out(nil, ".spanish")
       end
     end
 
     test "raise if selector is nil", %{page: page} do
       assert_raise ArgumentError, "selector is nil", fn ->
-        Query.filter(page, nil)
+        Query.filter_out(page, nil)
       end
     end
 
     test "empty page_or_elements" do
-      assert Query.filter([], ".english") == []
+      assert Query.filter_out([], ".english") == []
     end
 
     test "if all matched return empty list", %{page: page} do
-      assert Query.filter(page, "*") == []
+      assert Query.filter_out(page, "*") == []
     end
 
     test "returns elements of a page unmatched by css selector", %{page: page} do
@@ -111,7 +111,7 @@ defmodule Mechanize.QueryTest do
         """
         |> page.parser.parse_document()
 
-      [result] = Query.filter(page, ".spanish")
+      [result] = Query.filter_out(page, ".spanish")
 
       assert result.parser_node == expected
     end
@@ -128,7 +128,7 @@ defmodule Mechanize.QueryTest do
       [result] =
         page
         |> Query.search(".america")
-        |> Query.filter(".spanish")
+        |> Query.filter_out(".spanish")
 
       assert result.parser_node == expected
     end
@@ -144,7 +144,7 @@ defmodule Mechanize.QueryTest do
       result =
         page
         |> Query.search(".continent")
-        |> Query.filter(".spanish")
+        |> Query.filter_out(".spanish")
         |> Enum.map(& &1.parser_node)
 
       assert result == expected

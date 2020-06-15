@@ -35,17 +35,17 @@ defmodule Mechanize.HTMLParser.Floki do
   end
 
   @impl HTMLParser
-  def filter(nil, _selector) do
+  def filter_out(nil, _selector) do
     raise ArgumentError, "page_or_elements is nil"
   end
 
   @impl HTMLParser
-  def filter(_page_or_elements, nil) do
+  def filter_out(_page_or_elements, nil) do
     raise ArgumentError, "selector is nil"
   end
 
   @impl HTMLParser
-  def filter(%Element{} = element, selector) do
+  def filter_out(%Element{} = element, selector) do
     element.parser_node
     |> List.wrap()
     |> Floki.filter_out(selector)
@@ -53,7 +53,7 @@ defmodule Mechanize.HTMLParser.Floki do
   end
 
   @impl HTMLParser
-  def filter(%Page{} = page, selector) do
+  def filter_out(%Page{} = page, selector) do
     page.content
     |> parse_document()
     |> Floki.filter_out(selector)

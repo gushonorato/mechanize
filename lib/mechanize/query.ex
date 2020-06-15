@@ -21,18 +21,18 @@ defmodule Mechanize.Query do
     search([elementable], selector)
   end
 
-  def filter(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
-  def filter(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
+  def filter_out(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
+  def filter_out(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
 
-  def filter(%Page{} = page, selector), do: page.parser.filter(page, selector)
+  def filter_out(%Page{} = page, selector), do: page.parser.filter_out(page, selector)
 
-  def filter(elementables, selector) when is_list(elementables) do
+  def filter_out(elementables, selector) when is_list(elementables) do
     elementables
     |> Enum.map(&Elementable.element/1)
-    |> Enum.flat_map(fn el -> el.parser.filter(el, selector) end)
+    |> Enum.flat_map(fn el -> el.parser.filter_out(el, selector) end)
   end
 
-  def filter(elementable, selector), do: filter([elementable], selector)
+  def filter_out(elementable, selector), do: filter_out([elementable], selector)
 
   def elements_with(page_or_elements, selector, criteria \\ []) do
     page_or_elements

@@ -152,6 +152,6 @@ defmodule Mechanize.Page do
   end
 
   defdelegate search(page, selector), to: Query
-  defdelegate filter(page, selector), to: Query
+  defdelegate filter_out(page, selector), to: Query
   defdelegate elements_with(page, selector, criteria \\ []), to: Query
 end

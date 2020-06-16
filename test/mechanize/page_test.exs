@@ -46,27 +46,27 @@ defmodule Mechanize.PageTest do
     end
   end
 
-  describe ".browser" do
+  describe ".get_browser" do
     test "raise if page is nil" do
       assert_raise ArgumentError, "page is nil", fn ->
-        Page.browser(nil)
+        Page.get_browser(nil)
       end
     end
 
     test "returns the browser used to fetch the page", %{page: page, browser: browser} do
-      assert Page.browser(page) == browser
+      assert Page.get_browser(page) == browser
     end
   end
 
-  describe ".url" do
+  describe ".get_url" do
     test "raise if page is nil" do
       assert_raise ArgumentError, "page is nil", fn ->
-        Page.url(nil)
+        Page.get_url(nil)
       end
     end
 
     test "returns the page absolute url", %{page: page, bypass: bypass} do
-      assert Page.url(page) == endpoint_url(bypass, "/test/htdocs/page_with_links.html")
+      assert Page.get_url(page) == endpoint_url(bypass, "/test/htdocs/page_with_links.html")
     end
   end
 

@@ -198,7 +198,7 @@ defmodule Mechanize.BrowserTest do
 
       page = Browser.request!(Browser.new(), :get, endpoint_url(bypass))
 
-      assert Page.content(page) == "OK PAGE"
+      assert Page.get_content(page) == "OK PAGE"
     end
 
     test "send correct methods", %{bypass: bypass} do
@@ -397,7 +397,9 @@ defmodule Mechanize.BrowserTest do
       Browser.put_follow_redirect(browser, false)
       page = Browser.request!(browser, :get, endpoint_url(bypass, "/redirect_to"))
       assert page.status_code == 301
-      assert Header.get_value(Page.headers(page), "location") == endpoint_url(bypass, "/redirected")
+
+      assert Header.get_value(Page.get_headers(page), "location") ==
+               endpoint_url(bypass, "/redirected")
 
       Browser.put_follow_redirect(browser, true)
       page = Browser.request!(browser, :get, endpoint_url(bypass, "/redirect_to"))

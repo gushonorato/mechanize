@@ -275,7 +275,7 @@ defmodule Mechanize.FormTest do
         page
         |> Page.form_with(name: "login_form")
         |> Form.submit()
-        |> Page.content() == "OK"
+        |> Page.get_content() == "OK"
       )
     end
 

@@ -37,22 +37,22 @@ defmodule Mechanize.Page do
   @doc """
   Returns the browser that fetched the `page`.
   """
-  @spec browser(Page.t()) :: Browser.t()
-  def browser(nil), do: raise(ArgumentError, "page is nil")
-  def browser(page), do: page.browser
+  @spec get_browser(Page.t()) :: Browser.t()
+  def get_browser(nil), do: raise(ArgumentError, "page is nil")
+  def get_browser(page), do: page.browser
 
   @doc """
   Returns the `page` url.
   """
-  @spec url(Page.t()) :: String.t()
-  def url(nil), do: raise(ArgumentError, "page is nil")
-  def url(page), do: page.url
+  @spec get_url(Page.t()) :: String.t()
+  def get_url(nil), do: raise(ArgumentError, "page is nil")
+  def get_url(page), do: page.url
 
   @doc """
   Returns the page content.
   """
-  @spec content(Page.t()) :: String.t()
-  def content(page), do: page.content
+  @spec get_content(Page.t()) :: String.t()
+  def get_content(page), do: page.content
 
   @doc """
   Extracts meta-refresh data from a `page`.
@@ -105,13 +105,13 @@ defmodule Mechanize.Page do
     end
   end
 
-  def headers(page) do
+  def get_headers(page) do
     page
-    |> last_response()
+    |> get_response()
     |> Response.headers()
   end
 
-  def last_response(page), do: List.first(page.response_chain)
+  def get_response(page), do: List.first(page.response_chain)
 
   def click_link(page, criterias) when is_list(criterias) do
     page

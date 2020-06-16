@@ -68,7 +68,7 @@ defmodule Mechanize.Form.ImageInputTest do
 
       assert form
              |> ImageInput.click_image(name: "map2", x: 10, y: 10)
-             |> Page.content() == "NEXT PAGE"
+             |> Page.get_content() == "NEXT PAGE"
     end
 
     test "raise exception when image not found", %{form: form} do

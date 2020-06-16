@@ -39,20 +39,20 @@ defmodule Mechanize.Page do
   """
   @spec get_browser(Page.t()) :: Browser.t()
   def get_browser(nil), do: raise(ArgumentError, "page is nil")
-  def get_browser(page), do: page.browser
+  def get_browser(%__MODULE__{} = page), do: page.browser
 
   @doc """
   Returns the `page` url.
   """
   @spec get_url(Page.t()) :: String.t()
   def get_url(nil), do: raise(ArgumentError, "page is nil")
-  def get_url(page), do: page.url
+  def get_url(%__MODULE__{} = page), do: page.url
 
   @doc """
   Returns the page content.
   """
   @spec get_content(Page.t()) :: String.t()
-  def get_content(page), do: page.content
+  def get_content(%__MODULE__{} = page), do: page.content
 
   @doc """
   Extracts meta-refresh data from a `page`.
@@ -76,7 +76,7 @@ defmodule Mechanize.Page do
   @spec meta_refresh(Page.t()) :: {integer(), String.t()}
   def meta_refresh(nil), do: raise(ArgumentError, "page is nil")
 
-  def meta_refresh(page) do
+  def meta_refresh(%__MODULE__{} = page) do
     page
     |> search("meta[http-equiv=refresh]")
     |> List.first()
@@ -105,13 +105,13 @@ defmodule Mechanize.Page do
     end
   end
 
-  def get_headers(page) do
+  def get_headers(%__MODULE__{} = page) do
     page
     |> get_response()
     |> Response.headers()
   end
 
-  def get_response(page), do: List.first(page.response_chain)
+  def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
   def click_link(page, criterias) when is_list(criterias) do
     page

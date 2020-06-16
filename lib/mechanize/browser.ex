@@ -550,9 +550,4 @@ defmodule Mechanize.Browser do
   defp request!(browser, req) do
     GenServer.call(browser, {:request!, req})
   end
-
-  def click_link(browser, %Link{} = link) do
-    unless Element.attr_present?(link, :href), do: raise(ClickError, "href attribute is missing")
-    get!(browser, link.url)
-  end
 end

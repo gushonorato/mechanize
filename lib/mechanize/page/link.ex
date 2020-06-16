@@ -11,7 +11,8 @@ defmodule Mechanize.Page.Link do
         }
 
   def click(%__MODULE__{} = link) do
-    Browser.click_link(link.element.page.browser, link)
+    unless Element.attr_present?(link, :href), do: raise(ClickError, "href attribute is missing")
+    Browser.get!(link.element.page.browser, link.url)
   end
 
   def new(%Element{name: name} = el) when name == "a" or name == "area" do

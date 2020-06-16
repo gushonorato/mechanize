@@ -5,11 +5,13 @@ defmodule Mechanize.PageTest do
   alias Mechanize.Page
   import TestHelper
 
-  describe ".form_with" do
-    setup do
-      stub_requests("/test/htdocs/two_forms.html")
-    end
+  setup ctx do
+    url = Map.get(ctx, :url, "/test/htdocs/page_with_links.html")
+    stub_requests(url)
+  end
 
+  describe ".form_with" do
+    @tag url: "/test/htdocs/two_forms.html"
     test "return only the first form", %{page: page} do
       form = Page.form_with(page)
 
@@ -26,6 +28,7 @@ defmodule Mechanize.PageTest do
              ]
     end
 
+    @tag url: "/test/htdocs/two_forms.html"
     test "select form by its attributes", %{page: page} do
       form = Page.form_with(page, name: "form-name-2")
 
@@ -43,11 +46,31 @@ defmodule Mechanize.PageTest do
     end
   end
 
-  describe ".links_with" do
-    setup do
-      stub_requests("/test/htdocs/page_with_links.html")
+  describe ".browser" do
+    test "raise if page is nil" do
+      assert_raise ArgumentError, "page is nil", fn ->
+        Page.browser(nil)
+      end
     end
 
+    test "returns the browser used to fetch the page", %{page: page, browser: browser} do
+      assert Page.browser(page) == browser
+    end
+  end
+
+  describe ".url" do
+    test "raise if page is nil" do
+      assert_raise ArgumentError, "page is nil", fn ->
+        Page.url(nil)
+      end
+    end
+
+    test "returns the page absolute url", %{page: page, bypass: bypass} do
+      assert Page.url(page) == endpoint_url(bypass, "/test/htdocs/page_with_links.html")
+    end
+  end
+
+  describe ".links_with" do
     test "returns list of %Link struct", %{page: page} do
       [%Link{}] = Page.links_with(page, href: ~r/google/)
     end

@@ -38,12 +38,14 @@ defmodule Mechanize.Page do
   Returns the browser that fetched the `page`.
   """
   @spec browser(Page.t()) :: Browser.t()
+  def browser(nil), do: raise(ArgumentError, "page is nil")
   def browser(page), do: page.browser
 
   @doc """
   Returns the `page` url.
   """
   @spec url(Page.t()) :: String.t()
+  def url(nil), do: raise(ArgumentError, "page is nil")
   def url(page), do: page.url
 
   @doc """

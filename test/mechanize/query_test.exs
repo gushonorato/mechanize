@@ -344,6 +344,10 @@ defmodule Mechanize.QueryTest do
       assert Query.match_criteria?(fake_1a, text: "ElementableFake 1A") == true
     end
 
+    test "text matches string using shortcut", %{fake_1a: fake_1a} do
+      assert Query.match_criteria?(fake_1a, "ElementableFake 1A") == true
+    end
+
     test "text does not match string", %{fake_1a: fake_1a} do
       assert Query.match_criteria?(fake_1a, text: "wrong") == false
     end

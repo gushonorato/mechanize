@@ -114,7 +114,6 @@ defmodule Mechanize.Page do
 
   def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
-  def click_link!(page_or_fragment, criterias) when is_list(criterias) do
     page_or_fragment
     |> link_with!(criterias)
     |> Link.click!()

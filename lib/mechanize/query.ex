@@ -69,6 +69,10 @@ defmodule Mechanize.Query do
 
   def match_criteria?(_element, []), do: true
 
+  def match_criteria?(element, text) when is_binary(text) do
+    match_criteria?(element, [{:text, text}])
+  end
+
   def match_criteria?(element, index) when is_integer(index) do
     case Map.get(element, :index) do
       ^index ->

@@ -13,6 +13,7 @@ defmodule Mechanize.Page do
   ```
   """
   alias Mechanize.{Response, Query, Form}
+  alias Mechanize.Query.BadCriteriaError
   alias Mechanize.Page.{Link, Element}
 
   defstruct [:response_chain, :status_code, :content, :url, :browser, :parser]
@@ -113,10 +114,10 @@ defmodule Mechanize.Page do
 
   def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
-  def click_link(page, criterias) when is_list(criterias) do
-    page
-    |> link_with(criterias)
-    |> Link.click()
+  def click_link!(page_or_fragment, criterias) when is_list(criterias) do
+    page_or_fragment
+    |> link_with!(criterias)
+    |> Link.click!()
   end
 
   defdelegate links(page), to: __MODULE__, as: :links_with
@@ -127,10 +128,24 @@ defmodule Mechanize.Page do
     |> List.first()
   end
 
+  def link_with!(page, criteria \\ []) do
+    case link_with(page, criteria) do
+      nil -> raise BadCriteriaError, "no link found with given criteria"
+      link -> link
+    end
+  end
+
   def links_with(page, criteria \\ []) do
     page
     |> elements_with("a, area", criteria)
     |> Enum.map(&Link.new/1)
+  end
+
+  def links_with!(page, criteria \\ []) do
+    case links_with(page, criteria) do
+      [] -> raise BadCriteriaError, "no link found with given criteria"
+      link -> link
+    end
   end
 
   def form(page) do

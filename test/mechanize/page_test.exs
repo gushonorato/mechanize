@@ -118,8 +118,7 @@ defmodule Mechanize.PageTest do
           "Google",
           "Google Android",
           "Microsoft",
-          "Apple",
-          "Back"
+          "Apple"
         ]
       )
     end
@@ -136,6 +135,20 @@ defmodule Mechanize.PageTest do
           "Nibiru"
         ]
       )
+    end
+  end
+
+  describe ".links_with!" do
+    test "raise if no element found", %{page: page} do
+      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+        Page.links_with!(page, alt: "Pluto")
+      end
+    end
+
+    test "return links", %{page: page} do
+      assert page
+             |> Page.links_with!(class: ~r/great-company/)
+             |> Enum.map(&Element.text/1) == ["Google", "Google Android", "Microsoft", "Apple"]
     end
   end
 
@@ -198,7 +211,21 @@ defmodule Mechanize.PageTest do
     end
   end
 
-  describe ".click_link" do
+  describe ".link_with!" do
+    test "raise if no element found", %{page: page} do
+      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+        Page.link_with!(page, alt: "Pluto")
+      end
+    end
+
+    test "return first matched link", %{page: page} do
+      assert page
+             |> Page.link_with!(class: ~r/great-company/)
+             |> Element.text() == "Google"
+    end
+  end
+
+  describe ".click_link!" do
     setup do
       stub_requests("/test/htdocs/page_with_links.html")
     end
@@ -208,7 +235,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, class: ~r/great-company/)
+      Page.click_link!(page, class: ~r/great-company/)
     end
 
     test "click on first matched link by text", %{bypass: bypass, page: page} do
@@ -216,7 +243,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, text: "SEO Master")
+      Page.click_link!(page, text: "SEO Master")
     end
 
     test "relative link", %{bypass: bypass, page: page} do
@@ -224,7 +251,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, text: "Back")
+      Page.click_link!(page, text: "Back")
     end
 
     test "image area links", %{bypass: bypass, page: page} do
@@ -232,18 +259,24 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link(page, alt: "Sun")
+      Page.click_link!(page, alt: "Sun")
     end
 
     test "raise if link does't have href attribute", %{page: page} do
-      assert_raise Mechanize.Browser.ClickError, "href attribute is missing", fn ->
-        Page.click_link(page, text: "Stealth Company")
+      assert_raise Mechanize.Page.ClickError, "href attribute is missing", fn ->
+        Page.click_link!(page, text: "Stealth Company")
       end
     end
 
     test "raise if image area link does't have href attribute", %{page: page} do
-      assert_raise Mechanize.Browser.ClickError, "href attribute is missing", fn ->
-        Page.click_link(page, alt: "Nibiru")
+      assert_raise Mechanize.Page.ClickError, "href attribute is missing", fn ->
+        Page.click_link!(page, alt: "Nibiru")
+      end
+    end
+
+    test "raise if no link is found", %{page: page} do
+      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+        Page.click_link!(page, alt: "Pluto")
       end
     end
   end

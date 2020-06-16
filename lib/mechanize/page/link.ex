@@ -1,5 +1,5 @@
 defmodule Mechanize.Page.Link do
-  alias Mechanize.Page.Element
+  alias Mechanize.Page.{Element, ClickError}
   alias Mechanize.Browser
 
   @derive [Mechanize.Page.Elementable]
@@ -10,7 +10,7 @@ defmodule Mechanize.Page.Link do
           url: String.t()
         }
 
-  def click(%__MODULE__{} = link) do
+  def click!(%__MODULE__{} = link) do
     unless Element.attr_present?(link, :href), do: raise(ClickError, "href attribute is missing")
     Browser.get!(link.element.page.browser, link.url)
   end

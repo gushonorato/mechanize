@@ -32,17 +32,9 @@ defmodule Mechanize.Browser do
 
   """
   alias Mechanize.Request
-  alias Mechanize.Page.{Element, Link}
 
   @type t :: pid
   @type response_chain :: [Mechanize.Response.t()]
-
-  defmodule ClickError do
-    @moduledoc """
-    Raised when an error occurs on a click action.
-    """
-    defexception [:message]
-  end
 
   defmodule RedirectLimitReachedError do
     defexception [:message]

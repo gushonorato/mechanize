@@ -73,7 +73,7 @@ defmodule Mechanize.QueryTest do
       assert is_list(Query.filter_out(page, ".europe"))
     end
 
-    test "raise if parseable is nill" do
+    test "raise if parseable is nil" do
       assert_raise ArgumentError, "page_or_elements is nil", fn ->
         Query.filter_out(nil, ".spanish")
       end

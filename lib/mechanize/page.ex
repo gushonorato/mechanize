@@ -27,6 +27,15 @@ defmodule Mechanize.Page do
           parser: module()
         }
 
+  @type fragment :: [Element.t()]
+
+  defmodule ClickError do
+    @moduledoc """
+    Raised when an error occurs on a click action.
+    """
+    defexception [:message]
+  end
+
   defmodule InvalidMetaRefreshError do
     @moduledoc """
     Raised when Mechanize can not parse the `content` attribute of a
@@ -106,27 +115,103 @@ defmodule Mechanize.Page do
     end
   end
 
+  @doc """
+  Returns the response headers of a `page`.
+
+  In case of Mechanize Browser has followed one or more redirects when `page` was fetched,
+  the headers returned corresponds to the headers of the last response.
+  """
+  @spec get_headers(Page.t()) :: Header.headers()
   def get_headers(%__MODULE__{} = page) do
     page
     |> get_response()
     |> Response.headers()
   end
 
+  @doc """
+  Return the response of a `page`.
+
+  In case of Mechanize Browser has followed one or more redirects when `page` was fetched,
+  the response returned correspond to the last respose.
+  """
+  @spec get_response(Page.t()) :: Response.t()
   def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
+  @doc """
+  Clicks on a link that matches `criteria`.
+
+  Links are all elements defined by `a` and `area` html tags.
+
+  If the request does not fail, a Page struct is returned, otherwise, it raises
+  `Mechanize.HTTPAdapter.NetworkError`. In case of more than one link matches the criteria,
+  Mechanize will click on the first matched link.
+
+  Raises `Mechanize.Page.ClickError` if the matched link has no href attribute.
+
+  Raises `Mechanize.Page.BadCriteriaError` if no link matches with given `criteria`.
+
+  ## Examples
+
+  Click on the first link with text equals to "Back":
+  ```
+    Page.click_link!(page, "Back")
+  ```
+
+  Click on the first link by its "href" attribute:
+  ```
+    Page.click_link!(page, href: "sun.html")
+  ```
+
+  You can also click on a link inside a list returned by a `Mechanize.Page.search/2`:
+  ```
+    page
+    |> Page.search("area")
+    |> Page.click_link!(alt: "Sun")
+  ```
+
+  Or even in a element child:
+  ```
+    page
+    |> Page.search("map[name=planetmap]")
+    |> Page.click_link!(alt: "Sun")
+  ```
+  """
+  @dialyzer :no_return
+  @spec click_link!(Page.t() | Page.fragment(), Query.t()) :: Page.t()
+  def click_link!(page_or_fragment, criterias) do
     page_or_fragment
     |> link_with!(criterias)
     |> Link.click!()
   end
 
+  @doc """
+  Returns a list containing all links from `page` or an empty list if `page` has no links.
+  """
+  @spec links(Page.t()) :: [Link.t()]
   defdelegate links(page), to: __MODULE__, as: :links_with
 
+  @doc """
+  Return the first link matched by `criteria`.
+
+  Nil is returned if no link was matched.
+
+  See `Mechanize.Page.links_with/2` for more details about how to query links.
+  """
+  @spec link_with(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
   def link_with(page, criteria \\ []) do
     page
     |> links_with(criteria)
     |> List.first()
   end
 
+  @doc """
+  Return the first link matched by `criteria`.
+
+  Raise `Mechanize.Query.BadCriteriaError` if no link was matched.
+
+  See `Mechanize.Page.links_with/2` for more details about how to query links.
+  """
+  @spec link_with!(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
   def link_with!(page, criteria \\ []) do
     case link_with(page, criteria) do
       nil -> raise BadCriteriaError, "no link found with given criteria"
@@ -134,12 +219,50 @@ defmodule Mechanize.Page do
     end
   end
 
+  @doc """
+  Return all links matched by `criteria`.
+
+  An empty list is returned if no link was matched.
+
+  ## Examples
+
+  Retrieving all links containing "Back" text of `page`:
+  ```
+  Page.links_with(page, "Back")
+  ```
+
+  Retrieving all links by attribute:
+  ```
+    Page.links_with(page, href: "sun.html")
+  ```
+
+  You can also use regular expressions:
+  ```
+    Page.links_with(page, href: ~r/sun/)
+  ```
+
+  It's possible to chain functions:
+  ```
+    page
+    |> Page.search("map[name=planets]")
+    |> Page.links_with("Sun")
+  ```
+  """
+  @spec links_with(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
   def links_with(page, criteria \\ []) do
     page
     |> elements_with("a, area", criteria)
     |> Enum.map(&Link.new/1)
   end
 
+  @doc """
+  Return all links matched by `criteria`.
+
+  Raise `Mechanize.Query.BadCriteriaError` if no link was matched.
+
+  See `Mechanize.Page.links_with/2` for more details about how to query links.
+  """
+  @spec links_with!(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
   def links_with!(page, criteria \\ []) do
     case links_with(page, criteria) do
       [] -> raise BadCriteriaError, "no link found with given criteria"

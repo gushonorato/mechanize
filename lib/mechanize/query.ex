@@ -6,6 +6,8 @@ defmodule Mechanize.Query do
     defexception [:message]
   end
 
+  @type t :: keyword() | integer() | String.t()
+
   def search(nil, _selector), do: raise(ArgumentError, "page_or_elements is nil")
   def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
 

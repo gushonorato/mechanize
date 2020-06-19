@@ -191,7 +191,7 @@ defmodule Mechanize.QueryTest do
     fake_1b = %ElementableFake1{
       element: %Element{
         name: "elementable_fake_1",
-        attrs: [{"value", "B"}, {"rel", "fake_1a"}],
+        attrs: [{"value", "B"}, {"rel", "fake_1b"}],
         text: "ElementableFake1 1B"
       }
     }

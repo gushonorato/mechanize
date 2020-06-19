@@ -88,7 +88,7 @@ page
 |> Page.links()
 |> Enum.filter(fn link -> Element.text(link) == "News" end)
 |> List.first()
-|> Link.click()
+|> Link.click!()
 ```
 
 But Mechanize gives us a shortcut.  Instead we can do this:
@@ -96,13 +96,13 @@ But Mechanize gives us a shortcut.  Instead we can do this:
 ```elixir
 page
 |> Page.link_with(text: "News")
-|> Link.click()
+|> Link.click!()
 ```
 
 Or even shorter, with just one line:
 
 ```elixir
-Page.click_link(page, text: "News")
+Page.click_link!(page, text: "News")
 ```
 
 You're probably thinking "there could be multiple links with that text!", and you would be correct!  If you use the plural form, you can access the list. If you wanted to click on the second news link, you could do this:
@@ -258,7 +258,7 @@ serp
 |> Enum.each(fn {result, index} -> IO.puts("#{index}. #{result}") end)
 ```
 
-## Authors
+## Author
 Copyright © 2020 by Gustavo Honorato (gustavohonorato@gmail.com)
 
 ## License

@@ -17,7 +17,7 @@ defmodule Mechanize.HTMLParser.Floki do
   def search(nil, _selector), do: raise(ArgumentError, "page_or_element is nil")
 
   @impl HTMLParser
-  def search(_page_or_elements, nil), do: raise(ArgumentError, "selector is nil")
+  def search(_page_or_fragment, nil), do: raise(ArgumentError, "selector is nil")
 
   @impl HTMLParser
   def search(%Page{} = page, selector) do
@@ -62,7 +62,7 @@ defmodule Mechanize.HTMLParser.Floki do
 
   @impl HTMLParser
   def raw_html(nil) do
-    raise ArgumentError, "page_or_elements is nil"
+    raise ArgumentError, "page_or_fragment is nil"
   end
 
   @impl HTMLParser

@@ -141,8 +141,7 @@ defmodule Mechanize.Query do
   @doc """
   See `Mechanize.Page.elements_with/3`.
   """
-  def elements_with(page_or_elements, selector, criteria \\ []) do
-    page_or_elements
+    page_or_fragment
     |> search(selector)
     |> Enum.filter(&match_criteria?(&1, criteria))
   end

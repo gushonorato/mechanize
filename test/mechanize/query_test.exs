@@ -21,7 +21,7 @@ defmodule Mechanize.QueryTest do
     end
 
     test "raise if page or element list is nil" do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+      assert_raise ArgumentError, "page_or_fragment is nil", fn ->
         Query.search(nil, ".spanish")
       end
     end
@@ -32,7 +32,7 @@ defmodule Mechanize.QueryTest do
       end
     end
 
-    test "empty page_or_elements" do
+    test "empty page_or_fragment" do
       assert Query.search([], ".english") == []
     end
 
@@ -74,7 +74,7 @@ defmodule Mechanize.QueryTest do
     end
 
     test "raise if parseable is nil" do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+      assert_raise ArgumentError, "page_or_fragment is nil", fn ->
         Query.filter_out(nil, ".spanish")
       end
     end
@@ -85,7 +85,7 @@ defmodule Mechanize.QueryTest do
       end
     end
 
-    test "empty page_or_elements" do
+    test "empty page_or_fragment" do
       assert Query.filter_out([], ".english") == []
     end
 
@@ -153,7 +153,7 @@ defmodule Mechanize.QueryTest do
 
   describe ".elements_with" do
     test "raise if parseable is nil" do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+      assert_raise ArgumentError, "page_or_fragment is nil", fn ->
         Query.elements_with(nil, "div")
       end
     end

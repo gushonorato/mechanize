@@ -55,8 +55,8 @@ defmodule Mechanize.HTMLParser.FlokiTest do
   end
 
   describe ".filter_out" do
-    test "raise when page_or_elements is nil", %{parser: parser} do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+    test "raise when page_or_fragment is nil", %{parser: parser} do
+      assert_raise ArgumentError, "page_or_fragment is nil", fn ->
         parser.filter_out(nil, "a")
       end
     end
@@ -106,7 +106,7 @@ defmodule Mechanize.HTMLParser.FlokiTest do
 
   describe ".raw_html" do
     test "parseable is nil", %{parser: parser} do
-      assert_raise ArgumentError, "page_or_elements is nil", fn ->
+      assert_raise ArgumentError, "page_or_fragment is nil", fn ->
         parser.raw_html(nil)
       end
     end

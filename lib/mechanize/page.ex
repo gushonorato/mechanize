@@ -18,6 +18,9 @@ defmodule Mechanize.Page do
 
   defstruct [:response_chain, :status_code, :content, :url, :browser, :parser]
 
+  @typedoc """
+  The HTML Page struct.
+  """
   @type t :: %__MODULE__{
           response_chain: [Response.t()],
           status_code: integer(),
@@ -27,6 +30,10 @@ defmodule Mechanize.Page do
           parser: module()
         }
 
+  @typedoc """
+  A fragment of a page. It is an array of `Mechanize.Page.Element` struct in most of the cases,
+  but it could be any struct that implements `Mechanize.Page.Elementable` protocol.
+  """
   @type fragment :: [any]
 
   defmodule ClickError do
@@ -38,7 +45,7 @@ defmodule Mechanize.Page do
 
   defmodule InvalidMetaRefreshError do
     @moduledoc """
-    Raised when Mechanize can not parse the `content` attribute of a
+    Raised when Mechanize cannot parse the `content` attribute of a
     `<meta http-equiv="refresh" ...>` element inside the page content.
     """
     defexception [:message]
@@ -47,21 +54,21 @@ defmodule Mechanize.Page do
   @doc """
   Returns the browser that fetched the `page`.
   """
-  @spec get_browser(Page.t()) :: Browser.t()
+  @spec get_browser(t()) :: Browser.t()
   def get_browser(nil), do: raise(ArgumentError, "page is nil")
   def get_browser(%__MODULE__{} = page), do: page.browser
 
   @doc """
   Returns the `page` url.
   """
-  @spec get_url(Page.t()) :: String.t()
+  @spec get_url(t()) :: String.t()
   def get_url(nil), do: raise(ArgumentError, "page is nil")
   def get_url(%__MODULE__{} = page), do: page.url
 
   @doc """
   Returns the page content.
   """
-  @spec get_content(Page.t()) :: String.t()
+  @spec get_content(t()) :: String.t()
   def get_content(%__MODULE__{} = page), do: page.content
 
   @doc """
@@ -83,7 +90,7 @@ defmodule Mechanize.Page do
   url # => https://www.example.com
   ```
   """
-  @spec meta_refresh(Page.t()) :: {integer(), String.t()}
+  @spec meta_refresh(t()) :: {integer(), String.t()}
   def meta_refresh(nil), do: raise(ArgumentError, "page is nil")
 
   def meta_refresh(%__MODULE__{} = page) do
@@ -121,7 +128,7 @@ defmodule Mechanize.Page do
   In case of Mechanize Browser has followed one or more redirects when `page` was fetched,
   the headers returned corresponds to the headers of the last response.
   """
-  @spec get_headers(Page.t()) :: Header.headers()
+  @spec get_headers(t()) :: Header.headers()
   def get_headers(%__MODULE__{} = page) do
     page
     |> get_response()
@@ -134,7 +141,7 @@ defmodule Mechanize.Page do
   In case of Mechanize Browser has followed one or more redirects when `page` was fetched,
   the response returned correspond to the last respose.
   """
-  @spec get_response(Page.t()) :: Response.t()
+  @spec get_response(t()) :: Response.t()
   def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
   @doc """
@@ -150,6 +157,7 @@ defmodule Mechanize.Page do
 
   Raises `Mechanize.Page.BadQueryError` if no link matches with given `query`.
 
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
   ## Examples
 
   Click on the first link with text equals to "Back":
@@ -161,10 +169,9 @@ defmodule Mechanize.Page do
   ```
     Page.click_link!(page, href: "sun.html")
   ```
-
   """
   @dialyzer :no_return
-  @spec click_link!(Page.t() | Page.fragment(), Query.t()) :: Page.t()
+  @spec click_link!(t() | fragment(), Query.t()) :: t()
   def click_link!(page_or_fragment, query) do
     page_or_fragment
     |> link_with!(query)
@@ -172,10 +179,11 @@ defmodule Mechanize.Page do
   end
 
   @doc """
-  Returns a list containing all links from `page` or an empty list if `page` has no links.
+  Returns a list containing all links from a page or fragment of a page, or an empty list in
+  case it has no links.
   """
-  @spec links(Page.t()) :: [Link.t()]
-  defdelegate links(page), to: __MODULE__, as: :links_with
+  @spec links(t() | fragment()) :: [Link.t()]
+  defdelegate links(page_or_fragment), to: __MODULE__, as: :links_with
 
   @doc """
   Return the first link matched by `query`.
@@ -184,9 +192,9 @@ defmodule Mechanize.Page do
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
-  @spec link_with(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
-  def link_with(page, query \\ []) do
-    page
+  @spec link_with(t() | fragment(), Query.t()) :: Link.t() | nil
+  def link_with(page_or_fragment, query \\ []) do
+    page_or_fragment
     |> links_with(query)
     |> List.first()
   end
@@ -198,9 +206,9 @@ defmodule Mechanize.Page do
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
-  @spec link_with!(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
-  def link_with!(page, query \\ []) do
-    case link_with(page, query) do
+  @spec link_with!(t() | fragment(), Query.t()) :: Link.t() | nil
+  def link_with!(page_or_fragment, query \\ []) do
+    case link_with(page_or_fragment, query) do
       nil -> raise BadQueryError, "no link found with given query"
       link -> link
     end
@@ -211,8 +219,9 @@ defmodule Mechanize.Page do
 
   An empty list is returned if no link was matched.
 
-  ## Examples
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
 
+  ## Examples
   Retrieving all links containing "Back" text of `page`:
   ```
   Page.links_with(page, "Back")
@@ -222,12 +231,10 @@ defmodule Mechanize.Page do
   ```
     Page.links_with(page, href: "sun.html")
   ```
-
-  See `Mechanize.Query` module documentation to know all query capabilities in depth.
   """
-  @spec links_with(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
-  def links_with(page, query \\ []) do
-    page
+  @spec links_with(t() | fragment(), Query.t()) :: [Link.t()]
+  def links_with(page_or_fragment, query \\ []) do
+    page_or_fragment
     |> elements_with("a, area", query)
     |> Enum.map(&Link.new/1)
   end
@@ -239,9 +246,9 @@ defmodule Mechanize.Page do
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
-  @spec links_with!(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
-  def links_with!(page, query \\ []) do
-    case links_with(page, query) do
+  @spec links_with!(t() | fragment(), Query.t()) :: [Link.t()]
+  def links_with!(page_or_fragment, query \\ []) do
+    case links_with(page_or_fragment, query) do
       [] -> raise BadQueryError, "no link found with given query"
       link -> link
     end
@@ -251,7 +258,7 @@ defmodule Mechanize.Page do
   Returns the first form in a given page or fragment or nil in case of the given page or fragment
   does not have a form.
   """
-  @spec form(Page.t() | Page.fragment()) :: Form.t() | nil
+  @spec form(t() | fragment()) :: Form.t() | nil
   def form(page_or_fragment) do
     page_or_fragment
     |> forms()
@@ -263,23 +270,23 @@ defmodule Mechanize.Page do
 
   In case of a page or fragment does not have a form, returns a empty list.
   """
-  @spec forms(Page.t() | Page.fragment()) :: [Page.t()]
-  defdelegate forms(page), to: __MODULE__, as: :forms_with
+  @spec forms(t() | fragment()) :: [Form.t()]
+  defdelegate forms(page_or_fragment), to: __MODULE__, as: :forms_with
 
   @doc """
   Returns the first form that matches the `query` for the given page or fragment.
 
   In case of no form matches, returns nil instead.
 
-  ## Examples
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
 
+  ## Examples
   Fetch the first form which name is equal to "login".
   ```
   %Form{} = Page.form_with(page, name: "login")
   ```
-  See `Mechanize.Query` module documentation to know all query capabilities in depth.
   """
-  @spec form_with(Page.t() | Page.fragment(), Query.t()) :: Form.t() | nil
+  @spec form_with(t() | fragment(), Query.t()) :: Form.t() | nil
   def form_with(page_or_fragment, query \\ []) do
     page_or_fragment
     |> forms_with(query)
@@ -291,22 +298,79 @@ defmodule Mechanize.Page do
 
   In case of no form matches, returns an empty list instead.
 
-  ## Examples
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
 
+  ## Examples
   Fetch all forms which name is equal to "login".
   ```
   list = Page.forms_with(page, name: "login")
   ```
-  See `Mechanize.Query` module documentation to know all query capabilities in depth.
   """
-  @spec forms_with(Page.t() | Page.fragment(), Query.t()) :: [Form.t()]
+  @spec forms_with(t() | fragment(), Query.t()) :: [Form.t()]
   def forms_with(page_or_fragment, query \\ []) do
     page_or_fragment
     |> elements_with("form", query)
     |> Enum.map(&Form.new(page_or_fragment, &1))
   end
 
+  @doc """
+  Search for elements on a given page or fragment using a CSS selector.
+
+  A list of `Mechanize.Page.Element` matching the selector will be return. In case of no element
+  matches the selector, an empty list will be returned instead.
+
+
+  See also `Mechanize.Page.elements_with/3`.
+  ## Example
+
+  Printing in console todos of a todo html unordered list:
+  ```
+  page
+  |> Page.search("ul.todo > li")
+  |> Enum.map(&Element.text/1)
+  |> Enum.each(&IO.puts/1)
+  ```
+  """
+  @spec search(t() | fragment(), String.t()) :: [Element.t()]
   defdelegate search(page, selector), to: Query
+
+  @doc """
+  Returns all elements not matching the selector.
+
+  A list of `Mechanize.Page.Element` matching the selector will be return. In case of all elements
+  match the selector, and empty list will be returned instead.
+
+  ## Example
+
+  Removing a unordered list with "todo" class from the content of a page.
+
+  ```
+  Page.filter_out(page, "ul.todo > li")
+  ```
+  """
+  @spec filter_out(t() | fragment(), String.t()) :: [Element.t()]
   defdelegate filter_out(page, selector), to: Query
-  defdelegate elements_with(page, selector, query \\ []), to: Query
+
+  @doc """
+  Search for elements on a given page or fragment both using a CSS selector and queries.
+
+  This function is similar to `Mechanize.Page.search/2`, but you can also use the power of
+  queries combined. First, the function will match the page or the fragments against the
+  CSS selector, after it will perform a match of the remaining elements to the query. A list of
+  `Mechanize.Page.Element` will be return. In case of no element both matches the selector and
+  the query, an empty list will be returned instead.
+
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
+
+  ## Example
+  Printing in console todos of a todo html unordered list starting with "A":
+  ```
+  page
+  |> Page.elements_with("ul.todo > li", text: ~r/^A/i)
+  |> Enum.map(&Element.text/1)
+  |> Enum.each(&IO.puts/1)
+  ```
+  """
+  @spec elements_with(t() | fragment(), String.t(), Query.t()) :: [Element.t()]
+  defdelegate elements_with(page_or_fragment, selector, query \\ []), to: Query
 end

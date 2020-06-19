@@ -243,7 +243,7 @@ defmodule Mechanize.PageTest do
         Plug.Conn.resp(conn, 200, "OK")
       end)
 
-      Page.click_link!(page, text: "SEO Master")
+      Page.click_link!(page, "SEO Master")
     end
 
     test "relative link", %{bypass: bypass, page: page} do
@@ -260,6 +260,26 @@ defmodule Mechanize.PageTest do
       end)
 
       Page.click_link!(page, alt: "Sun")
+    end
+
+    test "click a link in fragment of a page", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/test/htdocs/sun.html", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.search("map[name=planetmap]")
+      |> Page.click_link!(alt: "Sun")
+    end
+
+    test "click a link in mutiple fragments of a page", %{bypass: bypass, page: page} do
+      Bypass.expect_once(bypass, "GET", "/test/htdocs/sun.html", fn conn ->
+        Plug.Conn.resp(conn, 200, "OK")
+      end)
+
+      page
+      |> Page.search("area")
+      |> Page.click_link!(alt: "Sun")
     end
 
     test "raise if link does't have href attribute", %{page: page} do

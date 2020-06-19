@@ -4,7 +4,7 @@ defmodule Mechanize.Form.SubmitButton do
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.{Form, Query}
   alias Mechanize.Form.ParameterizableField
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [ParameterizableField, Elementable]
   defstruct [:element, :name, :value, :visible_text]
@@ -34,10 +34,10 @@ defmodule Mechanize.Form.SubmitButton do
     }
   end
 
-  def submit_buttons_with(form, criteria \\ []) do
+  def submit_buttons_with(form, query \\ []) do
     get_in(form, [
       Access.key(:fields),
-      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+      Access.filter(&Query.match?(&1, __MODULE__, query))
     ])
   end
 
@@ -45,9 +45,9 @@ defmodule Mechanize.Form.SubmitButton do
     raise ArgumentError, message: "Can't click on button because button is nil."
   end
 
-  def click_button(form, criteria) when is_list(criteria) do
+  def click_button(form, query) when is_list(query) do
     form
-    |> submit_buttons_with(criteria)
+    |> submit_buttons_with(query)
     |> maybe_click_on_button(form)
   end
 
@@ -72,16 +72,16 @@ defmodule Mechanize.Form.SubmitButton do
   defp maybe_click_on_button(buttons, form) do
     case buttons do
       [] ->
-        raise BadCriteriaError,
-          message: "Can't click on submit button because no button was found for given criteria"
+        raise BadQueryError,
+          message: "Can't click on submit button because no button was found for given query"
 
       [button] ->
         click_button(form, button)
 
       buttons ->
-        raise BadCriteriaError,
+        raise BadQueryError,
           message:
-            "Can't decide which submit button to click because #{length(buttons)} buttons were found for given criteria"
+            "Can't decide which submit button to click because #{length(buttons)} buttons were found for given query"
     end
   end
 end

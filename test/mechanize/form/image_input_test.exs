@@ -3,7 +3,7 @@ defmodule Mechanize.Form.ImageInputTest do
   alias Mechanize.Page
   alias Mechanize.Form.ImageInput
   alias Mechanize.Page.Element
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   import TestHelper
 
   setup do
@@ -30,7 +30,7 @@ defmodule Mechanize.Form.ImageInputTest do
   end
 
   describe ".image_inputs_with" do
-    test "retrieve by criteria with name", %{form: form} do
+    test "retrieve by query with name", %{form: form} do
       inputs = ImageInput.image_inputs_with(form, name: "map2")
 
       assert length(inputs) == 1
@@ -72,13 +72,13 @@ defmodule Mechanize.Form.ImageInputTest do
     end
 
     test "raise exception when image not found", %{form: form} do
-      assert_raise BadCriteriaError, ~r/not found/, fn ->
+      assert_raise BadQueryError, ~r/not found/, fn ->
         ImageInput.click_image(form, name: "lero", x: 10, y: 10)
       end
     end
 
     test "raise exception when many images found", %{form: form} do
-      assert_raise BadCriteriaError, ~r/2 were found/, fn ->
+      assert_raise BadQueryError, ~r/2 were found/, fn ->
         ImageInput.click_image(form, name: ~r/map/, x: 10, y: 10)
       end
     end

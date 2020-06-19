@@ -2,7 +2,7 @@ defmodule Mechanize.Form.CheckboxTest do
   use ExUnit.Case, async: true
   alias Mechanize.{Page, Form}
   alias Mechanize.Form.Checkbox
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   import TestHelper
 
   setup do
@@ -39,12 +39,12 @@ defmodule Mechanize.Form.CheckboxTest do
     end
 
     test "error when checkbox doesnt exist", %{form: form} do
-      assert_raise BadCriteriaError, ~r/Can't check checkbox with criteria \[name: "lero"\]/, fn ->
+      assert_raise BadQueryError, ~r/Can't check checkbox with query \[name: "lero"\]/, fn ->
         Checkbox.check_checkbox(form, name: "lero")
       end
     end
 
-    test "check by criteria with name", %{form: form} do
+    test "check by query with name", %{form: form} do
       checked =
         form
         |> Checkbox.check_checkbox(name: "female")
@@ -55,7 +55,7 @@ defmodule Mechanize.Form.CheckboxTest do
       assert checked == ["male", "female", "red", "download"]
     end
 
-    test "check by criteria with name and value", %{form: form} do
+    test "check by query with name and value", %{form: form} do
       checked =
         form
         |> Checkbox.check_checkbox(name: "download", value: "no")
@@ -72,7 +72,7 @@ defmodule Mechanize.Form.CheckboxTest do
       assert match?(%Form{}, Checkbox.uncheck_checkbox(form, name: "download", value: "yes"))
     end
 
-    test "uncheck by criteria with name", %{form: form} do
+    test "uncheck by query with name", %{form: form} do
       checked =
         form
         |> Checkbox.uncheck_checkbox(name: "male")
@@ -83,7 +83,7 @@ defmodule Mechanize.Form.CheckboxTest do
       assert checked == ["red", "download"]
     end
 
-    test "uncheck by criteria with name and value", %{form: form} do
+    test "uncheck by query with name and value", %{form: form} do
       checked =
         form
         |> Checkbox.uncheck_checkbox(name: "download", value: "yes")
@@ -95,8 +95,8 @@ defmodule Mechanize.Form.CheckboxTest do
     end
 
     test "error when checkbox doesnt exist", %{form: form} do
-      assert_raise BadCriteriaError,
-                   ~r/Can't uncheck checkbox with criteria \[name: "lero"\]/,
+      assert_raise BadQueryError,
+                   ~r/Can't uncheck checkbox with query \[name: "lero"\]/,
                    fn ->
                      Form.uncheck_checkbox(form, name: "lero")
                    end

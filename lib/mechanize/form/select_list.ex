@@ -4,7 +4,7 @@ defmodule Mechanize.Form.SelectList do
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.{Option, InconsistentFormError}
   alias Mechanize.Query
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [Elementable]
   @enforce_keys [:element]
@@ -24,10 +24,10 @@ defmodule Mechanize.Form.SelectList do
     }
   end
 
-  def select_lists_with(form, criteria \\ []) do
+  def select_lists_with(form, query \\ []) do
     get_in(form, [
       Access.key(:fields),
-      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+      Access.filter(&Query.match?(&1, __MODULE__, query))
     ])
   end
 
@@ -47,56 +47,56 @@ defmodule Mechanize.Form.SelectList do
     |> Enum.map(&Option.new(&1))
   end
 
-  defp assert_select_found(form, criteria) do
+  defp assert_select_found(form, query) do
     selects =
-      get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+      get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, query))])
 
     if selects == [] do
-      raise(BadCriteriaError, "No select found with criteria #{inspect(criteria)}")
+      raise(BadQueryError, "No select found with query #{inspect(query)}")
     end
 
     form
   end
 
-  defp assert_options_found(form, criteria, opts_criteria) do
+  defp assert_options_found(form, query, opts_query) do
     options =
       get_in(form, [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:options),
-        Access.filter(&Query.match_criteria?(&1, opts_criteria))
+        Access.filter(&Query.match_query?(&1, opts_query))
       ])
 
     if options == [[]] do
-      raise(BadCriteriaError, "No option found with criteria #{inspect(criteria)} in select")
+      raise(BadQueryError, "No option found with query #{inspect(query)} in select")
     end
 
     form
   end
 
-  def select(form, criteria \\ [])
+  def select(form, query \\ [])
 
-  def select(nil, _criteria), do: raise(ArgumentError, "form is nil")
+  def select(nil, _query), do: raise(ArgumentError, "form is nil")
 
-  def select(form, criteria) do
-    {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])
+  def select(form, query) do
+    {opts_query, query} = Keyword.pop(query, :option, [])
 
     form
-    |> assert_select_found(criteria)
-    |> assert_options_found(criteria, opts_criteria)
-    |> ensure_single_selected(criteria)
-    |> update_select(criteria, opts_criteria, true)
+    |> assert_select_found(query)
+    |> assert_options_found(query, opts_query)
+    |> ensure_single_selected(query)
+    |> update_select(query, opts_query, true)
     |> assert_single_option_selected()
   end
 
-  defp ensure_single_selected(form, criteria) do
-    criteria = Keyword.put(criteria, :multiple, false)
+  defp ensure_single_selected(form, query) do
+    query = Keyword.put(query, :multiple, false)
 
     put_in(
       form,
       [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:options),
         Access.all(),
         Access.key(:selected)
@@ -105,30 +105,30 @@ defmodule Mechanize.Form.SelectList do
     )
   end
 
-  defp update_select(form, criteria, opts_criteria, selected) do
+  defp update_select(form, query, opts_query, selected) do
     put_in(
       form,
       [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:options),
-        Access.filter(&Query.match_criteria?(&1, opts_criteria)),
+        Access.filter(&Query.match_query?(&1, opts_query)),
         Access.key(:selected)
       ],
       selected
     )
   end
 
-  def unselect(form, criteria \\ [])
-  def unselect(nil, _criteria), do: raise(ArgumentError, "form is nil")
+  def unselect(form, query \\ [])
+  def unselect(nil, _query), do: raise(ArgumentError, "form is nil")
 
-  def unselect(form, criteria) do
-    {opts_criteria, criteria} = Keyword.pop(criteria, :option, [])
+  def unselect(form, query) do
+    {opts_query, query} = Keyword.pop(query, :option, [])
 
     form
-    |> assert_select_found(criteria)
-    |> assert_options_found(criteria, opts_criteria)
-    |> update_select(criteria, opts_criteria, false)
+    |> assert_select_found(query)
+    |> assert_options_found(query, opts_query)
+    |> update_select(query, opts_query, false)
   end
 
   defp assert_single_option_selected(form) do

@@ -168,11 +168,11 @@ defmodule Mechanize.QueryTest do
       assert Query.elements_with(page, ".asia", class: "spanish") == []
     end
 
-    test "select none by criteria", %{page: page} do
+    test "select none by query", %{page: page} do
       assert Query.elements_with(page, ".america", class: "english") == []
     end
 
-    test "select by css and criteria", %{page: page} do
+    test "select by css and query", %{page: page} do
       assert page
              |> Query.elements_with(".continent > *", class: "portuguese")
              |> Enum.map(&Element.text/1) == ["Portugal", "Brazil"]
@@ -207,165 +207,165 @@ defmodule Mechanize.QueryTest do
     {:ok, %{fake_1a: fake_1a, fake_1b: fake_1b, fake_2a: fake_2a}}
   end
 
-  describe ".match_criteria?/2" do
+  describe ".match_query?/2" do
     test "raise if element is nil" do
       assert_raise ArgumentError, "element is nil", fn ->
-        Query.match_criteria?(nil, value: "A")
+        Query.match_query?(nil, value: "A")
       end
     end
 
-    test "raise if criteria is nil", %{fake_1a: fake_1a} do
-      assert_raise ArgumentError, "criteria is nil", fn ->
-        Query.match_criteria?(fake_1a, nil)
+    test "raise if query is nil", %{fake_1a: fake_1a} do
+      assert_raise ArgumentError, "query is nil", fn ->
+        Query.match_query?(fake_1a, nil)
       end
     end
 
-    test "raise if criteria has a nil value", %{fake_1a: fake_1a} do
-      assert_raise ArgumentError, "criteria :value is nil", fn ->
-        Query.match_criteria?(fake_1a, value: nil)
+    test "raise if query has a nil value", %{fake_1a: fake_1a} do
+      assert_raise ArgumentError, "query :value is nil", fn ->
+        Query.match_query?(fake_1a, value: nil)
       end
     end
 
-    test "empty criteria matches everything", %{
+    test "empty query matches everything", %{
       fake_1a: fake_1a,
       fake_1b: fake_1b,
       fake_2a: fake_2a
     } do
-      assert Query.match_criteria?(fake_1a, []) == true
-      assert Query.match_criteria?(fake_1b, []) == true
-      assert Query.match_criteria?(fake_2a, []) == true
+      assert Query.match_query?(fake_1a, []) == true
+      assert Query.match_query?(fake_1b, []) == true
+      assert Query.match_query?(fake_2a, []) == true
     end
 
     test "match by index attribute" do
-      assert Query.match_criteria?(%{index: 1}, 1) == true
+      assert Query.match_query?(%{index: 1}, 1) == true
     end
 
     test "does not match by index attribute" do
-      assert Query.match_criteria?(%{index: 1}, 2) == false
+      assert Query.match_query?(%{index: 1}, 2) == false
     end
 
     test "does not match if index is not present" do
-      assert Query.match_criteria?(%{value: 1}, 1) == false
+      assert Query.match_query?(%{value: 1}, 1) == false
     end
 
     test "present attributes match true", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: true) == true
+      assert Query.match_query?(fake_1a, value: true) == true
     end
 
     test "absent attributes do not match true", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, absent_attr: true) == false
+      assert Query.match_query?(fake_1a, absent_attr: true) == false
     end
 
     test "present attributes do not match false", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: false) == false
+      assert Query.match_query?(fake_1a, value: false) == false
     end
 
     test "absent attributes match false", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, absent_attr: false) == true
+      assert Query.match_query?(fake_1a, absent_attr: false) == true
     end
 
     test "attributes with empty string value matches empty string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, empty_attr: "") == true
+      assert Query.match_query?(fake_1a, empty_attr: "") == true
     end
 
     test "attributes matches list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ["A", "B"]) == true
+      assert Query.match_query?(fake_1a, value: ["A", "B"]) == true
     end
 
     test "attributes does not matches list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ["B", "C"]) == false
+      assert Query.match_query?(fake_1a, value: ["B", "C"]) == false
     end
 
     test "attributes does not matches an empty list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: []) == false
+      assert Query.match_query?(fake_1a, value: []) == false
     end
 
     test "attributes matches string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: "A") == true
+      assert Query.match_query?(fake_1a, value: "A") == true
     end
 
     test "attribute doest not match string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: "B") == false
+      assert Query.match_query?(fake_1a, value: "B") == false
     end
 
     test "absent attribute does not match string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, absent_attr: "A") == false
+      assert Query.match_query?(fake_1a, absent_attr: "A") == false
     end
 
     test "attributes matches regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ~r/A/) == true
+      assert Query.match_query?(fake_1a, value: ~r/A/) == true
     end
 
     test "attribute doest not match regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ~r/B/) == false
+      assert Query.match_query?(fake_1a, value: ~r/B/) == false
     end
 
     test "absent attribute does not match regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, absent_attr: ~r/A/) == false
+      assert Query.match_query?(fake_1a, absent_attr: ~r/A/) == false
     end
 
     test "match attribute chain by string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: "A", rel: "fake_1a") == true
+      assert Query.match_query?(fake_1a, value: "A", rel: "fake_1a") == true
     end
 
     test "unmatch attribute chain by string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: "A", rel: "wrong") == false
+      assert Query.match_query?(fake_1a, value: "A", rel: "wrong") == false
     end
 
     test "match attribute chain by regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ~r/A/, rel: ~r/fake_1a/) == true
+      assert Query.match_query?(fake_1a, value: ~r/A/, rel: ~r/fake_1a/) == true
     end
 
     test "unmatch attribute chain by regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, value: ~r/A/, rel: ~r/wrong/) == false
+      assert Query.match_query?(fake_1a, value: ~r/A/, rel: ~r/wrong/) == false
     end
 
-    test "raise if text criteria is nil", %{fake_1a: fake_1a} do
-      assert_raise ArgumentError, "criteria :text is nil", fn ->
-        Query.match_criteria?(fake_1a, text: nil)
+    test "raise if text query is nil", %{fake_1a: fake_1a} do
+      assert_raise ArgumentError, "query :text is nil", fn ->
+        Query.match_query?(fake_1a, text: nil)
       end
     end
 
     test "text matches a list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: ["ElementableFake 1A", "ElementableFake 1B"]) ==
+      assert Query.match_query?(fake_1a, text: ["ElementableFake 1A", "ElementableFake 1B"]) ==
                true
     end
 
     test "text does not match a list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: ["ElementableFake 2A", "ElementableFake 1B"]) ==
+      assert Query.match_query?(fake_1a, text: ["ElementableFake 2A", "ElementableFake 1B"]) ==
                false
     end
 
     test "text matches does not match an empty list", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: []) == false
+      assert Query.match_query?(fake_1a, text: []) == false
     end
 
     test "text matches string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: "ElementableFake 1A") == true
+      assert Query.match_query?(fake_1a, text: "ElementableFake 1A") == true
     end
 
     test "text matches string using shortcut", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, "ElementableFake 1A") == true
+      assert Query.match_query?(fake_1a, "ElementableFake 1A") == true
     end
 
     test "text does not match string", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: "wrong") == false
+      assert Query.match_query?(fake_1a, text: "wrong") == false
     end
 
     test "text match regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: ~r/1A/) == true
+      assert Query.match_query?(fake_1a, text: ~r/1A/) == true
     end
 
     test "text does not match regexp", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: ~r/wrong/) == false
+      assert Query.match_query?(fake_1a, text: ~r/wrong/) == false
     end
 
     test "match attribute and text chained", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: "ElementableFake 1A", rel: "fake_1a") == true
+      assert Query.match_query?(fake_1a, text: "ElementableFake 1A", rel: "fake_1a") == true
     end
 
     test "does not match attribute and text chained", %{fake_1a: fake_1a} do
-      assert Query.match_criteria?(fake_1a, text: "ElementableFake 1A", rel: "wrong") == false
+      assert Query.match_query?(fake_1a, text: "ElementableFake 1A", rel: "wrong") == false
     end
   end
 
@@ -382,8 +382,8 @@ defmodule Mechanize.QueryTest do
       end
     end
 
-    test "raise if criteria is nil", %{fake_1a: fake_1a} do
-      assert_raise ArgumentError, "criteria is nil", fn ->
+    test "raise if query is nil", %{fake_1a: fake_1a} do
+      assert_raise ArgumentError, "query is nil", fn ->
         Query.match?(fake_1a, ElementableFake1, nil)
       end
     end
@@ -398,7 +398,7 @@ defmodule Mechanize.QueryTest do
       assert Query.match?(fake_2a, [ElementableFake1, ElementableFake2], value: "A") == true
     end
 
-    test "matches criteria", %{fake_1a: fake_1a, fake_1b: fake_1b} do
+    test "matches query", %{fake_1a: fake_1a, fake_1b: fake_1b} do
       assert Query.match?(fake_1a, ElementableFake1, value: "A") == true
       assert Query.match?(fake_1b, ElementableFake1, value: "A") == false
     end

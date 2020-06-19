@@ -51,31 +51,31 @@ defmodule Mechanize.Form do
   end
 
   defdelegate text_inputs(form), to: TextInput, as: :text_inputs_with
-  defdelegate text_inputs_with(form, criteria), to: TextInput
-  defdelegate fill_text(form, criteria), to: TextInput
+  defdelegate text_inputs_with(form, query), to: TextInput
+  defdelegate fill_text(form, query), to: TextInput
 
   defdelegate checkboxes(form), to: Checkbox, as: :checkboxes_with
-  defdelegate checkboxes_with(form, criteria), to: Checkbox
-  defdelegate check_checkbox(form, criteria), to: Checkbox
-  defdelegate uncheck_checkbox(form, criteria), to: Checkbox
+  defdelegate checkboxes_with(form, query), to: Checkbox
+  defdelegate check_checkbox(form, query), to: Checkbox
+  defdelegate uncheck_checkbox(form, query), to: Checkbox
 
   defdelegate image_inputs(form), to: ImageInput, as: :image_inputs_with
-  defdelegate image_inputs_with(form, criteria), to: ImageInput
-  defdelegate click_image(form, criteria), to: ImageInput
+  defdelegate image_inputs_with(form, query), to: ImageInput
+  defdelegate click_image(form, query), to: ImageInput
 
   defdelegate radio_buttons(form), to: RadioButton, as: :radio_buttons_with
-  defdelegate radio_buttons_with(form, criteria), to: RadioButton
-  defdelegate check_radio_button(form, criteria), to: RadioButton
-  defdelegate uncheck_radio_button(form, criteria), to: RadioButton
+  defdelegate radio_buttons_with(form, query), to: RadioButton
+  defdelegate check_radio_button(form, query), to: RadioButton
+  defdelegate uncheck_radio_button(form, query), to: RadioButton
 
   defdelegate select_lists(form), to: SelectList, as: :select_lists_with
-  defdelegate select_lists_with(form, criteria), to: SelectList
-  defdelegate select(form, criteria), to: SelectList
-  defdelegate unselect(form, criteria), to: SelectList
+  defdelegate select_lists_with(form, query), to: SelectList
+  defdelegate select(form, query), to: SelectList
+  defdelegate unselect(form, query), to: SelectList
 
   defdelegate submit_buttons(form), to: SubmitButton, as: :submit_buttons_with
-  defdelegate submit_buttons_with(form, criteria), to: SubmitButton
-  defdelegate click_button(form, criteria), to: SubmitButton
+  defdelegate submit_buttons_with(form, query), to: SubmitButton
+  defdelegate click_button(form, query), to: SubmitButton
 
   def submit(form, button \\ nil) do
     case method(form) do

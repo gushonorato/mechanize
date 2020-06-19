@@ -83,13 +83,13 @@ defmodule Mechanize.Form.SelectTest do
 
   describe ".select" do
     test "raise when option not found", %{form: form} do
-      assert_raise Mechanize.Query.BadCriteriaError, ~r/No option found/, fn ->
+      assert_raise Mechanize.Query.BadQueryError, ~r/No option found/, fn ->
         SelectList.select(form, name: "select1", option: [label: ~r/Lero/])
       end
     end
 
     test "raise when select list not found", %{form: form} do
-      assert_raise Mechanize.Query.BadCriteriaError, ~r/No select found/, fn ->
+      assert_raise Mechanize.Query.BadQueryError, ~r/No select found/, fn ->
         SelectList.select(form, name: "lero", option: [label: ~r/Option/])
       end
     end
@@ -144,7 +144,7 @@ defmodule Mechanize.Form.SelectTest do
              ]
     end
 
-    test "select by criteria with attributes name and option value", %{form: form} do
+    test "select by query with attributes name and option value", %{form: form} do
       assert form
              |> SelectList.select(name: "select1", option: [value: "1"])
              |> Form.select_lists_with(name: "select1")
@@ -170,7 +170,7 @@ defmodule Mechanize.Form.SelectTest do
              ]
     end
 
-    test "empty criteria selects all options", %{form: form} do
+    test "empty query selects all options", %{form: form} do
       assert form
              |> SelectList.select(name: "multiple1")
              |> Form.select_lists_with(name: "multiple1")
@@ -204,13 +204,13 @@ defmodule Mechanize.Form.SelectTest do
     end
 
     test "raise when select list not found", %{form: form} do
-      assert_raise(Mechanize.Query.BadCriteriaError, ~r/No select found/, fn ->
+      assert_raise(Mechanize.Query.BadQueryError, ~r/No select found/, fn ->
         SelectList.unselect(form, name: "lero", option: [name: ~r/Option/])
       end)
     end
 
     test "raise when option not found", %{form: form} do
-      assert_raise Mechanize.Query.BadCriteriaError, ~r/No option found/, fn ->
+      assert_raise Mechanize.Query.BadQueryError, ~r/No option found/, fn ->
         SelectList.unselect(form, name: "multiple1", option: [name: ~r/Lero/])
       end
     end
@@ -221,7 +221,7 @@ defmodule Mechanize.Form.SelectTest do
       end
     end
 
-    test "empty option criteria selects all option", %{form: form} do
+    test "empty option query selects all option", %{form: form} do
       assert form
              |> SelectList.unselect(name: "multiple1")
              |> Form.select_lists_with(name: "multiple1")
@@ -260,7 +260,7 @@ defmodule Mechanize.Form.SelectTest do
              ]
     end
 
-    test "select by criteria with attributes name and option value", %{form: form} do
+    test "select by query with attributes name and option value", %{form: form} do
       assert form
              |> SelectList.unselect(name: "multiple1", option: [value: "2"])
              |> Form.select_lists_with(name: "multiple1")

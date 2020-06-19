@@ -4,7 +4,7 @@ defmodule Mechanize.Form.ImageInput do
   alias Mechanize.Form
   alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [Elementable]
   defstruct element: nil, name: nil, x: 0, y: 0
@@ -23,33 +23,33 @@ defmodule Mechanize.Form.ImageInput do
     }
   end
 
-  def image_inputs_with(form, criteria \\ []) do
-    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+  def image_inputs_with(form, query \\ []) do
+    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, query))])
   end
 
   def click_image(form, %__MODULE__{} = image) do
     Form.submit(form, image)
   end
 
-  def click_image(form, criteria) do
-    {x, criteria} = Keyword.pop(criteria, :x, 0)
-    {y, criteria} = Keyword.pop(criteria, :y, 0)
+  def click_image(form, query) do
+    {x, query} = Keyword.pop(query, :x, 0)
+    {y, query} = Keyword.pop(query, :y, 0)
 
     form
-    |> Form.image_inputs_with(criteria)
+    |> Form.image_inputs_with(query)
     |> maybe_click_on_image(form, x, y)
   end
 
   defp maybe_click_on_image(images, form, x, y) do
     case images do
       [] ->
-        raise BadCriteriaError, message: "Can't click on image input because it was not found"
+        raise BadQueryError, message: "Can't click on image input because it was not found"
 
       [image] ->
         click_image(form, %__MODULE__{image | x: x, y: y})
 
       images ->
-        raise BadCriteriaError,
+        raise BadQueryError,
           message: "Can't decide which image input to click because #{length(images)} were found"
     end
   end

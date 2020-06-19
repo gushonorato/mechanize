@@ -3,7 +3,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
   alias Mechanize.Page
   alias Mechanize.Page.Element
   alias Mechanize.Form.SubmitButton
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   import TestHelper
 
   setup do
@@ -45,25 +45,25 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
   describe ".click_button" do
     test "visible text not match", %{form: form} do
-      assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
+      assert_raise BadQueryError, ~r/no button was found/i, fn ->
         SubmitButton.click_button(form, "Button 1")
       end
     end
 
-    test "criteria not match", %{form: form} do
-      assert_raise BadCriteriaError, ~r/no button was found/i, fn ->
+    test "query not match", %{form: form} do
+      assert_raise BadQueryError, ~r/no button was found/i, fn ->
         SubmitButton.click_button(form, name: "lero")
       end
     end
 
     test "multiple visible texts match", %{form: form} do
-      assert_raise BadCriteriaError, ~r/16 buttons were found./i, fn ->
+      assert_raise BadQueryError, ~r/16 buttons were found./i, fn ->
         SubmitButton.click_button(form, ~r/Button/i)
       end
     end
 
-    test "multiple criteria match", %{form: form} do
-      assert_raise BadCriteriaError, ~r/12 buttons were found./i, fn ->
+    test "multiple query match", %{form: form} do
+      assert_raise BadQueryError, ~r/12 buttons were found./i, fn ->
         SubmitButton.click_button(form, name: ~r/button/)
       end
     end

@@ -4,7 +4,7 @@ defmodule Mechanize.Form.RadioButton do
   alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.InconsistentFormError
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [Elementable]
   @enforce_keys [:element]
@@ -26,10 +26,10 @@ defmodule Mechanize.Form.RadioButton do
     }
   end
 
-  def radio_buttons_with(form, criteria \\ []) do
+  def radio_buttons_with(form, query \\ []) do
     get_in(form, [
       Access.key(:fields),
-      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+      Access.filter(&Query.match?(&1, __MODULE__, query))
     ])
   end
 
@@ -37,49 +37,49 @@ defmodule Mechanize.Form.RadioButton do
     update_radio_button(form, false, name: radio_names)
   end
 
-  def update_radio_button(form, checked, criteria) do
+  def update_radio_button(form, checked, query) do
     put_in(
       form,
       [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:checked)
       ],
       checked
     )
   end
 
-  def check_radio_button(form, criteria) do
+  def check_radio_button(form, query) do
     assert_radio_found(
       form,
-      criteria,
-      "Can't check radio with criteria #{inspect(criteria)} because it was not found"
+      query,
+      "Can't check radio with query #{inspect(query)} because it was not found"
     )
 
     radio_names =
       form
-      |> radio_buttons_with(criteria)
+      |> radio_buttons_with(query)
       |> Stream.map(& &1.name)
       |> Enum.uniq()
 
     form
     |> clear_radios(radio_names)
-    |> update_radio_button(true, criteria)
+    |> update_radio_button(true, query)
     |> assert_single_radio_in_group_checked()
   end
 
-  def uncheck_radio_button(form, criteria) do
+  def uncheck_radio_button(form, query) do
     assert_radio_found(
       form,
-      criteria,
-      "Can't uncheck radio with criteria #{inspect(criteria)} because it was not found"
+      query,
+      "Can't uncheck radio with query #{inspect(query)} because it was not found"
     )
 
-    update_radio_button(form, false, criteria)
+    update_radio_button(form, false, query)
   end
 
-  defp assert_radio_found(form, criteria, error_msg) do
-    if radio_buttons_with(form, criteria) == [], do: raise(BadCriteriaError, message: error_msg)
+  defp assert_radio_found(form, query, error_msg) do
+    if radio_buttons_with(form, query) == [], do: raise(BadQueryError, message: error_msg)
   end
 
   defp assert_single_radio_in_group_checked(form) do

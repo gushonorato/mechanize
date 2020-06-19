@@ -4,7 +4,7 @@ defmodule Mechanize.Form.TextInput do
   alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Form.ParameterizableField
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [ParameterizableField, Elementable]
   @enforce_keys [:element]
@@ -32,28 +32,28 @@ defmodule Mechanize.Form.TextInput do
     }
   end
 
-  def text_inputs_with(form, criteria \\ []) do
+  def text_inputs_with(form, query \\ []) do
     get_in(form, [
       Access.key(:fields),
-      Access.filter(&Query.match?(&1, __MODULE__, criteria))
+      Access.filter(&Query.match?(&1, __MODULE__, query))
     ])
   end
 
-  def fill_text(form, criteria) do
-    {value, criteria} = Keyword.pop(criteria, :with)
+  def fill_text(form, query) do
+    {value, query} = Keyword.pop(query, :with)
 
     assert_value_present(value)
-    assert_text_input_found(form, criteria)
+    assert_text_input_found(form, query)
 
-    update_text_input(form, value, criteria)
+    update_text_input(form, value, query)
   end
 
-  defp update_text_input(form, value, criteria) do
+  defp update_text_input(form, value, query) do
     put_in(
       form,
       [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:value)
       ],
       value
@@ -64,12 +64,11 @@ defmodule Mechanize.Form.TextInput do
     if value == nil, do: raise(ArgumentError, "No \"with\" clause given with text input value")
   end
 
-  defp assert_text_input_found(form, criteria) do
-    if text_inputs_with(form, criteria) == [],
+  defp assert_text_input_found(form, query) do
+    if text_inputs_with(form, query) == [],
       do:
-        raise(BadCriteriaError,
-          message:
-            "Can't fill text input with criteria #{inspect(criteria)} because it was not found"
+        raise(BadQueryError,
+          message: "Can't fill text input with query #{inspect(query)} because it was not found"
         )
   end
 end

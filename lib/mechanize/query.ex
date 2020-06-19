@@ -4,9 +4,9 @@ defmodule Mechanize.Query do
 
   This module is not primarily designed to be used by cliente code, instead you should use
   indirectly throught `Mechanize.Page.search/2` and `Mechanize.Page.filter_out/2`. Many other
-  functions that accept `Mechanize.Query.t()` criterias also uses this module under the hood.
+  functions that accept `Mechanize.Query.t()` also uses this module under the hood.
   Therefore it's important to understand how this module works to unlock all capabilities in
-  functions that uses `Mechanize.Query.t()` as criteria.
+  functions that use queries.
 
   ## Examples
 
@@ -20,7 +20,7 @@ defmodule Mechanize.Query do
   ```
 
   When you call `Mechanize.Page.click_link!/2`, another call to `Mechanize.Query.elements_with/3` is
-  made under the hood to fetch all links with given `[href: "/home/about"]` criteria and then
+  made under the hood to fetch all links with given `[href: "/home/about"]` query and then
   Mechanize "clicks" on the first link.
 
   You can also query elements by its inner text, which is the visible text in case of text links:
@@ -38,13 +38,13 @@ defmodule Mechanize.Query do
   Page.click_link!(page, href: ~r/about/)
   ```
 
-  You can combine different types of criterias at once. The following example returns a list of
+  You can combine different types of queries at once. The following example returns a list of
   links by its href, title attributes and inner text.
   ```
   Page.links_with(page, href: "/home/about", title: "About page", text: "About page")
   ```
 
-  Use boolean criterias to query if an element attribute exists. In example below, we fetch all
+  Use boolean to query if an element attribute exists. In example below, we fetch all
   checked and unchecked checkboxes from a given form:
   ```
   alias Mechanize.Form
@@ -95,9 +95,9 @@ defmodule Mechanize.Query do
   alias Mechanize.Page.{Element, Elementable}
   alias Mechanize.Page
 
-  defmodule BadCriteriaError do
+  defmodule BadQueryError do
     @moduledoc """
-    Raises when an error occurs when searching an element using a criteria.
+    Raises when an error occurs when searching an element using a query.
     """
     defexception [:message]
   end
@@ -141,26 +141,27 @@ defmodule Mechanize.Query do
   @doc """
   See `Mechanize.Page.elements_with/3`.
   """
+  def elements_with(page_or_fragment, selector, query \\ []) do
     page_or_fragment
     |> search(selector)
-    |> Enum.filter(&match_criteria?(&1, criteria))
+    |> Enum.filter(&match_query?(&1, query))
   end
 
   @doc false
-  def match?(nil, _types, _criteria) do
+  def match?(nil, _types, _query) do
     raise ArgumentError, "element is nil"
   end
 
-  def match?(_element, nil, _criteria) do
+  def match?(_element, nil, _query) do
     raise ArgumentError, "types is nil"
   end
 
   def match?(_element, _types, nil) do
-    raise ArgumentError, "criteria is nil"
+    raise ArgumentError, "query is nil"
   end
 
-  def match?(element, types, criteria) do
-    match_type?(element, types) and match_criteria?(element, criteria)
+  def match?(element, types, query) do
+    match_type?(element, types) and match_query?(element, query)
   end
 
   @doc false
@@ -173,16 +174,16 @@ defmodule Mechanize.Query do
   end
 
   @doc false
-  def match_criteria?(nil, _criteria), do: raise(ArgumentError, "element is nil")
-  def match_criteria?(_element, nil), do: raise(ArgumentError, "criteria is nil")
+  def match_query?(nil, _query), do: raise(ArgumentError, "element is nil")
+  def match_query?(_element, nil), do: raise(ArgumentError, "query is nil")
 
-  def match_criteria?(_element, []), do: true
+  def match_query?(_element, []), do: true
 
-  def match_criteria?(element, text) when is_binary(text) do
-    match_criteria?(element, [{:text, text}])
+  def match_query?(element, text) when is_binary(text) do
+    match_query?(element, [{:text, text}])
   end
 
-  def match_criteria?(element, index) when is_integer(index) do
+  def match_query?(element, index) when is_integer(index) do
     case Map.get(element, :index) do
       ^index ->
         true
@@ -192,12 +193,12 @@ defmodule Mechanize.Query do
     end
   end
 
-  def match_criteria?(element, [attributes | criterias]) do
-    match_attribute?(element, attributes) and match_criteria?(element, criterias)
+  def match_query?(element, [attributes | query]) do
+    match_attribute?(element, attributes) and match_query?(element, query)
   end
 
   defp match_attribute?(_element, {:text, nil}) do
-    raise ArgumentError, "criteria :text is nil"
+    raise ArgumentError, "query :text is nil"
   end
 
   defp match_attribute?(element, {:text, value}) when is_list(value) do
@@ -213,7 +214,7 @@ defmodule Mechanize.Query do
   end
 
   defp match_attribute?(_element, {attr_name, nil}) do
-    raise ArgumentError, "criteria :#{attr_name} is nil"
+    raise ArgumentError, "query :#{attr_name} is nil"
   end
 
   defp match_attribute?(element, {attr_name, value}) when is_list(value) do

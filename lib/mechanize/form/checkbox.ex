@@ -3,7 +3,7 @@ defmodule Mechanize.Form.Checkbox do
 
   alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
 
   @derive [Elementable]
   @enforce_keys [:element]
@@ -25,44 +25,44 @@ defmodule Mechanize.Form.Checkbox do
     }
   end
 
-  def checkboxes_with(form, criteria \\ []) do
-    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, criteria))])
+  def checkboxes_with(form, query \\ []) do
+    get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, query))])
   end
 
-  def update_checkbox(form, checked, criteria) do
+  def update_checkbox(form, checked, query) do
     put_in(
       form,
       [
         Access.key(:fields),
-        Access.filter(&Query.match?(&1, __MODULE__, criteria)),
+        Access.filter(&Query.match?(&1, __MODULE__, query)),
         Access.key(:checked)
       ],
       checked
     )
   end
 
-  def check_checkbox(form, criteria) do
+  def check_checkbox(form, query) do
     assert_checkbox_found(
       form,
-      criteria,
-      "Can't check checkbox with criteria #{inspect(criteria)} because it was not found"
+      query,
+      "Can't check checkbox with query #{inspect(query)} because it was not found"
     )
 
-    update_checkbox(form, true, criteria)
+    update_checkbox(form, true, query)
   end
 
-  def uncheck_checkbox(form, criteria) do
+  def uncheck_checkbox(form, query) do
     assert_checkbox_found(
       form,
-      criteria,
-      "Can't uncheck checkbox with criteria #{inspect(criteria)} because it was not found"
+      query,
+      "Can't uncheck checkbox with query #{inspect(query)} because it was not found"
     )
 
-    update_checkbox(form, false, criteria)
+    update_checkbox(form, false, query)
   end
 
-  defp assert_checkbox_found(form, criteria, error_msg) do
-    if checkboxes_with(form, criteria) == [], do: raise(BadCriteriaError, error_msg)
+  defp assert_checkbox_found(form, query, error_msg) do
+    if checkboxes_with(form, query) == [], do: raise(BadQueryError, error_msg)
   end
 end
 

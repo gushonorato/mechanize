@@ -75,7 +75,7 @@ defmodule Mechanize.PageTest do
       [%Link{}] = Page.links_with(page, href: ~r/google/)
     end
 
-    test "with one attribute criteria", %{page: page} do
+    test "with one attribute query", %{page: page} do
       assert(
         page
         |> Page.links_with(href: ~r/google/)
@@ -83,7 +83,7 @@ defmodule Mechanize.PageTest do
       )
     end
 
-    test "with many attributes criteria", %{page: page} do
+    test "with many attributes query", %{page: page} do
       assert(
         page
         |> Page.links_with(class: ~r/great-company/, rel: "search")
@@ -91,7 +91,7 @@ defmodule Mechanize.PageTest do
       )
     end
 
-    test "with text criteria", %{page: page} do
+    test "with text query", %{page: page} do
       assert(
         page
         |> Page.links_with(text: "Google")
@@ -140,7 +140,7 @@ defmodule Mechanize.PageTest do
 
   describe ".links_with!" do
     test "raise if no element found", %{page: page} do
-      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+      assert_raise Mechanize.Query.BadQueryError, "no link found with given query", fn ->
         Page.links_with!(page, alt: "Pluto")
       end
     end
@@ -161,7 +161,7 @@ defmodule Mechanize.PageTest do
       %Link{} = Page.link_with(page, href: ~r/google/)
     end
 
-    test "with one attribute criteria", %{page: page} do
+    test "with one attribute query", %{page: page} do
       assert(
         page
         |> Page.link_with(href: ~r/google/)
@@ -169,7 +169,7 @@ defmodule Mechanize.PageTest do
       )
     end
 
-    test "with many attributes criteria", %{page: page} do
+    test "with many attributes query", %{page: page} do
       assert(
         page
         |> Page.link_with(class: ~r/great-company/, rel: "search")
@@ -177,7 +177,7 @@ defmodule Mechanize.PageTest do
       )
     end
 
-    test "with text criteria", %{page: page} do
+    test "with text query", %{page: page} do
       assert(
         page
         |> Page.link_with(text: "Google")
@@ -213,7 +213,7 @@ defmodule Mechanize.PageTest do
 
   describe ".link_with!" do
     test "raise if no element found", %{page: page} do
-      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+      assert_raise Mechanize.Query.BadQueryError, "no link found with given query", fn ->
         Page.link_with!(page, alt: "Pluto")
       end
     end
@@ -295,7 +295,7 @@ defmodule Mechanize.PageTest do
     end
 
     test "raise if no link is found", %{page: page} do
-      assert_raise Mechanize.Query.BadCriteriaError, "no link found with given criteria", fn ->
+      assert_raise Mechanize.Query.BadQueryError, "no link found with given query", fn ->
         Page.click_link!(page, alt: "Pluto")
       end
     end

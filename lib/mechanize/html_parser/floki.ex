@@ -36,11 +36,11 @@ defmodule Mechanize.HTMLParser.Floki do
 
   @impl HTMLParser
   def filter_out(nil, _selector) do
-    raise ArgumentError, "page_or_elements is nil"
+    raise ArgumentError, "page_or_fragment is nil"
   end
 
   @impl HTMLParser
-  def filter_out(_page_or_elements, nil) do
+  def filter_out(_page_or_fragment, nil) do
     raise ArgumentError, "selector is nil"
   end
 

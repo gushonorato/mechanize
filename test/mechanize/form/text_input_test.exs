@@ -3,7 +3,7 @@ defmodule Mechanize.Form.TextInputTest do
   alias Mechanize
   alias Mechanize.{Page, Form}
   alias Mechanize.Form.TextInput
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   import TestHelper
 
   setup do
@@ -84,7 +84,7 @@ defmodule Mechanize.Form.TextInputTest do
     end
 
     test "raise when field does not exist", %{form: form} do
-      assert_raise BadCriteriaError, ~r/it was not found/, fn ->
+      assert_raise BadQueryError, ~r/it was not found/, fn ->
         TextInput.fill_text(form, name: "lero", with: "lero")
       end
     end

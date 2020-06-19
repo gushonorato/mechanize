@@ -2,7 +2,7 @@ defmodule Mechanize.Form.RadioButtonTest do
   use ExUnit.Case, async: true
   alias Mechanize.{Page, Form}
   alias Mechanize.Form.{RadioButton, InconsistentFormError}
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   alias Mechanize.Page.Element
   import TestHelper
 
@@ -82,7 +82,7 @@ defmodule Mechanize.Form.RadioButtonTest do
     end
 
     test "check inexistent radio button", %{form: form} do
-      assert_raise BadCriteriaError, ~r/it was not found/, fn ->
+      assert_raise BadQueryError, ~r/it was not found/, fn ->
         Form.check_radio_button(form, name: "lero")
       end
     end
@@ -111,7 +111,7 @@ defmodule Mechanize.Form.RadioButtonTest do
     end
 
     test "raise when uncheck inexistent radio button", %{form: form} do
-      assert_raise BadCriteriaError, ~r/it was not found/, fn ->
+      assert_raise BadQueryError, ~r/it was not found/, fn ->
         RadioButton.uncheck_radio_button(form, name: "lero")
       end
     end

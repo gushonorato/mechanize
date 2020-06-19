@@ -2,7 +2,7 @@ defmodule Mechanize.Page do
   @moduledoc """
   The HTML Page.
 
-  This module defines Mechanize.Page and the main functions for working with Pages.
+  This module defines `Mechanize.Page` and the main functions for working with Pages.
 
   The Page is created as a result of a successful HTTP request.
   ```
@@ -13,7 +13,7 @@ defmodule Mechanize.Page do
   ```
   """
   alias Mechanize.{Response, Query, Form}
-  alias Mechanize.Query.BadCriteriaError
+  alias Mechanize.Query.BadQueryError
   alias Mechanize.Page.{Link, Element}
 
   defstruct [:response_chain, :status_code, :content, :url, :browser, :parser]
@@ -27,7 +27,7 @@ defmodule Mechanize.Page do
           parser: module()
         }
 
-  @type fragment :: [Element.t()]
+  @type fragment :: [any]
 
   defmodule ClickError do
     @moduledoc """
@@ -138,17 +138,17 @@ defmodule Mechanize.Page do
   def get_response(%__MODULE__{} = page), do: List.first(page.response_chain)
 
   @doc """
-  Clicks on a link that matches `criteria`.
+  Clicks on a link that matches `query`.
 
   Links are all elements defined by `a` and `area` html tags.
 
   If the request does not fail, a Page struct is returned, otherwise, it raises
-  `Mechanize.HTTPAdapter.NetworkError`. In case of more than one link matches the criteria,
+  `Mechanize.HTTPAdapter.NetworkError`. In case of more than one link matches the query,
   Mechanize will click on the first matched link.
 
   Raises `Mechanize.Page.ClickError` if the matched link has no href attribute.
 
-  Raises `Mechanize.Page.BadCriteriaError` if no link matches with given `criteria`.
+  Raises `Mechanize.Page.BadQueryError` if no link matches with given `query`.
 
   ## Examples
 
@@ -162,25 +162,12 @@ defmodule Mechanize.Page do
     Page.click_link!(page, href: "sun.html")
   ```
 
-  You can also click on a link inside a list returned by a `Mechanize.Page.search/2`:
-  ```
-    page
-    |> Page.search("area")
-    |> Page.click_link!(alt: "Sun")
-  ```
-
-  Or even in a element child:
-  ```
-    page
-    |> Page.search("map[name=planetmap]")
-    |> Page.click_link!(alt: "Sun")
-  ```
   """
   @dialyzer :no_return
   @spec click_link!(Page.t() | Page.fragment(), Query.t()) :: Page.t()
-  def click_link!(page_or_fragment, criterias) do
+  def click_link!(page_or_fragment, query) do
     page_or_fragment
-    |> link_with!(criterias)
+    |> link_with!(query)
     |> Link.click!()
   end
 
@@ -191,36 +178,36 @@ defmodule Mechanize.Page do
   defdelegate links(page), to: __MODULE__, as: :links_with
 
   @doc """
-  Return the first link matched by `criteria`.
+  Return the first link matched by `query`.
 
   Nil is returned if no link was matched.
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
   @spec link_with(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
-  def link_with(page, criteria \\ []) do
+  def link_with(page, query \\ []) do
     page
-    |> links_with(criteria)
+    |> links_with(query)
     |> List.first()
   end
 
   @doc """
-  Return the first link matched by `criteria`.
+  Return the first link matched by `query`.
 
-  Raise `Mechanize.Query.BadCriteriaError` if no link was matched.
+  Raise `Mechanize.Query.BadQueryError` if no link was matched.
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
   @spec link_with!(Page.t() | Page.fragment(), Query.t()) :: Link.t() | nil
-  def link_with!(page, criteria \\ []) do
-    case link_with(page, criteria) do
-      nil -> raise BadCriteriaError, "no link found with given criteria"
+  def link_with!(page, query \\ []) do
+    case link_with(page, query) do
+      nil -> raise BadQueryError, "no link found with given query"
       link -> link
     end
   end
 
   @doc """
-  Return all links matched by `criteria`.
+  Return all links matched by `query`.
 
   An empty list is returned if no link was matched.
 
@@ -236,61 +223,90 @@ defmodule Mechanize.Page do
     Page.links_with(page, href: "sun.html")
   ```
 
-  You can also use regular expressions:
-  ```
-    Page.links_with(page, href: ~r/sun/)
-  ```
-
-  It's possible to chain functions:
-  ```
-    page
-    |> Page.search("map[name=planets]")
-    |> Page.links_with("Sun")
-  ```
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
   """
   @spec links_with(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
-  def links_with(page, criteria \\ []) do
+  def links_with(page, query \\ []) do
     page
-    |> elements_with("a, area", criteria)
+    |> elements_with("a, area", query)
     |> Enum.map(&Link.new/1)
   end
 
   @doc """
-  Return all links matched by `criteria`.
+  Return all links matched by `query`.
 
-  Raise `Mechanize.Query.BadCriteriaError` if no link was matched.
+  Raise `Mechanize.Query.BadQueryError` if no link was matched.
 
   See `Mechanize.Page.links_with/2` for more details about how to query links.
   """
   @spec links_with!(Page.t() | Page.fragment(), Query.t()) :: [Link.t()]
-  def links_with!(page, criteria \\ []) do
-    case links_with(page, criteria) do
-      [] -> raise BadCriteriaError, "no link found with given criteria"
+  def links_with!(page, query \\ []) do
+    case links_with(page, query) do
+      [] -> raise BadQueryError, "no link found with given query"
       link -> link
     end
   end
 
-  def form(page) do
-    page
+  @doc """
+  Returns the first form in a given page or fragment or nil in case of the given page or fragment
+  does not have a form.
+  """
+  @spec form(Page.t() | Page.fragment()) :: Form.t() | nil
+  def form(page_or_fragment) do
+    page_or_fragment
     |> forms()
     |> List.first()
   end
 
+  @doc """
+  Returns a list containing all forms of a given page or fragment.
+
+  In case of a page or fragment does not have a form, returns a empty list.
+  """
+  @spec forms(Page.t() | Page.fragment()) :: [Page.t()]
   defdelegate forms(page), to: __MODULE__, as: :forms_with
 
-  def form_with(page, criteria \\ []) do
-    page
-    |> forms_with(criteria)
+  @doc """
+  Returns the first form that matches the `query` for the given page or fragment.
+
+  In case of no form matches, returns nil instead.
+
+  ## Examples
+
+  Fetch the first form which name is equal to "login".
+  ```
+  %Form{} = Page.form_with(page, name: "login")
+  ```
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
+  """
+  @spec form_with(Page.t() | Page.fragment(), Query.t()) :: Form.t() | nil
+  def form_with(page_or_fragment, query \\ []) do
+    page_or_fragment
+    |> forms_with(query)
     |> List.first()
   end
 
-  def forms_with(page, criteria \\ []) do
-    page
-    |> elements_with("form", criteria)
-    |> Enum.map(&Form.new(page, &1))
+  @doc """
+  Returns a list containing all forms matching `query` for the given page or fragment.
+
+  In case of no form matches, returns an empty list instead.
+
+  ## Examples
+
+  Fetch all forms which name is equal to "login".
+  ```
+  list = Page.forms_with(page, name: "login")
+  ```
+  See `Mechanize.Query` module documentation to know all query capabilities in depth.
+  """
+  @spec forms_with(Page.t() | Page.fragment(), Query.t()) :: [Form.t()]
+  def forms_with(page_or_fragment, query \\ []) do
+    page_or_fragment
+    |> elements_with("form", query)
+    |> Enum.map(&Form.new(page_or_fragment, &1))
   end
 
   defdelegate search(page, selector), to: Query
   defdelegate filter_out(page, selector), to: Query
-  defdelegate elements_with(page, selector, criteria \\ []), to: Query
+  defdelegate elements_with(page, selector, query \\ []), to: Query
 end

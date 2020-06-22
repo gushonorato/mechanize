@@ -23,6 +23,6 @@ defmodule Mechanize.Page.Link do
   end
 
   defp resolve_url(el) do
-    Browser.resolve_url(Element.page(el), Element.attr(el, :href))
+    Browser.resolve_url(Element.get_page(el), Element.attr(el, :href))
   end
 end

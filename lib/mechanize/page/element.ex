@@ -12,8 +12,8 @@ defmodule Mechanize.Page.Element do
           page: Page.t()
         }
 
-  def page(el), do: Elementable.element(el).page
   def text(el), do: Elementable.element(el).text
+  def get_page(elementable), do: Elementable.element(elementable).page
 
   def name(el) do
     el

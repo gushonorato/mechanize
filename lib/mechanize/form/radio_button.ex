@@ -3,7 +3,6 @@ defmodule Mechanize.Form.RadioButton do
 
   alias Mechanize.Query
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Form.InconsistentFormError
   alias Mechanize.Query.BadQueryError
 
   @derive [Elementable]
@@ -94,7 +93,7 @@ defmodule Mechanize.Form.RadioButton do
         form
 
       radio_names ->
-        raise InconsistentFormError,
+        raise BadQueryError,
           message:
             "Cannot check multiple radio buttons with same name (#{Enum.join(radio_names, ", ")})"
     end

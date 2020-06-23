@@ -2,7 +2,7 @@ defmodule Mechanize.Form.SelectList do
   @moduledoc false
 
   alias Mechanize.Page.{Element, Elementable}
-  alias Mechanize.Form.{Option, InconsistentFormError}
+  alias Mechanize.Form.Option
   alias Mechanize.Query
   alias Mechanize.Query.BadQueryError
 
@@ -142,7 +142,7 @@ defmodule Mechanize.Form.SelectList do
         form
 
       names ->
-        raise InconsistentFormError,
+        raise BadQueryError,
               "Multiple selected options on single select list with name(s) #{names}"
     end
   end

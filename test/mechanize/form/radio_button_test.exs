@@ -1,7 +1,7 @@
 defmodule Mechanize.Form.RadioButtonTest do
   use ExUnit.Case, async: true
   alias Mechanize.{Page, Form}
-  alias Mechanize.Form.{RadioButton, InconsistentFormError}
+  alias Mechanize.Form.RadioButton
   alias Mechanize.Query.BadQueryError
   alias Mechanize.Page.Element
   import TestHelper
@@ -76,7 +76,7 @@ defmodule Mechanize.Form.RadioButtonTest do
     end
 
     test "check multiple radios with same name", %{form: form} do
-      assert_raise InconsistentFormError, ~r/same name \(color\)/, fn ->
+      assert_raise BadQueryError, ~r/same name \(color\)/, fn ->
         RadioButton.check_radio_button(form, name: "color")
       end
     end

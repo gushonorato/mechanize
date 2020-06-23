@@ -95,7 +95,7 @@ defmodule Mechanize.Form.SelectTest do
     end
 
     test "raise when many options selected on single selection select list", %{form: form} do
-      assert_raise Mechanize.Form.InconsistentFormError, ~r/Multiple selected/, fn ->
+      assert_raise Mechanize.Query.BadQueryError, ~r/Multiple selected/, fn ->
         SelectList.select(form, name: "select1", option: [label: ~r/Label/])
       end
     end

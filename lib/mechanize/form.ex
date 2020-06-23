@@ -25,11 +25,7 @@ defmodule Mechanize.Form do
           fields: list()
         }
 
-  defmodule InconsistentFormError do
-    defexception [:message]
-  end
-
-  @spec new(Page.t(), Element.t()) :: Form.t()
+  @doc false
   def new(page, element) do
     %Mechanize.Form{element: element, fields: parse_fields(page, element)}
   end

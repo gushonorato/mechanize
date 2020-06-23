@@ -5,11 +5,11 @@ defmodule Mechanize.Form.Option do
 
   @derive [Elementable]
   @enforce_keys [:element, :index]
-  defstruct element: nil, label: nil, value: nil, selected: false, index: nil
+  defstruct element: nil, visible_text: nil, value: nil, selected: false, index: nil
 
   @type t :: %__MODULE__{
           element: Element.t(),
-          label: String.t(),
+          visible_text: String.t(),
           value: String.t(),
           index: integer(),
           selected: boolean()
@@ -19,7 +19,7 @@ defmodule Mechanize.Form.Option do
     %__MODULE__{
       element: el,
       value: Element.attr(el, :value) || Element.text(el),
-      label: Element.attr(el, :label) || Element.text(el),
+      visible_text: Element.attr(el, :label) || Element.text(el),
       index: index,
       selected: Element.attr_present?(el, :selected)
     }

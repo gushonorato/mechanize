@@ -395,7 +395,6 @@ defmodule Mechanize.Form do
   @spec submit_buttons_with(t(), Query.t()) :: [SubmitButton.t()]
   defdelegate submit_buttons_with(form, query), to: SubmitButton
 
-  # TODO: Change to !
   @doc """
   Clicks on a submit button matching the given query.
 
@@ -411,12 +410,12 @@ defmodule Mechanize.Form do
 
   You can click on an submit button by its visible text:
   ```
-  SubmitButton.click_button(form, "OK")
+  SubmitButton.click_button!(form, "OK")
   ```
 
   You can also click by attribute name:
   ```
-  SubmitButton.click_button(form, name: "submit1")
+  SubmitButton.click_button!(form, name: "submit1")
   ```
 
   Fill a login form and submit by clicking in "OK" submit button:
@@ -424,11 +423,11 @@ defmodule Mechanize.Form do
   form
   |> Form.fill_text(name: "username", with: "me@example.com")
   |> Form.fill_text(name: "password", with: "123456")
-  |> Form.click_button("OK")
+  |> Form.click_button!("OK")
   ```
   """
-  @spec click_button(t(), Query.t()) :: Page.t()
-  defdelegate click_button(form, query), to: SubmitButton
+  @spec click_button!(t(), Query.t()) :: Page.t()
+  defdelegate click_button!(form, query), to: SubmitButton
 
   # TODO: Change to !
   @doc """

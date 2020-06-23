@@ -46,31 +46,31 @@ defmodule Mechanize.Form.SubmitButtonTest do
   describe ".click_button" do
     test "visible text not match", %{form: form} do
       assert_raise BadQueryError, ~r/no button was found/i, fn ->
-        SubmitButton.click_button(form, "Button 1")
+        SubmitButton.click_button!(form, "Button 1")
       end
     end
 
     test "query not match", %{form: form} do
       assert_raise BadQueryError, ~r/no button was found/i, fn ->
-        SubmitButton.click_button(form, name: "lero")
+        SubmitButton.click_button!(form, name: "lero")
       end
     end
 
     test "multiple visible texts match", %{form: form} do
       assert_raise BadQueryError, ~r/16 buttons were found./i, fn ->
-        SubmitButton.click_button(form, ~r/Button/i)
+        SubmitButton.click_button!(form, ~r/Button/i)
       end
     end
 
     test "multiple query match", %{form: form} do
       assert_raise BadQueryError, ~r/12 buttons were found./i, fn ->
-        SubmitButton.click_button(form, name: ~r/button/)
+        SubmitButton.click_button!(form, name: ~r/button/)
       end
     end
 
     test "a nil button", %{form: form} do
       assert_raise ArgumentError, ~r/button is nil./i, fn ->
-        SubmitButton.click_button(form, nil)
+        SubmitButton.click_button!(form, nil)
       end
     end
 
@@ -83,7 +83,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
       assert(
         form
-        |> SubmitButton.click_button("Button 6")
+        |> SubmitButton.click_button!("Button 6")
         |> Page.get_content() == "Lero lero"
       )
     end
@@ -97,7 +97,7 @@ defmodule Mechanize.Form.SubmitButtonTest do
 
       assert(
         form
-        |> SubmitButton.click_button(name: "button1")
+        |> SubmitButton.click_button!(name: "button1")
         |> Page.get_content() == "Lero lero"
       )
     end

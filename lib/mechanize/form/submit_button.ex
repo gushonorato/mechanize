@@ -41,28 +41,28 @@ defmodule Mechanize.Form.SubmitButton do
     ])
   end
 
-  def click_button(_form, nil) do
+  def click_button!(_form, nil) do
     raise ArgumentError, message: "Can't click on button because button is nil."
   end
 
-  def click_button(form, query) when is_list(query) do
+  def click_button!(form, query) when is_list(query) do
     form
     |> submit_buttons_with(query)
     |> maybe_click_on_button(form)
   end
 
-  def click_button(form, visible_text) when is_binary(visible_text) do
+  def click_button!(form, visible_text) when is_binary(visible_text) do
     form
     |> submit_buttons_with()
     |> Enum.filter(&(&1.visible_text == visible_text))
     |> maybe_click_on_button(form)
   end
 
-  def click_button(form, %__MODULE__{} = button) do
+  def click_button!(form, %__MODULE__{} = button) do
     Form.submit(form, button)
   end
 
-  def click_button(form, visible_text) do
+  def click_button!(form, visible_text) do
     form
     |> submit_buttons_with()
     |> Enum.filter(&(&1.visible_text != nil and &1.visible_text =~ visible_text))
@@ -76,7 +76,7 @@ defmodule Mechanize.Form.SubmitButton do
           message: "Can't click on submit button because no button was found for given query"
 
       [button] ->
-        click_button(form, button)
+        click_button!(form, button)
 
       buttons ->
         raise BadQueryError,

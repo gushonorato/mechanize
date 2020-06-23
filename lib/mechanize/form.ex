@@ -42,6 +42,7 @@ defmodule Mechanize.Form do
     %Mechanize.Form{element: element, fields: parse_fields(page, element)}
   end
 
+  @doc false
   def put_field(form, field, value) do
     put_field(form, ArbitraryField.new(field, value))
   end
@@ -50,6 +51,10 @@ defmodule Mechanize.Form do
     %__MODULE__{form | fields: [field | form.fields]}
   end
 
+  @doc """
+  Returns all fields from the given form.
+  """
+  @spec fields(t()) :: list()
   def fields(nil) do
     raise ArgumentError, "form is nil"
   end

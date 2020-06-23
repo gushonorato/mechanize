@@ -24,7 +24,7 @@ The package can be installed by adding `mechanize` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:mechanize, github: "gushonorato/mechanize"}
+    {:mechanize, , "~> 0.1"}
   ]
 end
 ```

@@ -1,7 +1,7 @@
 defmodule Mechanize.MixProject do
   use Mix.Project
 
-  @version "0.1.0-dev"
+  @version "0.1.0"
 
   def project do
     [
@@ -13,10 +13,12 @@ defmodule Mechanize.MixProject do
       test_coverage: [tool: ExCoveralls],
       dialyzer: [plt_add_deps: :transitive],
       elixirc_paths: elixirc_paths(Mix.env()),
+      description: "Build web scrapers and automate interaction with websites in Elixir with ease!",
+      package: package(),
 
       # Docs
       name: "Mechanize",
-      source_url: "https://github.com/ghonorato/mechanize",
+      source_url: "https://github.com/gushonorato/mechanize",
       docs: [
         main: "readme",
         extras: ["README.md"]
@@ -44,6 +46,14 @@ defmodule Mechanize.MixProject do
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
       {:bypass, "~> 1.0", only: :test},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package() do
+    [
+      maintainers: ["Gustavo Honorato"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/gushonorato/mechanize"}
     ]
   end
 end

@@ -147,15 +147,14 @@ defmodule Mechanize.Page do
   @doc """
   Clicks on a link that matches `query`.
 
-  Links are all elements defined by `a` and `area` html tags.
-
-  If the request does not fail, a Page struct is returned, otherwise, it raises
-  `Mechanize.HTTPAdapter.NetworkError`. In case of more than one link matches the query,
-  Mechanize will click on the first matched link.
+  Links are all elements defined by `a` and `area` html tags. In case of more than one link matches
+  the query, Mechanize will click on the first matched link.
 
   Raises `Mechanize.Page.ClickError` if the matched link has no href attribute.
 
   Raises `Mechanize.Page.BadQueryError` if no link matches with given `query`.
+
+  Raises additional exceptions from `Mechanize.Browser.request!/5`.
 
   See `Mechanize.Query` module documentation to know all query capabilities in depth.
   ## Examples

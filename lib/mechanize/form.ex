@@ -195,7 +195,6 @@ defmodule Mechanize.Form do
   @spec image_inputs_with(t(), Query.t()) :: [ImageInput.t()]
   defdelegate image_inputs_with(form, query), to: ImageInput
 
-  # TODO: Change to !
   @doc """
   Clicks on a image input matching the given query.
 
@@ -203,6 +202,8 @@ defmodule Mechanize.Form do
   returned as the result.
 
   Raises `Mechanize.Query.BadQueryError` if none or more than one image input is matched by query.
+
+  Raises additional exceptions from `Mechanize.Browser.request!/5`.
 
   See `Mechanize.Query` module documentation to know all query capabilities in depth.
 
@@ -409,6 +410,8 @@ defmodule Mechanize.Form do
   Raises `Mechanize.Query.BadQueryError` if none or more than one submit button is matched by
   query.
 
+  Raises additional exceptions from `Mechanize.Browser.request!/5`.
+
   See `Mechanize.Query` module documentation to know all query capabilities in depth.
 
   ## Example
@@ -443,6 +446,8 @@ defmodule Mechanize.Form do
   or use any of our helper functions `click_button!/2` or
   `click_image!/2`. To simulate a form submited by enter key press, ignore the
   second parameter.
+
+  Raises additional exceptions from `Mechanize.Browser.request!/5`.
 
   ## Example
 

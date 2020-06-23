@@ -205,16 +205,16 @@ defmodule Mechanize.Form do
 
   You can click on an image input:
   ```
-  Form.click_image(form, name: "america")
+  Form.click_image!(form, name: "america")
   ```
 
   You can also send x,y coordinates of the click:
   ```
-  Form.click_image(form, name: "america", x: 120, y: 120)
+  Form.click_image!(form, name: "america", x: 120, y: 120)
   ```
   """
-  @spec click_image(t(), Query.t()) :: Page.t()
-  defdelegate click_image(form, query), to: ImageInput
+  @spec click_image!(t(), Query.t()) :: Page.t()
+  defdelegate click_image!(form, query), to: ImageInput
 
   @doc """
   Returns a list of radio buttons or an empty list if no radio buttons are found.

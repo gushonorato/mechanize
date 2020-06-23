@@ -27,11 +27,11 @@ defmodule Mechanize.Form.ImageInput do
     get_in(form, [Access.key(:fields), Access.filter(&Query.match?(&1, __MODULE__, query))])
   end
 
-  def click_image(form, %__MODULE__{} = image) do
+  def click_image!(form, %__MODULE__{} = image) do
     Form.submit!(form, image)
   end
 
-  def click_image(form, query) do
+  def click_image!(form, query) do
     {x, query} = Keyword.pop(query, :x, 0)
     {y, query} = Keyword.pop(query, :y, 0)
 
@@ -46,7 +46,7 @@ defmodule Mechanize.Form.ImageInput do
         raise BadQueryError, message: "Can't click on image input because it was not found"
 
       [image] ->
-        click_image(form, %__MODULE__{image | x: x, y: y})
+        click_image!(form, %__MODULE__{image | x: x, y: y})
 
       images ->
         raise BadQueryError,

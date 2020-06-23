@@ -47,7 +47,7 @@ defmodule Mechanize.Form.ImageInputTest do
         Plug.Conn.resp(conn, 200, "NEXT PAGE")
       end)
 
-      ImageInput.click_image(form, name: "map2")
+      ImageInput.click_image!(form, name: "map2")
     end
 
     test "passing click coords as named params", %{form: form, bypass: bypass} do
@@ -58,7 +58,7 @@ defmodule Mechanize.Form.ImageInputTest do
         Plug.Conn.resp(conn, 200, "NEXT PAGE")
       end)
 
-      ImageInput.click_image(form, name: "map2", x: 10, y: 10)
+      ImageInput.click_image!(form, name: "map2", x: 10, y: 10)
     end
 
     test "returns next page", %{form: form, bypass: bypass} do
@@ -67,19 +67,19 @@ defmodule Mechanize.Form.ImageInputTest do
       end)
 
       assert form
-             |> ImageInput.click_image(name: "map2", x: 10, y: 10)
+             |> ImageInput.click_image!(name: "map2", x: 10, y: 10)
              |> Page.get_content() == "NEXT PAGE"
     end
 
     test "raise exception when image not found", %{form: form} do
       assert_raise BadQueryError, ~r/not found/, fn ->
-        ImageInput.click_image(form, name: "lero", x: 10, y: 10)
+        ImageInput.click_image!(form, name: "lero", x: 10, y: 10)
       end
     end
 
     test "raise exception when many images found", %{form: form} do
       assert_raise BadQueryError, ~r/2 were found/, fn ->
-        ImageInput.click_image(form, name: ~r/map/, x: 10, y: 10)
+        ImageInput.click_image!(form, name: ~r/map/, x: 10, y: 10)
       end
     end
   end

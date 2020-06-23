@@ -131,6 +131,19 @@ defmodule Mechanize.Form.SelectTest do
              ]
     end
 
+    test "select option by text with shortcut", %{form: form} do
+      assert form
+             |> SelectList.select(name: "select1", option: "Option 3")
+             |> Form.select_lists_with(name: "select1")
+             |> SelectList.options()
+             |> Enum.map(&{Element.attr(&1, :label), &1.value, Element.text(&1), &1.selected}) == [
+               {"Label 1", "1", "Option 1", false},
+               {nil, "2", "Option 2", false},
+               {"Label 3", "3", "Option 3", true},
+               {nil, "Option 4", "Option 4", false}
+             ]
+    end
+
     test "select option by label", %{form: form} do
       assert form
              |> SelectList.select(name: "select1", option: [label: "Label 3"])

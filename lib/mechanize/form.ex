@@ -66,7 +66,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of text inputs or an empty list if no text inputs are found.
 
-  See related `Mechanize.Form.fill_text/2`.
+  See related `fill_text/2`.
   """
   @spec text_inputs(t()) :: [TextInput.t()]
   defdelegate text_inputs(form), to: TextInput, as: :text_inputs_with
@@ -76,7 +76,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no text input is matched by the given `query`.
 
-  See related `Mechanize.Form.fill_text/2`.
+  See related `fill_text/2`.
 
   ## Example
   Returns all text inputs with name "download".
@@ -112,7 +112,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of checkboxes or an empty list if no checkboxes are found.
 
-  See related `Mechanize.Form.check_checkbox/2` and `Mechanize.Form.uncheck_checkbox/2`.
+  See related `check_checkbox/2` and `uncheck_checkbox/2`.
   """
   @spec checkboxes(t()) :: [Checkbox.t()]
   defdelegate checkboxes(form), to: Checkbox, as: :checkboxes_with
@@ -122,7 +122,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no checkbox is matched by the given `query`.
 
-  See related `Mechanize.Form.check_checkbox/2` and `Mechanize.Form.uncheck_checkbox/2`.
+  See related `check_checkbox/2` and `uncheck_checkbox/2`.
 
   ## Example
   Returns all checkboxes with name "download".
@@ -174,7 +174,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of image inputs or an empty list if no image input are found.
 
-  See related `Mechanize.Form.click_image/2`.
+  See related `click_image!/2`.
   """
   @spec image_inputs(t()) :: [ImageInput.t()]
   defdelegate image_inputs(form), to: ImageInput, as: :image_inputs_with
@@ -184,7 +184,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no image input is matched by the given `query`.
 
-  See related `Mechanize.Form.click_image/2`.
+  See related `click_image!/2`.
 
   ## Example
   Returns all image inputs with name "america".
@@ -224,7 +224,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of radio buttons or an empty list if no radio buttons are found.
 
-  See related `Mechanize.Form.check_radio_button/2` and `Mechanize.Form.uncheck_radio_button/2`.
+  See related `check_radio_button/2` and `uncheck_radio_button/2`.
   """
   @spec radio_buttons(t()) :: [RadioButton.t()]
   defdelegate radio_buttons(form), to: RadioButton, as: :radio_buttons_with
@@ -234,7 +234,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no radio button is matched by the given `query`.
 
-  See related `Mechanize.Form.check_radio_button/2` and `Mechanize.Form.uncheck_radio_button/2`.
+  See related `check_radio_button/2` and `uncheck_radio_button/2`.
 
   ## Example
   Returns all radio buttons with name "subscribe".
@@ -290,7 +290,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of selects or an empty list if no selects are found.
 
-  See related `Mechanize.Form.select/2` and `Mechanize.Form.unselect/2`.
+  See related `select/2` and `unselect/2`.
   """
   @spec select_lists(t()) :: [SelectList.t()]
   defdelegate select_lists(form), to: SelectList, as: :select_lists_with
@@ -300,7 +300,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no selects is matched by the given `query`.
 
-  See related `Mechanize.Form.select/2` and `Mechanize.Form.unselect/2`.
+  See related `select/2` and `unselect/2`.
 
   ## Example
   Returns all selects with name "category".
@@ -379,7 +379,7 @@ defmodule Mechanize.Form do
   @doc """
   Returns a list of submit buttons or an empty list if no submit buttons are found.
 
-  See related `Mechanize.Form.select/2` and `Mechanize.Form.unselect/2`.
+  See related `select/2` and `unselect/2`.
   """
   @spec submit_buttons(t()) :: [SubmitButton.t()]
   defdelegate submit_buttons(form), to: SubmitButton, as: :submit_buttons_with
@@ -389,7 +389,7 @@ defmodule Mechanize.Form do
 
   An empty list is returned in case no submit button is matched by the given `query`.
 
-  See related `Mechanize.Form.click_button/2`.
+  See related `click_button!/2`.
 
   ## Example
   Returns all submit buttons with name "send".
@@ -440,8 +440,8 @@ defmodule Mechanize.Form do
   Mechanize submits the form and a `Mechanize.Page` struct is returned as the result.
 
   To simulate a form submited by a button click, pass the button as the second parameter
-  or use any of our helper functions `Mechanize.Form.click_button/2` or
-  `Mechanize.Form.click_image/2`. To simulate a form submited by enter key press, ignore the
+  or use any of our helper functions `click_button!/2` or
+  `click_image!/2`. To simulate a form submited by enter key press, ignore the
   second parameter.
 
   ## Example
@@ -466,7 +466,7 @@ defmodule Mechanize.Form do
   |> Form.fill_text(name: "password", with: "123456")
   |> Form.submit!(button)
   ```
-  See `Mechanize.Form.click_button/2` for a simpler way to do this.
+  See `click_button!/2` for a simpler way to do this.
   """
   @spec submit!(t(), SubmitButton.t() | ImageInput.t()) :: Page.t()
   def submit!(form, button \\ nil) do

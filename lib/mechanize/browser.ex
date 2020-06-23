@@ -428,7 +428,7 @@ defmodule Mechanize.Browser do
   defdelegate resolve_url(page_or_base_url, relative_url), to: __MODULE__.Impl
 
   @doc """
-    Issues a to request the given `url`. See `request!/6` for details.
+    Issues a to request the given `url`. See `request!/5` for details.
   """
   @spec get!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def get!(browser, url, opts \\ []) do
@@ -436,7 +436,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a HEAD request to the given `url`. See `request!/6` for details.
+    Issues a HEAD request to the given `url`. See `request!/5` for details.
   """
   @spec head!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def head!(browser, url, opts \\ []) do
@@ -444,7 +444,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a OPTIONS request to the given `url`. See `request!/6` for details.
+    Issues a OPTIONS request to the given `url`. See `request!/5` for details.
   """
   @spec options!(t(), String.t(), keyword) :: Mechanize.Page.t()
   def options!(browser, url, opts \\ []) do
@@ -452,7 +452,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a DELETE request to the given `url`. See `request!/6` for details.
+    Issues a DELETE request to the given `url`. See `request!/5` for details.
   """
   @spec delete!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def delete!(browser, url, body \\ "", opts \\ []) do
@@ -460,7 +460,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a PATCH request to the given `url`. See `request!/6` for details.
+    Issues a PATCH request to the given `url`. See `request!/5` for details.
   """
   @spec patch!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def patch!(browser, url, body \\ "", opts \\ []) do
@@ -468,7 +468,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a POST request to the given `url`. See `request!/6` for details.
+    Issues a POST request to the given `url`. See `request!/5` for details.
   """
   @spec post!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def post!(browser, url, body \\ "", opts \\ []) do
@@ -476,7 +476,7 @@ defmodule Mechanize.Browser do
   end
 
   @doc """
-    Issues a PUT request to the given `url`. See `request!/6` for details.
+    Issues a PUT request to the given `url`. See `request!/5` for details.
   """
   @spec put!(t(), String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def put!(browser, url, body \\ "", opts \\ []) do

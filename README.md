@@ -161,7 +161,7 @@ clicking the 'Google Search' button.
 Another way to do that is typing in the text field and hitting the return button. We can also simulate that by using `submit` function instead of `click_button`:
 
 ```elixir
-Form.submit(form)
+Form.submit!(form)
 ```
 
 Let's take a look at the code all together:
@@ -177,7 +177,7 @@ b
 |> Browser.get!("https://www.google.com")
 |> Page.form_with(name: "f")
 |> Form.fill_text(name: "q", with: "elixir mechanize")
-|> Form.submit() # or Form.click_button!(form, text: "Google Search")
+|> Form.submit!() # or Form.click_button!(form, text: "Google Search")
 ```
 
 Before we go on to screen scraping, let's take a look at forms a little more
@@ -249,7 +249,7 @@ serp =
   initial_page
   |> Page.form_with(name: "f")
   |> Form.fill_text(name: "q", with: keyword)
-  |> Form.submit()
+  |> Form.submit!()
 
 serp
 |> Page.search(".kCrYT > a .vvjwJb") # Selects each search result element

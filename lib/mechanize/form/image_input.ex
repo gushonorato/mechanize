@@ -28,7 +28,7 @@ defmodule Mechanize.Form.ImageInput do
   end
 
   def click_image(form, %__MODULE__{} = image) do
-    Form.submit(form, image)
+    Form.submit!(form, image)
   end
 
   def click_image(form, query) do

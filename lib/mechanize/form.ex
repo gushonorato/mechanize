@@ -98,7 +98,7 @@ defmodule Mechanize.Form do
   form
   |> Form.fill_text(name: "username", with: "me@example.com")
   |> Form.fill_text(name: "password", with: "123456")
-  |> Form.submit()
+  |> Form.submit!()
   ```
   """
   @spec fill_text(t(), Query.t()) :: t()
@@ -141,7 +141,7 @@ defmodule Mechanize.Form do
   ```
   form
   |> Form.check_checkbox(name: "subscribe", value: "yes")
-  |> Form.submit()
+  |> Form.submit!()
   ```
   """
   @spec check_checkbox(t(), Query.t()) :: t()
@@ -160,7 +160,7 @@ defmodule Mechanize.Form do
   ```
   form
   |> Form.uncheck_checkbox(name: "subscribe", value: "yes")
-  |> Form.submit()
+  |> Form.submit!()
   ```
   """
   @spec uncheck_checkbox(t(), Query.t()) :: t()
@@ -257,7 +257,7 @@ defmodule Mechanize.Form do
   ```
   form
   |> Form.check_checkbox(name: "subscribe", value: "yes")
-  |> Form.submit()
+  |> Form.submit!()
   ```
   """
   @spec check_radio_button(t(), Query.t()) :: t()
@@ -276,7 +276,7 @@ defmodule Mechanize.Form do
   ```
   form
   |> Form.uncheck_checkbox(name: "subscribe", value: "yes")
-  |> Form.submit()
+  |> Form.submit!()
   ```
   """
   @spec uncheck_radio_button(t(), Query.t()) :: t()
@@ -429,7 +429,6 @@ defmodule Mechanize.Form do
   @spec click_button!(t(), Query.t()) :: Page.t()
   defdelegate click_button!(form, query), to: SubmitButton
 
-  # TODO: Change to !
   @doc """
   Submits the given form.
 
@@ -447,7 +446,7 @@ defmodule Mechanize.Form do
   form
   |> Form.fill_text(name: "username", with: "me@example.com")
   |> Form.fill_text(name: "password", with: "123456")
-  |> Form.submit()
+  |> Form.submit!()
   ```
 
   Simulate a login form submission by clicking the submit button:
@@ -460,12 +459,12 @@ defmodule Mechanize.Form do
   form
   |> Form.fill_text(name: "username", with: "me@example.com")
   |> Form.fill_text(name: "password", with: "123456")
-  |> Form.submit(button)
+  |> Form.submit!(button)
   ```
   See `Mechanize.Form.click_button/2` for a simpler way to do this.
   """
-  @spec submit(t(), SubmitButton.t() | ImageInput.t()) :: Page.t()
-  def submit(form, button \\ nil) do
+  @spec submit!(t(), SubmitButton.t() | ImageInput.t()) :: Page.t()
+  def submit!(form, button \\ nil) do
     case method(form) do
       :post ->
         Mechanize.Browser.request!(

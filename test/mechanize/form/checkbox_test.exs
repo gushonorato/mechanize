@@ -113,7 +113,7 @@ defmodule Mechanize.Form.CheckboxTest do
 
       page
       |> Page.form_with()
-      |> Form.submit()
+      |> Form.submit!()
     end
   end
 end

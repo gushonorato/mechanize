@@ -134,7 +134,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_missing")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "method is GET when method attribute is blank", %{page: page, bypass: bypass} do
@@ -145,7 +145,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_blank")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "send form fields in URL when GET", %{page: page, bypass: bypass} do
@@ -157,7 +157,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_get")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "sends form fields in body when POST", %{page: page, bypass: bypass} do
@@ -169,7 +169,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_post")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "content-type header added when POST", %{page: page, bypass: bypass} do
@@ -183,7 +183,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_post")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "POST method is case insensitive", %{page: page, bypass: bypass} do
@@ -194,7 +194,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "method_post_case_insensitive")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "absent action attribute must send request to current page path", %{
@@ -208,7 +208,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "absent_action")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "empty action url must send request to current page path", %{page: page, bypass: bypass} do
@@ -219,7 +219,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "empty_action")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "relative action url", %{page: page, bypass: bypass} do
@@ -230,7 +230,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "relative_action_url")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "does not submit buttons", %{page: page, bypass: bypass} do
@@ -241,7 +241,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "do_not_submit_buttons")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "does not submit disabled fields", %{page: page, bypass: bypass} do
@@ -252,7 +252,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "with_disabled_fields")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "does not submit input without name", %{page: page, bypass: bypass} do
@@ -263,7 +263,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "field_without_name")
-      |> Form.submit()
+      |> Form.submit!()
     end
 
     test "returns a page on success", %{page: page, bypass: bypass} do
@@ -274,7 +274,7 @@ defmodule Mechanize.FormTest do
       assert(
         page
         |> Page.form_with(name: "login_form")
-        |> Form.submit()
+        |> Form.submit!()
         |> Page.get_content() == "OK"
       )
     end
@@ -287,7 +287,7 @@ defmodule Mechanize.FormTest do
 
       page
       |> Page.form_with(name: "form_with_field_with_absent_value")
-      |> Form.submit()
+      |> Form.submit!()
     end
   end
 end

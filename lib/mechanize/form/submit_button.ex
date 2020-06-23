@@ -59,7 +59,7 @@ defmodule Mechanize.Form.SubmitButton do
   end
 
   def click_button!(form, %__MODULE__{} = button) do
-    Form.submit(form, button)
+    Form.submit!(form, button)
   end
 
   def click_button!(form, visible_text) do

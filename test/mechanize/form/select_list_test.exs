@@ -310,7 +310,7 @@ defmodule Mechanize.Form.SelectTest do
       end)
 
       form
-      |> Form.submit()
+      |> Form.submit!()
     end
   end
 end

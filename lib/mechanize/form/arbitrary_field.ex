@@ -1,4 +1,4 @@
-defmodule Mechanize.Form.DetachedField do
+defmodule Mechanize.Form.ArbitraryField do
   @moduledoc false
 
   alias Mechanize.Form.ParameterizableField
@@ -13,6 +13,6 @@ defmodule Mechanize.Form.DetachedField do
         }
 
   def new(name, value) do
-    %Mechanize.Form.DetachedField{name: name, value: value}
+    %Mechanize.Form.ArbitraryField{name: name, value: value}
   end
 end

@@ -12,7 +12,7 @@ defmodule Mechanize.Form do
 
   alias Mechanize.Form.{
     TextInput,
-    DetachedField,
+    ArbitraryField,
     Checkbox,
     ParameterizableField,
     RadioButton,
@@ -43,7 +43,7 @@ defmodule Mechanize.Form do
   end
 
   def put_field(form, field, value) do
-    put_field(form, DetachedField.new(field, value))
+    put_field(form, ArbitraryField.new(field, value))
   end
 
   def put_field(form, field) do

@@ -3,7 +3,7 @@ defmodule Mechanize.FormTest do
   alias Mechanize
   alias Mechanize.Page.Element
   alias Mechanize.{Form, Page}
-  alias Mechanize.Form.DetachedField
+  alias Mechanize.Form.ArbitraryField
   import TestHelper
 
   setup do
@@ -16,14 +16,14 @@ defmodule Mechanize.FormTest do
 
       assert match?(
                %Form{},
-               Form.put_field(form, %DetachedField{name: "remember", value: "remember"})
+               Form.put_field(form, %ArbitraryField{name: "remember", value: "remember"})
              )
     end
 
     test "put a new field on form", %{page: page} do
       assert page
              |> Page.form_with(name: "login_form")
-             |> Form.put_field(%DetachedField{name: "remember", value: "remember"})
+             |> Form.put_field(%ArbitraryField{name: "remember", value: "remember"})
              |> Form.fields()
              |> Enum.map(&{&1.name, &1.value}) == [
                {"remember", "remember"},

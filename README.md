@@ -191,10 +191,10 @@ text input fields.  Select fields are very similar to text fields, but they
 have many options associated with them.  If you select one option, mechanize
 will de-select the other options (unless it is a multi select!).
 
-For example, let's select an `option` with visible text "Option 1" on a `select` with `name="select1"`.
+For example, let's select an `option` with text "Option 1" on a `select` with `name="select1"`.
 
 ```elixir
-Form.select(form, name: "select1", option: [label: "Option 1"])
+Form.select(form, name: "select1", option: "Option 1")
 ```
 
 Whe can also select an `option` by an attribute, in this case we'll select by `value` attribute:

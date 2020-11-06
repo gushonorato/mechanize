@@ -24,7 +24,7 @@ The package can be installed by adding `mechanize` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:mechanize, , "~> 0.1"}
+    {:mechanize, "~> 0.1"}
   ]
 end
 ```
@@ -54,7 +54,7 @@ Now we'll use the browser we've started to fetch a page.  Let's fetch Google
 with our mechanize browser:
 
 ```elixir
-page = Browser.get!(browser, "https://www.google.com)
+page = Browser.get!(browser, "https://www.google.com")
 ```
 
 What just happened?  We told mechanize to go pick up Google's main page.

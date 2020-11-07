@@ -24,7 +24,7 @@ The package can be installed by adding `mechanize` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:mechanize, , "~> 0.1"}
+    {:mechanize, "~> 0.1"}
   ]
 end
 ```
@@ -54,7 +54,7 @@ Now we'll use the browser we've started to fetch a page.  Let's fetch Google
 with our mechanize browser:
 
 ```elixir
-page = Browser.get!(browser, "https://www.google.com)
+page = Browser.get!(browser, "https://www.google.com")
 ```
 
 What just happened?  We told mechanize to go pick up Google's main page.
@@ -69,6 +69,7 @@ form. Now that we've fetched Google's homepage, let's try listing all of the lin
 
 ```elixir
 alias Mechanize.Page
+alias Mechanize.Page.Element
 
 page
 |> Page.links()
@@ -82,6 +83,7 @@ link to click on.  Let's say we wanted to click the link whose text is 'News'. N
 
 ```elixir
 alias Mechanize.Page
+alias Mechanize.Page.Element
 alias Mechanize.Page.Link
 
 page
@@ -94,6 +96,9 @@ page
 But Mechanize gives us a shortcut.  Instead we can do this:
 
 ```elixir
+alias Mechanize.Page
+alias Mechanize.Page.Link
+
 page
 |> Page.link_with(text: "News")
 |> Link.click!()
@@ -102,12 +107,16 @@ page
 Or even shorter, with just one line:
 
 ```elixir
+alias Mechanize.Page
+
 Page.click_link!(page, text: "News")
 ```
 
 You're probably thinking "there could be multiple links with that text!", and you would be correct!  If you use the plural form, you can access the list. If you wanted to click on the second news link, you could do this:
 
 ```elixir
+alias Mechanize.Page
+
   page
   |> Page.links_with(text: "News")
   |> Enum.at(1)
@@ -116,13 +125,17 @@ You're probably thinking "there could be multiple links with that text!", and yo
 We can even find a link matching its href with some regular expression:
 
 ```elixir
+alias Mechanize.Page
+
 Page.link_with(page, href: ~r/something/)
 ```
 
 Or chain them together to find a link with certain text and certain href:
 
 ```elixir
-  Page.link_with(page, text: 'News', href: "/news")
+alias Mechanize.Page
+
+Page.link_with(page, text: 'News', href: "/news")
 ```
 
 Now that we know how to find and click links, let's try something more complicated like filling out a form.
@@ -134,7 +147,7 @@ Let's continue with our Google example.
 If we look at the html of the page, we can see that there is one form named 'f', that has a couple buttons and a few fields. You can see this by saving the page in a file and opening it in your favorite text editor.
 
 ```elixir
-  File.write!("google.html", page)
+File.write!("google.html", page)
 ```
 
 Now that we know the name of the form, let's fetch it off the page:
@@ -168,7 +181,6 @@ Let's take a look at the code all together:
 
 ```elixir
 alias Mechanize.{Browser, Page, Form}
-alias Mechanize.Page.Element
 
 b = Browser.new(follow_meta_refresh: true)
     |> Browser.put_user_agent(:mac_safari)
@@ -197,7 +209,7 @@ For example, let's select an `option` with text "Option 1" on a `select` with `n
 Form.select(form, name: "select1", option: "Option 1")
 ```
 
-Whe can also select an `option` by an attribute, in this case we'll select by `value` attribute:
+We can also select an `option` by an attribute, in this case we'll select by `value` attribute:
 
 ```elixir
 Form.select(form, name: "select1", option: [value: "1"])

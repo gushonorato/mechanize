@@ -473,15 +473,18 @@ defmodule Mechanize.Form do
   ```
   See `click_button!/2` for a simpler way to do this.
   """
-  @spec submit!(t(), SubmitButton.t() | ImageInput.t()) :: Page.t()
-  def submit!(form, button \\ nil) do
+  @spec submit!(t(), SubmitButton.t() | ImageInput.t(), keyword()) :: Page.t()
+  def submit!(form, button \\ nil, opts \\ []) do
+    {options, _opts} = Keyword.pop(opts, :options, [])
+
     case method(form) do
       :post ->
         Mechanize.Browser.request!(
           browser(form),
           :post,
           action_url(form),
-          {:form, params(form.fields, button)}
+          {:form, params(form.fields, button)},
+          opts
         )
 
       :get ->
@@ -490,7 +493,7 @@ defmodule Mechanize.Form do
           :get,
           action_url(form),
           "",
-          params: params(form.fields, button)
+          params: params(form.fields, button), options: options
         )
     end
   end

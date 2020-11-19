@@ -494,6 +494,7 @@ defmodule Mechanize.Browser do
 
   * `:headers` - a list of additional headers for this request.
   * `:params` - a list of params to be merged into the `url`.
+  * `:options` - a list of request options for this  request.
 
   ## Examples
 
@@ -522,6 +523,15 @@ defmodule Mechanize.Browser do
   # GET https://www.example.com?search=mechanize&order=name
   ```
 
+  Request with custom options:
+
+  ```
+  Browser.request!(browser, :get, "https://www.example.com", "", options: [
+    recv_timeout: 500, ssl: [{:versions, [:'tlsv1.2']}
+  ])
+  # GET https://www.example.com?search=mechanize&order=name
+  ```
+
   """
   @spec request!(t(), :atom, String.t(), String.t() | {atom, any}, keyword) :: Mechanize.Page.t()
   def request!(browser, method, url, body \\ "", opts \\ [])
@@ -529,13 +539,15 @@ defmodule Mechanize.Browser do
   def request!(browser, method, url, body, opts) do
     {headers, opts} = Keyword.pop(opts, :headers, [])
     {params, _opts} = Keyword.pop(opts, :params, [])
+    {options, _opts} = Keyword.pop(opts, :options, [])
 
     request!(browser, %Request{
       method: method,
       url: url,
       body: body,
       headers: headers,
-      params: params
+      params: params,
+      options: options
     })
   end
 

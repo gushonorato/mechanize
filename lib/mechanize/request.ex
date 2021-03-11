@@ -2,18 +2,21 @@ defmodule Mechanize.Request do
   alias Mechanize.Header
 
   @default_params []
+  @default_options []
   @default_body ""
 
   @enforce_keys [:url]
-  defstruct method: :get, url: nil, headers: [], body: @default_body, params: @default_params
+  defstruct method: :get, url: nil, headers: [], body: @default_body, params: @default_params, options: @default_options
 
   @type body() :: {atom(), Enum.t()} | binary()
   @type params() :: Enum.t()
+  @type options() :: Enum.t()
   @type t :: %__MODULE__{
           method: atom(),
           url: binary(),
           params: params(),
           headers: Header.headers(),
+          options: options(),
           body: body()
         }
 

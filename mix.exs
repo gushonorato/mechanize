@@ -7,7 +7,7 @@ defmodule Mechanize.MixProject do
     [
       app: :mechanize,
       version: @version,
-      elixir: "~> 1.7",
+      elixir: "~> 1.13.4",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
@@ -39,13 +39,13 @@ defmodule Mechanize.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 1.5"},
-      {:floki, "~> 0.26.0"},
+      {:httpoison, "~> 1.8.2"},
+      {:floki, "~> 0.33.1"},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:excoveralls, github: "parroty/excoveralls", only: [:dev, :test]},
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
       {:bypass, "~> 1.0", only: :test},
-      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.28.4", only: :dev, runtime: false}
     ]
   end
 

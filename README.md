@@ -1,4 +1,4 @@
-# ATENTION: Retirement notice
+# ATTENTION: Retirement notice
 
 I am announcing the retirement of Mechanize. The modern web now relies heavily on JavaScript and single-page applications, which demand a fully automated or headless browser to handle dynamic content effectively. Because of this, the community never showed significant interest in Mechanize. Without that engagement, I find no reason to continue active development and support.
 
